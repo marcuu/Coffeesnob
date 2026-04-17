@@ -332,9 +332,12 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - **PR 2** (merged): Pure functions in `lib/scoring/weights.ts` and
   `lib/scoring/aggregation.ts` with unit, property-based (`fast-check`), and
   golden-fixture test coverage in `__tests__/scoring/`. No DB integration.
-- **PR 3**: Pipeline implementation, API route, one-off backfill script
-  `npm run scoring:backfill`. Run backfill in staging first, inspect output,
-  then production. App still reads from old aggregation.
+- **PR 3** (merged): Pipeline implementation (`lib/scoring/pipeline.ts`), API
+  route (`POST /api/scoring/run` with `SCORING_CRON_SECRET` bearer auth),
+  `npm run scoring:run` / `npm run scoring:backfill` CLIs, and a
+  `scoring_dirty_queue` table populated by a trigger on `public.reviews`.
+  Run backfill in staging first, inspect output, then production. App still
+  reads from old aggregation.
 - **PR 4**: Switch read path to `venue_axis_scores`. Behind feature flag
   `SCORING_USE_WEIGHTED`. Compare for a week. Keep old aggregation code
   intact under flag — do not clean up in this PR.

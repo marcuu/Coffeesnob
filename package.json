@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "scoring:run": "tsx scripts/scoring-run.ts",
+    "scoring:backfill": "tsx scripts/scoring-backfill.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
@@ -43,6 +45,7 @@
     "postcss": "^8.5.1",
     "supabase": "^2.0.0",
     "tailwindcss": "^4.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.0"
   }
