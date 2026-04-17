@@ -34,7 +34,7 @@ app/
   auth/callback/        # OAuth + magic-link callback handler
   login/                # Login page (Google OAuth + magic-link) + server actions
   venues/
-    page.tsx            # Venue listing with avg rating per venue
+    page.tsx            # Venue listing with avg rating + ?city= filter
     new/                # Create venue form
     [slug]/             # Venue detail, reviews, and add-review form
     actions.ts          # Venue server actions (createVenue, deleteVenue)
