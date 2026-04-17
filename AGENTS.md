@@ -50,9 +50,20 @@ __tests__/              # Vitest tests
 - **RLS as defense-in-depth:** All tables have RLS enabled. The `is_allowed_email()` function gates access. Do not rely on RLS as the sole auth check in application code.
 - **Component conventions:** Client components use `"use client"`. shadcn/ui components live in `components/ui/` and should not be modified directly. App-level components live in `components/`.
 
+## Local Development
+
+- `npm run db:start` boots the Supabase CLI stack (Postgres, Auth, Studio,
+  Inbucket, Storage) in Docker. Migrations from `supabase/migrations/` apply
+  on first start, and `supabase/seed.sql` runs after.
+- `npm run db:reset` wipes the local DB and re-applies migrations + seed.
+- Schema changes go in a new timestamped file under `supabase/migrations/`,
+  not by editing the existing `20260417190000_init.sql`.
+- Seed data (`supabase/seed.sql`) is idempotent — it no-ops if any venues
+  already exist. Wipe with `db:reset` to re-seed.
+
 ## Database Schema
 
-See `supabase/migration.sql` for full DDL. Core tables:
+See `supabase/migrations/` for full DDL. Core tables:
 
 - `allowed_users` — email allowlist (`email` primary key). Gates access via `is_allowed_email()`.
 - `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`.
@@ -64,6 +75,14 @@ A trigger on `auth.users` insert auto-creates a `reviewers` row with
 satisfied on first login.
 
 Matching TypeScript types live in `lib/types.ts`.
+
+### Known limitations
+
+- The app login page supports Google OAuth only. For local dev you can either
+  wire `[auth.external.google]` in `supabase/config.toml` or talk to the DB
+  via Studio / `psql` using the seeded email/password test accounts. A magic
+  link / email fallback on the login page will be added when the venue/review
+  UI lands.
 
 ## Testing
 

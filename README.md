@@ -17,14 +17,49 @@ architecture overview.
 
 ## Getting started
 
+Prerequisites: Node 20+, Docker running (for the local Supabase stack).
+
 ```bash
 npm install
-cp .env.example .env.local   # fill in Supabase values
-npm run dev                  # http://localhost:3000
+npm run db:start            # boots local Supabase in Docker
+cp .env.example .env.local  # then paste the API URL + anon key from db:start output
+npm run dev                 # http://localhost:3000
 ```
 
-Run the SQL in `supabase/migration.sql` against your Supabase project, then
-insert your email into `allowed_users` so RLS will allow reads/writes.
+The first `db:start` applies `supabase/migrations/` and runs `supabase/seed.sql`,
+which creates three email/password test users (all password `password123`):
+
+| email                      | display name |
+| -------------------------- | ------------ |
+| alice@coffeesnob.local     | Alice        |
+| bob@coffeesnob.local       | Bob          |
+| carol@coffeesnob.local     | Carol        |
+
+...along with four London/Leeds venues and a handful of reviews.
+
+### Useful URLs when the stack is up
+
+- App: http://localhost:3000
+- Supabase Studio: http://localhost:54323
+- Inbucket (emails): http://localhost:54324
+- Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`
+
+To wipe and re-seed:
+
+```bash
+npm run db:reset
+```
+
+> **Note:** the login page currently only supports Google OAuth, so signing in
+> locally via the app requires adding `[auth.external.google]` credentials to
+> `supabase/config.toml`. The seeded email/password users are reachable via
+> Studio or directly against the DB until email login lands in the app.
+
+### Production setup
+
+Run the SQL in `supabase/migrations/` against your Supabase project (easiest:
+`supabase db push` with the project linked), then insert your email into
+`allowed_users` so RLS will allow reads/writes.
 
 ## Scripts
 
@@ -36,6 +71,9 @@ npm run lint        # next lint
 npm run typecheck   # tsc --noEmit
 npm test            # vitest run
 npm run test:watch  # vitest watch
+npm run db:start    # supabase start (local stack)
+npm run db:stop     # supabase stop
+npm run db:reset    # re-apply migrations + re-seed
 ```
 
 ## Environment variables
