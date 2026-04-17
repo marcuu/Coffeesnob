@@ -31,13 +31,18 @@ shadcn/ui (Radix primitives).
 ```
 app/
   page.tsx              # Home
-  auth/callback/        # OAuth callback handler
-  login/                # Login page (Google OAuth) + server action
+  auth/callback/        # OAuth + magic-link callback handler
+  login/                # Login page (Google OAuth + magic-link) + server actions
+  venues/
+    page.tsx            # Venue listing with avg rating per venue
+    new/                # Create venue form
+    [slug]/             # Venue detail, reviews, and add-review form
+    actions.ts          # Venue server actions (createVenue, deleteVenue)
 components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
-lib/                    # Types, utilities
+lib/                    # Types, validators, aggregation helpers
 utils/supabase/         # Supabase client factories (server, client, middleware)
-supabase/               # SQL migrations and RLS policies
+supabase/               # config.toml, migrations/, seed.sql
 docs/                   # Documentation
 __tests__/              # Vitest tests
 ```
@@ -76,13 +81,31 @@ satisfied on first login.
 
 Matching TypeScript types live in `lib/types.ts`.
 
-### Known limitations
+## Validation
 
-- The app login page supports Google OAuth only. For local dev you can either
-  wire `[auth.external.google]` in `supabase/config.toml` or talk to the DB
-  via Studio / `psql` using the seeded email/password test accounts. A magic
-  link / email fallback on the login page will be added when the venue/review
-  UI lands.
+Zod schemas in `lib/validators.ts` back both create/update paths:
+
+- `venueCreateSchema` / `venueUpdateSchema` — venue fields plus allowlists
+  for `brew_methods` (enum of `BREW_METHODS`) and a slug regex.
+- `reviewCreateSchema` — five 1-10 axes, 10-5000 char body, `YYYY-MM-DD`
+  visit date, UUID venue_id.
+
+Server actions parse `FormData` with the `formString` / `formNumber` /
+`parseCsv` helpers in the same file, then call `schema.safeParse`. On
+failure they return a `fieldErrors` map keyed by Zod path so the form can
+surface inline messages.
+
+## Auth
+
+Two sign-in paths on `/login`:
+
+- **Google OAuth** via `loginWithGoogle` server action. Only works when
+  `[auth.external.google]` is configured.
+- **Magic link** via `loginWithEmail` server action (`signInWithOtp`). This
+  is the primary path for local dev — the link lands in Inbucket at
+  http://localhost:54324. Works in production too as a fallback.
+
+Both flows share `/auth/callback` for session exchange.
 
 ## Testing
 

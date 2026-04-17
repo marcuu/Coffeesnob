@@ -76,8 +76,23 @@ iterate without schema migrations; the DB only stores the signals.
 - shadcn/ui components are generated into `components/ui/` and should not be
   modified in place — extend with wrapper components in `components/` instead.
 
+## Write path
+
+Mutations go through server actions that:
+
+1. `getUser()` for authoritative auth (middleware is not sufficient).
+2. Narrow `FormData` with `formString` / `formNumber` / `parseCsv`.
+3. `schema.safeParse` via the Zod validators in `lib/validators.ts`.
+4. Supabase write. RLS is layered underneath as defense-in-depth.
+5. `revalidatePath` on affected routes, then `redirect` or return state.
+
+Actions used with `useActionState` return a `{ status, message, fieldErrors }`
+shape so forms can render inline Zod messages without round-tripping.
+
 ## Testing
 
 - Vitest + jsdom + Testing Library. Add tests under `__tests__/` alongside new
   logic in `lib/` and for page/component regressions where the output is stable
   enough to render in Vitest.
+- Current coverage: `cn` class-merge helper, Zod venue + review validators,
+  and the `summariseVenue` / `formatRating` aggregation helpers.

@@ -50,10 +50,13 @@ To wipe and re-seed:
 npm run db:reset
 ```
 
-> **Note:** the login page currently only supports Google OAuth, so signing in
-> locally via the app requires adding `[auth.external.google]` credentials to
-> `supabase/config.toml`. The seeded email/password users are reachable via
-> Studio or directly against the DB until email login lands in the app.
+### Signing in locally
+
+The login page offers a magic-link flow. Enter one of the seeded emails (or
+any email — Supabase local accepts all), click **Send magic link**, then open
+Inbucket at http://localhost:54324 and click the link in the received email.
+Google OAuth on the same page is disabled locally unless you configure
+`[auth.external.google]` in `supabase/config.toml`.
 
 ### Production setup
 
