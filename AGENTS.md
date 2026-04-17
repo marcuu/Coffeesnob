@@ -11,7 +11,9 @@
 Coffeesnob is a UK third-wave coffee review app — a TableLog analogue where
 authenticated, allowlisted users review venues on a multi-axis scale. The
 long-term moat is an algorithm that weights experienced and critical
-reviewers more heavily.
+reviewers more heavily. See `docs/scoring.md` for the full design of the
+weighted-scoring system (schema, pure functions, pipeline, rollout plan);
+it is the source of truth for any scoring work.
 
 Built on Next.js 15, Supabase (Auth, Postgres, Storage), Tailwind CSS v4, and
 shadcn/ui (Radix primitives).
@@ -41,6 +43,7 @@ app/
 components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
 lib/                    # Types, validators, aggregation helpers
+  scoring/              # Pure weighted-scoring functions (see docs/scoring.md)
 utils/supabase/         # Supabase client factories (server, client, middleware)
 supabase/               # config.toml, migrations/, seed.sql
 docs/                   # Documentation
@@ -71,9 +74,13 @@ __tests__/              # Vitest tests
 See `supabase/migrations/` for full DDL. Core tables:
 
 - `allowed_users` — email allowlist (`email` primary key). Gates access via `is_allowed_email()`.
-- `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`.
+- `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`. Also has `status text` (`'seeded' | 'invited' | 'active'`, default `'active'`) — SQL-managed tier consumed by the scoring pipeline (see `docs/scoring.md`).
 - `venues` — coffee venues. Any allowlisted user can insert; only the creator can edit or delete. Third-wave-specific fields: `roasters text[]`, `brew_methods text[]`, `has_decaf`, `has_plant_milk`.
 - `reviews` — multi-axis ratings (`rating_overall`, `rating_coffee`, `rating_ambience`, `rating_service`, `rating_value`, each 1-10) plus `body` and `visited_on`. Unique on `(venue_id, reviewer_id, visited_on)` so a reviewer can review a venue multiple times across visits.
+- `reviewer_axis_weights` — per-reviewer, per-axis credibility weight. Populated by the scoring pipeline, never by user writes.
+- `reviewer_tenure` — per-reviewer tenure and consistency scalars. Populated by the scoring pipeline.
+- `review_weights` — cached per-review, per-axis weight used to aggregate venue scores. Populated by the scoring pipeline.
+- `venue_axis_scores` — weighted per-axis score, confidence, and review counts read by the UI. Populated by the scoring pipeline; read-only to authenticated clients via RLS.
 
 A trigger on `auth.users` insert auto-creates a `reviewers` row with
 `display_name` defaulted from the email local-part, so review FKs are always
