@@ -43,6 +43,7 @@ app/
 components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
 lib/                    # Types, validators, aggregation helpers
+  scoring/              # Pure weighted-scoring functions (see docs/scoring.md)
 utils/supabase/         # Supabase client factories (server, client, middleware)
 supabase/               # config.toml, migrations/, seed.sql
 docs/                   # Documentation

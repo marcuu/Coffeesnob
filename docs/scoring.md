@@ -327,9 +327,11 @@ Pipeline integration tests:
 
 Each PR updates `AGENTS.md` and `docs/scoring.md`.
 
-- **PR 1**: Schema migration only. Empty tables. No app behaviour change.
-- **PR 2**: Pure functions in `lib/scoring/weights.ts` and
-  `lib/scoring/aggregation.ts` with full test coverage. No DB integration.
+- **PR 1** (merged): Schema migration only. Empty tables. No app behaviour
+  change.
+- **PR 2** (merged): Pure functions in `lib/scoring/weights.ts` and
+  `lib/scoring/aggregation.ts` with unit, property-based (`fast-check`), and
+  golden-fixture test coverage in `__tests__/scoring/`. No DB integration.
 - **PR 3**: Pipeline implementation, API route, one-off backfill script
   `npm run scoring:backfill`. Run backfill in staging first, inspect output,
   then production. App still reads from old aggregation.

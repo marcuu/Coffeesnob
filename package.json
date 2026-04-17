@@ -38,6 +38,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.4",
+    "fast-check": "^4.7.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.5.1",
     "supabase": "^2.0.0",
