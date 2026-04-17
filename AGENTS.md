@@ -8,8 +8,13 @@
 
 ## Project Overview
 
-Scaffold for a Next.js 15 app built on Supabase (Auth, Postgres, Storage),
-styled with Tailwind CSS v4 and shadcn/ui (Radix primitives).
+Coffeesnob is a UK third-wave coffee review app — a TableLog analogue where
+authenticated, allowlisted users review venues on a multi-axis scale. The
+long-term moat is an algorithm that weights experienced and critical
+reviewers more heavily.
+
+Built on Next.js 15, Supabase (Auth, Postgres, Storage), Tailwind CSS v4, and
+shadcn/ui (Radix primitives).
 
 ## Tech Stack
 
@@ -47,10 +52,18 @@ __tests__/              # Vitest tests
 
 ## Database Schema
 
-See `supabase/migration.sql` for full DDL. Starter tables:
+See `supabase/migration.sql` for full DDL. Core tables:
 
-- `allowed_users` — email allowlist (`email` primary key)
-- `items` — example per-user table; replace with your real domain tables
+- `allowed_users` — email allowlist (`email` primary key). Gates access via `is_allowed_email()`.
+- `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`.
+- `venues` — coffee venues. Any allowlisted user can insert; only the creator can edit or delete. Third-wave-specific fields: `roasters text[]`, `brew_methods text[]`, `has_decaf`, `has_plant_milk`.
+- `reviews` — multi-axis ratings (`rating_overall`, `rating_coffee`, `rating_ambience`, `rating_service`, `rating_value`, each 1-10) plus `body` and `visited_on`. Unique on `(venue_id, reviewer_id, visited_on)` so a reviewer can review a venue multiple times across visits.
+
+A trigger on `auth.users` insert auto-creates a `reviewers` row with
+`display_name` defaulted from the email local-part, so review FKs are always
+satisfied on first login.
+
+Matching TypeScript types live in `lib/types.ts`.
 
 ## Testing
 
