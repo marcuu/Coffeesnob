@@ -89,11 +89,15 @@ export default async function VenuesPage({
             id="city"
             name="city"
             defaultValue={selectedCity}
-            className="flex h-10 w-full rounded-md border border-[var(--color-input)] bg-transparent px-3 py-2 text-sm ring-offset-background"
+            className="flex h-10 w-full rounded-md border border-[var(--color-input)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)] ring-offset-background dark:[color-scheme:dark]"
           >
             <option value="">All cities</option>
             {cities.map((cityOption) => (
-              <option key={cityOption} value={cityOption}>
+              <option
+                key={cityOption}
+                value={cityOption}
+                className="bg-[var(--color-background)] text-[var(--color-foreground)]"
+              >
                 {cityOption}
               </option>
             ))}
