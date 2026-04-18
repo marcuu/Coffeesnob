@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { Axis } from "@/lib/scoring/weights";
+import { AXES, SCORING_CONSTANTS, type Axis } from "@/lib/scoring/weights";
 
 export type AxisScore = {
   score: number;
@@ -12,6 +12,10 @@ export type VenueScores = {
   axes: Partial<Record<Axis, AxisScore>>;
   displayable: boolean;
 };
+
+const DISPLAY_CONFIDENCE_THRESHOLD = 0.2;
+const MIN_EFFECTIVE_WEIGHT = 0.05;
+const MS_PER_DAY = 86_400_000;
 
 export async function getVenueScores(
   supabase: SupabaseClient,
@@ -37,32 +41,197 @@ export async function getVenueScores(
   const overall = axes.overall;
   return {
     axes,
-    displayable: overall ? overall.confidence > 0.2 : false,
+    displayable: overall
+      ? overall.confidence > DISPLAY_CONFIDENCE_THRESHOLD
+      : false,
   };
 }
+
+export type OverallScoreSummary = {
+  score: number;
+  confidence: number;
+  rawReviewCount: number;
+  displayable: boolean;
+};
 
 export async function getVenueOverallScores(
   supabase: SupabaseClient,
   venueIds: string[],
-): Promise<Map<string, { score: number; confidence: number; displayable: boolean }>> {
+): Promise<Map<string, OverallScoreSummary>> {
   if (venueIds.length === 0) return new Map();
 
   const { data, error } = await supabase
     .from("venue_axis_scores")
-    .select("venue_id, score, confidence")
+    .select("venue_id, score, confidence, raw_review_count")
     .eq("axis", "overall")
     .in("venue_id", venueIds);
 
   if (error) throw error;
 
-  const result = new Map<string, { score: number; confidence: number; displayable: boolean }>();
+  const result = new Map<string, OverallScoreSummary>();
   for (const row of data ?? []) {
     const confidence = Number(row.confidence);
     result.set(row.venue_id, {
       score: Number(row.score),
       confidence,
-      displayable: confidence > 0.2,
+      rawReviewCount: row.raw_review_count,
+      displayable: confidence > DISPLAY_CONFIDENCE_THRESHOLD,
     });
   }
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Explain endpoint (docs/scoring.md Section 5). Surfaces how a venue's
+// weighted score for one axis decomposes into reviewer contributions,
+// recency, and the prior's pull. Read-only; does not recompute.
+// ---------------------------------------------------------------------------
+
+export type VenueScoreExplanation = {
+  displayedScore: number;
+  confidence: number;
+  totalReviews: number;
+  effectiveReviews: number;
+  topContributors: Array<{
+    reviewerDisplayName: string;
+    weightContribution: number;
+    score: number;
+    visitedOn: string;
+  }>;
+  recencyProfile: {
+    last6Months: number;
+    sixTo18Months: number;
+    older: number;
+  };
+  priorPull: number;
+};
+
+const AXIS_COLUMN: Record<Axis, string> = {
+  overall: "rating_overall",
+  coffee: "rating_coffee",
+  ambience: "rating_ambience",
+  service: "rating_service",
+  value: "rating_value",
+};
+
+export async function explainVenueScore(
+  supabase: SupabaseClient,
+  venueId: string,
+  axis: Axis,
+  now: Date = new Date(),
+): Promise<VenueScoreExplanation | null> {
+  if (!AXES.includes(axis)) return null;
+
+  const { data: scoreRow, error: scoreErr } = await supabase
+    .from("venue_axis_scores")
+    .select("score, confidence, raw_review_count")
+    .eq("venue_id", venueId)
+    .eq("axis", axis)
+    .maybeSingle();
+  if (scoreErr) throw scoreErr;
+  if (!scoreRow) return null;
+
+  const ratingColumn = AXIS_COLUMN[axis];
+  const { data: reviewRows, error: reviewsErr } = await supabase
+    .from("reviews")
+    .select(
+      `id, visited_on, reviewer_id, ${ratingColumn}, reviewer:reviewers(display_name)`,
+    )
+    .eq("venue_id", venueId);
+  if (reviewsErr) throw reviewsErr;
+
+  const reviews = (reviewRows ?? []) as unknown as Array<
+    {
+      id: string;
+      visited_on: string;
+      reviewer_id: string;
+      reviewer: { display_name: string } | null;
+    } & Record<string, number | string | null>
+  >;
+
+  const reviewIds = reviews.map((r) => r.id);
+  let weightByReviewId = new Map<string, number>();
+  if (reviewIds.length > 0) {
+    const { data: weightRows, error: weightsErr } = await supabase
+      .from("review_weights")
+      .select("review_id, weight")
+      .eq("axis", axis)
+      .in("review_id", reviewIds);
+    if (weightsErr) throw weightsErr;
+    weightByReviewId = new Map(
+      (weightRows ?? []).map((r: { review_id: string; weight: number }) => [
+        r.review_id,
+        Number(r.weight),
+      ]),
+    );
+  }
+
+  const contributors = reviews.map((r) => {
+    const w = weightByReviewId.get(r.id) ?? 0;
+    const score = Number(r[ratingColumn] ?? 0);
+    return {
+      reviewerDisplayName: r.reviewer?.display_name ?? "Unknown",
+      weightContribution: w,
+      score,
+      visitedOn: r.visited_on,
+    };
+  });
+
+  const effective = contributors.filter(
+    (c) => c.weightContribution > MIN_EFFECTIVE_WEIGHT,
+  );
+  const totalEffectiveWeight = effective.reduce(
+    (s, c) => s + c.weightContribution,
+    0,
+  );
+
+  const topContributors = [...contributors]
+    .sort((a, b) => b.weightContribution - a.weightContribution)
+    .slice(0, 5);
+
+  // Recency buckets by weight share.
+  let w6 = 0;
+  let w18 = 0;
+  let wOlder = 0;
+  for (const c of effective) {
+    const days =
+      (now.getTime() - new Date(c.visitedOn).getTime()) / MS_PER_DAY;
+    if (days <= 183) w6 += c.weightContribution;
+    else if (days <= 548) w18 += c.weightContribution;
+    else wOlder += c.weightContribution;
+  }
+  const recencyProfile =
+    totalEffectiveWeight > 0
+      ? {
+          last6Months: w6 / totalEffectiveWeight,
+          sixTo18Months: w18 / totalEffectiveWeight,
+          older: wOlder / totalEffectiveWeight,
+        }
+      : { last6Months: 0, sixTo18Months: 0, older: 0 };
+
+  // priorPull = |weightedMean(effective reviews) − posterior|.
+  const priorScore = SCORING_CONSTANTS.PRIOR_SCORE_BY_AXIS[axis];
+  const posterior = Number(scoreRow.score);
+  let priorPull = 0;
+  if (totalEffectiveWeight > 0) {
+    const weightedSum = effective.reduce(
+      (s, c) => s + c.score * c.weightContribution,
+      0,
+    );
+    const weightedMean = weightedSum / totalEffectiveWeight;
+    priorPull = Math.abs(weightedMean - posterior);
+  } else {
+    priorPull = Math.abs(priorScore - posterior);
+  }
+
+  return {
+    displayedScore: posterior,
+    confidence: Number(scoreRow.confidence),
+    totalReviews: reviews.length,
+    effectiveReviews: effective.length,
+    topContributors,
+    recencyProfile,
+    priorPull,
+  };
+}
+

@@ -12,12 +12,11 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
 import { formatRating } from "@/lib/venues";
-import { getVenueScores } from "@/lib/aggregation";
+import { explainVenueScore, getVenueScores } from "@/lib/aggregation";
 
 import { deleteReview } from "./actions";
 import { ReviewForm } from "./review-form";
-
-const SCORING_USE_WEIGHTED = process.env.SCORING_USE_WEIGHTED === "true";
+import { ScoreExplain } from "./score-explain";
 
 export const dynamic = "force-dynamic";
 
@@ -58,18 +57,15 @@ export default async function VenueDetailPage({
 
   const reviews = (reviewsData ?? []) as ReviewWithReviewer[];
   const count = reviews.length;
-  const avg =
-    count === 0
-      ? null
-      : reviews.reduce((s, r) => s + r.rating_overall, 0) / count;
 
-  let displayScore: number | null = avg;
-  if (SCORING_USE_WEIGHTED) {
-    const weightedScores = await getVenueScores(supabase, venueRow.id);
-    displayScore = weightedScores?.displayable
-      ? (weightedScores.axes.overall?.score ?? null)
+  const weightedScores = await getVenueScores(supabase, venueRow.id);
+  const displayScore = weightedScores?.displayable
+    ? (weightedScores.axes.overall?.score ?? null)
+    : null;
+  const explain =
+    weightedScores?.displayable
+      ? await explainVenueScore(supabase, venueRow.id, "overall")
       : null;
-  }
 
   const alreadyReviewedToday = user
     ? reviews.some(
@@ -127,6 +123,8 @@ export default async function VenueDetailPage({
           ))}
         </div>
       ) : null}
+
+      {explain ? <ScoreExplain data={explain} /> : null}
 
       {venueRow.notes ? (
         <p className="mt-6 whitespace-pre-line text-sm">{venueRow.notes}</p>
