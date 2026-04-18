@@ -28,9 +28,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     const report = await runFullPipeline(sb);
     return NextResponse.json(report);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: serializeError(err) }, { status: 500 });
   }
+}
+
+// Pipeline code re-throws raw Supabase PostgrestError objects ({ message,
+// details, hint, code }) — not Error instances. Flatten both shapes so the
+// response body carries actionable info instead of "[object Object]".
+function serializeError(err: unknown): unknown {
+  if (err instanceof Error) return { message: err.message, stack: err.stack };
+  if (err && typeof err === "object") return err;
+  return { message: String(err) };
 }
 
 // Constant-time string comparison to avoid secret leakage via timing.
