@@ -13,7 +13,13 @@ import {
 
 export type VenueFormState =
   | { status: "idle" }
-  | { status: "error"; message: string; fieldErrors?: Record<string, string> };
+  | {
+      status: "error";
+      message: string;
+      fieldErrors?: Record<string, string>;
+      values?: Record<string, string>;
+      _key?: number;
+    };
 
 const initial: VenueFormState = { status: "idle" };
 
@@ -29,6 +35,18 @@ export async function createVenue(
     return { status: "error", message: "Not authenticated" };
   }
 
+  const stringFields = [
+    "slug", "name", "address_line1", "address_line2",
+    "city", "postcode", "website", "roasters", "brew_methods", "notes",
+  ] as const;
+
+  const savedValues: Record<string, string> = {};
+  for (const key of stringFields) {
+    savedValues[key] = String(formData.get(key) ?? "");
+  }
+  savedValues.has_decaf = formData.get("has_decaf") === "on" ? "on" : "";
+  savedValues.has_plant_milk = formData.get("has_plant_milk") === "on" ? "on" : "";
+
   const raw = {
     slug: formString(formData.get("slug")),
     name: formString(formData.get("name")),
@@ -39,7 +57,7 @@ export async function createVenue(
     country: formString(formData.get("country")) ?? "GB",
     latitude: formNumber(formData.get("latitude")) ?? null,
     longitude: formNumber(formData.get("longitude")) ?? null,
-    website: formString(formData.get("website")) ?? null,
+    website: formString(formData.get("website")),
     instagram: formString(formData.get("instagram")),
     roasters: parseCsv(formData.get("roasters")),
     brew_methods: parseCsv(formData.get("brew_methods")),
@@ -59,6 +77,8 @@ export async function createVenue(
       status: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
       fieldErrors,
+      values: savedValues,
+      _key: Date.now(),
     };
   }
 
