@@ -33,6 +33,7 @@ shadcn/ui (Radix primitives).
 ```
 app/
   page.tsx              # Home
+  api/scoring/run/      # POST-only cron endpoint (SCORING_CRON_SECRET bearer)
   auth/callback/        # OAuth + magic-link callback handler
   login/                # Login page (Google OAuth + magic-link) + server actions
   venues/
@@ -43,8 +44,9 @@ app/
 components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
 lib/                    # Types, validators, aggregation helpers
-  scoring/              # Pure weighted-scoring functions (see docs/scoring.md)
-utils/supabase/         # Supabase client factories (server, client, middleware)
+  scoring/              # Pure weighted-scoring functions + pipeline (see docs/scoring.md)
+scripts/                # Node CLIs (scoring:run, scoring:backfill)
+utils/supabase/         # Supabase client factories (server, client, middleware, service)
 supabase/               # config.toml, migrations/, seed.sql
 docs/                   # Documentation
 __tests__/              # Vitest tests
@@ -81,6 +83,7 @@ See `supabase/migrations/` for full DDL. Core tables:
 - `reviewer_tenure` — per-reviewer tenure and consistency scalars. Populated by the scoring pipeline.
 - `review_weights` — cached per-review, per-axis weight used to aggregate venue scores. Populated by the scoring pipeline.
 - `venue_axis_scores` — weighted per-axis score, confidence, and review counts read by the UI. Populated by the scoring pipeline; read-only to authenticated clients via RLS.
+- `scoring_dirty_queue` — append-only work queue for the nightly scoring pipeline. A trigger on `public.reviews` (`reviews_enqueue_scoring_trigger`) enqueues on insert/update/delete so review writes never block on recomputation. Drained by `runFullPipeline`.
 
 A trigger on `auth.users` insert auto-creates a `reviewers` row with
 `display_name` defaulted from the email local-part, so review FKs are always
@@ -130,3 +133,17 @@ See `.env.example`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` — used by the scoring pipeline (server-only, never exposed to the browser).
+- `SCORING_CRON_SECRET` — bearer token required by `POST /api/scoring/run`.
+
+## Scoring pipeline
+
+Weighted scoring is computed in a batched pipeline (`lib/scoring/pipeline.ts`),
+not inline on review writes. Invocation options:
+
+- `POST /api/scoring/run` — nightly cron endpoint, bearer-authed.
+- `npm run scoring:run` — manual full run for debugging.
+- `npm run scoring:backfill` — one-off full recompute for rollout staging.
+
+Review writes enqueue into `scoring_dirty_queue` via a DB trigger; the
+pipeline drains it on each run. See `docs/scoring.md` for the full design.

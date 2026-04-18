@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
 import { formatRating, summariseVenue } from "@/lib/venues";
+import { getVenueOverallScores } from "@/lib/aggregation";
+
+const SCORING_USE_WEIGHTED = process.env.SCORING_USE_WEIGHTED === "true";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +62,17 @@ export default async function VenuesPage({
       v as Venue & { reviews: { rating_overall: number }[] | null },
     ),
   );
+
+  if (SCORING_USE_WEIGHTED && venues.length > 0) {
+    const weightedScores = await getVenueOverallScores(
+      supabase,
+      venues.map((v) => v.id),
+    );
+    for (const v of venues) {
+      const ws = weightedScores.get(v.id);
+      v.avg_overall = ws?.displayable ? ws.score : null;
+    }
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">

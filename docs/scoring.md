@@ -332,10 +332,13 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - **PR 2** (merged): Pure functions in `lib/scoring/weights.ts` and
   `lib/scoring/aggregation.ts` with unit, property-based (`fast-check`), and
   golden-fixture test coverage in `__tests__/scoring/`. No DB integration.
-- **PR 3**: Pipeline implementation, API route, one-off backfill script
-  `npm run scoring:backfill`. Run backfill in staging first, inspect output,
-  then production. App still reads from old aggregation.
-- **PR 4**: Switch read path to `venue_axis_scores`. Behind feature flag
+- **PR 3** (merged): Pipeline implementation (`lib/scoring/pipeline.ts`), API
+  route (`POST /api/scoring/run` with `SCORING_CRON_SECRET` bearer auth),
+  `npm run scoring:run` / `npm run scoring:backfill` CLIs, and a
+  `scoring_dirty_queue` table populated by a trigger on `public.reviews`.
+  Run backfill in staging first, inspect output, then production. App still
+  reads from old aggregation.
+- **PR 4** (merged): Switch read path to `venue_axis_scores`. Behind feature flag
   `SCORING_USE_WEIGHTED`. Compare for a week. Keep old aggregation code
   intact under flag — do not clean up in this PR.
 - **PR 5**: Remove feature flag and old aggregation. Add explain UI.
@@ -363,6 +366,15 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - Simulation harness ships in PR 6. No tuning of `SCORING_CONSTANTS` is
   permitted in PRs 1-5. If tuning becomes necessary mid-rollout, pull the
   harness forward — do not tune blind.
+- **Seeded reviewer anchor treatment** (added PR 4): seeded reviewers bypass
+  the new-account penalties so a single seeded review can anchor an otherwise
+  empty venue. Specifically: (a) `computeReviewerAxisWeight` skips the
+  count-based saturation for seeded reviewers once `reviewsInAxis >= 1`, and
+  (b) `computeReviewWeight` uses `1.0` in place of `tenureScore` and
+  `consistencyScore` for seeded reviewers. Recency and completeness still
+  apply. `PRIOR_STRENGTH` was lowered from `5.0` to `3.0` so one seeded
+  review (weight ≈ 1.0) produces `confidence ≈ 0.25 > 0.2` and displays in
+  the UI. Non-seeded reviewers are unaffected by these bypasses.
 
 ## Section 10: Deliberate omissions at MVP
 
