@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatRating } from "@/lib/venues";
+import { buildCityFilterOptions, formatRating } from "@/lib/venues";
 
 describe("formatRating", () => {
   it("formats a number to one decimal place", () => {
@@ -10,5 +10,20 @@ describe("formatRating", () => {
 
   it("renders an em dash for null", () => {
     expect(formatRating(null)).toBe("—");
+  });
+});
+
+describe("buildCityFilterOptions", () => {
+  it("deduplicates, trims, and sorts city names", () => {
+    expect(
+      buildCityFilterOptions([
+        "Leeds",
+        " London ",
+        "Leeds",
+        "",
+        null,
+        undefined,
+      ]),
+    ).toEqual(["Leeds", "London"]);
   });
 });

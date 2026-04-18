@@ -36,6 +36,8 @@ which creates three email/password test users (all password `password123`):
 | carol@coffeesnob.local     | Carol        |
 
 ...along with four London/Leeds venues and a handful of reviews.
+The `/venues` page includes an **All cities / specific city** dropdown filter
+driven by cities present in the database.
 
 ### Useful URLs when the stack is up
 
