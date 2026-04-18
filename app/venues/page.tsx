@@ -8,10 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
-import { formatRating } from "@/lib/venues";
+import { buildCityFilterOptions, formatRating } from "@/lib/venues";
 import { getVenueOverallScores } from "@/lib/aggregation";
 
 export const dynamic = "force-dynamic";
@@ -26,21 +25,20 @@ export default async function VenuesPage({
 
   const supabase = await createClient();
 
-  // Full list of distinct cities for the datalist, independent of the filter.
+  // Full list of distinct cities for the select, independent of the filter.
   const { data: cityRows } = await supabase
     .from("venues")
     .select("city")
     .order("city", { ascending: true });
-  const cities = Array.from(
-    new Set((cityRows ?? []).map((r) => r.city as string)),
-  );
+  const cities = buildCityFilterOptions((cityRows ?? []).map((r) => r.city));
+  const selectedCity = cities.includes(cityFilter) ? cityFilter : "";
 
   let query = supabase
     .from("venues")
     .select("*")
     .order("created_at", { ascending: false });
-  if (cityFilter) {
-    query = query.ilike("city", `%${cityFilter}%`);
+  if (selectedCity) {
+    query = query.eq("city", selectedCity);
   }
   const { data, error } = await query;
 
@@ -87,23 +85,24 @@ export default async function VenuesPage({
           <label htmlFor="city" className="text-xs font-medium">
             Filter by city
           </label>
-          <Input
+          <select
             id="city"
             name="city"
-            list="cities"
-            defaultValue={cityFilter}
-            placeholder="London, Leeds, …"
-          />
-          <datalist id="cities">
-            {cities.map((c) => (
-              <option key={c} value={c} />
+            defaultValue={selectedCity}
+            className="flex h-10 w-full rounded-md border border-[var(--color-input)] bg-transparent px-3 py-2 text-sm ring-offset-background"
+          >
+            <option value="">All cities</option>
+            {cities.map((cityOption) => (
+              <option key={cityOption} value={cityOption}>
+                {cityOption}
+              </option>
             ))}
-          </datalist>
+          </select>
         </div>
         <Button type="submit" variant="outline">
-          Search
+          Apply
         </Button>
-        {cityFilter ? (
+        {selectedCity ? (
           <Button asChild variant="ghost">
             <Link href="/venues">Clear</Link>
           </Button>
@@ -112,8 +111,8 @@ export default async function VenuesPage({
 
       {venues.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          {cityFilter
-            ? `No venues matched "${cityFilter}".`
+          {selectedCity
+            ? `No venues matched "${selectedCity}".`
             : "No venues yet — add the first."}
         </p>
       ) : (
