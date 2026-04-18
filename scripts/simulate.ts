@@ -19,6 +19,7 @@ import {
   type ReviewerStatus,
 } from "@/lib/scoring/weights";
 import { aggregateVenueAxis } from "@/lib/scoring/aggregation";
+import { deriveCoffeeScore, deriveExperienceScore, deriveOverallScore } from "@/lib/review-scoring";
 import { createServiceRoleClient } from "@/utils/supabase/service";
 import { loadDotEnv } from "./_env";
 
@@ -40,19 +41,44 @@ type ReviewRow = {
   reviewer_id: string;
   visited_on: string;
   rating_overall: number;
-  rating_coffee: number;
   rating_ambience: number;
   rating_service: number;
   rating_value: number;
+  rating_taste: number | null;
+  rating_body: number | null;
+  rating_aroma: number | null;
 };
 
-const AXIS_COLUMN: Record<Axis, keyof ReviewRow> = {
-  overall: "rating_overall",
-  coffee: "rating_coffee",
-  ambience: "rating_ambience",
-  service: "rating_service",
-  value: "rating_value",
-};
+function reviewScores(rev: ReviewRow): Record<Axis, number> {
+  const taste = rev.rating_taste;
+  const body = rev.rating_body;
+  const aroma = rev.rating_aroma;
+  const hasCoffeeInputs =
+    typeof taste === "number" && typeof body === "number" && typeof aroma === "number";
+
+  const coffee = hasCoffeeInputs
+    ? deriveCoffeeScore({ rating_taste: taste, rating_body: body, rating_aroma: aroma })
+    : rev.rating_overall;
+
+  const experience = deriveExperienceScore({
+    rating_ambience: rev.rating_ambience,
+    rating_service: rev.rating_service,
+    rating_value: rev.rating_value,
+  });
+
+  const overall = hasCoffeeInputs
+    ? deriveOverallScore({
+        rating_ambience: rev.rating_ambience,
+        rating_service: rev.rating_service,
+        rating_value: rev.rating_value,
+        rating_taste: taste,
+        rating_body: body,
+        rating_aroma: aroma,
+      })
+    : rev.rating_overall;
+
+  return { overall, coffee, experience };
+}
 
 function clamp(x: number, lo: number, hi: number): number {
   if (Number.isNaN(x)) return lo;
@@ -121,7 +147,7 @@ async function main() {
       sb
         .from("reviews")
         .select(
-          "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee, rating_ambience, rating_service, rating_value",
+          "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
         ),
       sb.from("venue_axis_scores").select("venue_id, axis, score, confidence"),
       sb.from("reviewer_axis_weights").select("reviewer_id, axis, weight"),
@@ -189,7 +215,7 @@ async function main() {
     const list = scoresByReviewer.get(rev.reviewer_id);
     if (list) {
       for (const axis of AXES) {
-        const v = rev[AXIS_COLUMN[axis]] as number;
+        const v = reviewScores(rev)[axis];
         if (typeof v === "number") list.push(v);
       }
     }
@@ -228,16 +254,14 @@ async function main() {
     perReviewerAxisCount.set(r.id, {
       overall: 0,
       coffee: 0,
-      ambience: 0,
-      service: 0,
-      value: 0,
+      experience: 0,
     });
   }
   for (const rev of reviews) {
     const per = perReviewerAxisCount.get(rev.reviewer_id);
     if (per) {
       for (const axis of AXES) {
-        if (typeof (rev[AXIS_COLUMN[axis]] as unknown) === "number") per[axis]++;
+        if (typeof reviewScores(rev)[axis] === "number") per[axis]++;
       }
     }
   }
@@ -256,9 +280,7 @@ async function main() {
     const weights: Record<Axis, number> = {
       overall: 0,
       coffee: 0,
-      ambience: 0,
-      service: 0,
-      value: 0,
+      experience: 0,
     };
     for (const axis of AXES) {
       const w = clamp(
@@ -314,9 +336,7 @@ async function main() {
     const weights: Record<Axis, number> = {
       overall: 0,
       coffee: 0,
-      ambience: 0,
-      service: 0,
-      value: 0,
+      experience: 0,
     };
     for (const axis of AXES) {
       weights[axis] = clamp(
@@ -326,13 +346,7 @@ async function main() {
             id: rev.id,
             reviewerId: rev.reviewer_id,
             visitedOn: new Date(rev.visited_on),
-            scores: {
-              overall: rev.rating_overall,
-              coffee: rev.rating_coffee,
-              ambience: rev.rating_ambience,
-              service: rev.rating_service,
-              value: rev.rating_value,
-            },
+            scores: reviewScores(rev),
           },
           axis,
           now,
@@ -377,7 +391,7 @@ async function main() {
     const venueReviews = reviewsByVenue.get(venueId) ?? [];
     for (const axis of AXES) {
       const weighted = venueReviews.map((rev) => ({
-        score: rev[AXIS_COLUMN[axis]] as number,
+        score: reviewScores(rev)[axis],
         weight: simReviewWeights.get(rev.id)?.[axis] ?? 0,
       }));
       const agg = aggregateVenueAxis(

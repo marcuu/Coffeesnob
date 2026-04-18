@@ -2,8 +2,7 @@
 
 ## Context
 
-Coffeesnob currently computes venue scores as simple averages across the five
-rating axes. This doc specifies the weighted-scoring system that replaces
+Coffeesnob currently computes venue scores from six review inputs: ambience, service, value, taste, body, and aroma. This doc specifies the weighted-scoring system that replaces
 simple averaging. The goal is the moat mechanism described in `AGENTS.md`:
 reviews from experienced and critical reviewers count more than reviews from
 casual contributors, applied per-axis so expertise in one domain doesn't leak
@@ -11,9 +10,9 @@ into others.
 
 ## Non-goals
 
-- No new rating axes — stay with the existing five (`rating_overall`,
-  `rating_coffee`, `rating_ambience`, `rating_service`, `rating_value`).
-- No review form UX changes.
+- `rating_overall` is derived from six sliders and not user-entered directly.
+- `rating_coffee` is legacy and nullable; new reviews use `rating_taste`, `rating_body`, and `rating_aroma`.
+- Review form now captures six sliders and derives `rating_overall` server-side.
 - No public reviewer profiles or follow graph.
 - No auth or allowlist changes.
 
@@ -30,7 +29,7 @@ Add to `reviewers` table:
 New table `reviewer_axis_weights`:
 
 - `reviewer_id uuid references reviewers(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'ambience', 'service', 'value'))`
+- `axis text check (axis in ('overall', 'coffee', 'experience'))`
 - `weight numeric(4,3) not null default 0.500 check (weight >= 0 and weight <= 3)`
 - `review_count_in_axis int not null default 0`
 - `updated_at timestamptz not null default now()`
@@ -46,7 +45,7 @@ New table `reviewer_tenure`:
 New table `review_weights` — cached computed weight per review per axis:
 
 - `review_id uuid references reviews(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'ambience', 'service', 'value'))`
+- `axis text check (axis in ('overall', 'coffee', 'experience'))`
 - `weight numeric(5,4) not null check (weight >= 0 and weight <= 1)`
 - `computed_at timestamptz not null default now()`
 - Primary key `(review_id, axis)`
@@ -54,7 +53,7 @@ New table `review_weights` — cached computed weight per review per axis:
 New table `venue_axis_scores` — output read by the UI:
 
 - `venue_id uuid references venues(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'ambience', 'service', 'value'))`
+- `axis text check (axis in ('overall', 'coffee', 'experience'))`
 - `score numeric(4,2) not null check (score >= 1 and score <= 10)`
 - `confidence numeric(4,3) not null check (confidence >= 0 and confidence <= 1)`
 - `effective_review_count numeric(6,2) not null`
@@ -83,7 +82,7 @@ access, no imports from `utils/supabase/*`.
 ### File `lib/scoring/weights.ts`
 
 ```typescript
-export type Axis = 'overall' | 'coffee' | 'ambience' | 'service' | 'value';
+export type Axis = 'overall' | 'coffee' | 'experience';
 
 export type ReviewerState = {
   id: string;
@@ -114,7 +113,7 @@ export const SCORING_CONSTANTS = {
   TENURE_COUNT_WEIGHT: 0.5,
   TENURE_MONTHS_SATURATION: 12,
   TENURE_COUNT_SATURATION: 50,
-  PRIOR_SCORE_BY_AXIS: { overall: 6.0, coffee: 6.0, ambience: 6.0, service: 6.5, value: 6.0 },
+  PRIOR_SCORE_BY_AXIS: { overall: 6.0, coffee: 6.0, experience: 6.0 },
   PRIOR_STRENGTH: 5.0,
 };
 

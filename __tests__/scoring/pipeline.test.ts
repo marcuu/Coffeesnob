@@ -45,10 +45,12 @@ function seedTables(): Tables {
           reviewer_id: reviewerId,
           visited_on: daysAgo(10 + ((seq + i) % 200)),
           rating_overall: clampInt(s + bump),
-          rating_coffee: clampInt(s + bump),
           rating_ambience: clampInt(s - 1 + bump),
           rating_service: clampInt(s + 1 + bump),
           rating_value: clampInt(s - 2 + bump),
+          rating_taste: clampInt(s + bump),
+          rating_body: clampInt(s + bump),
+          rating_aroma: clampInt(s + bump),
         });
         seq++;
       }
@@ -118,12 +120,12 @@ describe("pipeline orchestration", () => {
 
     // Metrics: one row per reviewer (2)
     expect(fake.tables.reviewer_tenure.length).toBe(2);
-    // Axis weights: 2 reviewers × 5 axes
-    expect(fake.tables.reviewer_axis_weights.length).toBe(10);
-    // Review weights: 60 reviews × 5 axes
-    expect(fake.tables.review_weights.length).toBe(60 * 5);
-    // Venue scores: 2 venues × 5 axes
-    expect(fake.tables.venue_axis_scores.length).toBe(10);
+    // Axis weights: 2 reviewers × 3 axes
+    expect(fake.tables.reviewer_axis_weights.length).toBe(6);
+    // Review weights: 60 reviews × 3 axes
+    expect(fake.tables.review_weights.length).toBe(60 * 3);
+    // Venue scores: 2 venues × 3 axes
+    expect(fake.tables.venue_axis_scores.length).toBe(6);
 
     // Queue drained
     expect(fake.tables.scoring_dirty_queue.length).toBe(0);
@@ -131,9 +133,9 @@ describe("pipeline orchestration", () => {
 
     // Report shape
     expect(report.steps.metrics.updated).toBe(2);
-    expect(report.steps.axisWeights.updated).toBe(10);
-    expect(report.steps.reviewWeights.updated).toBe(60 * 5);
-    expect(report.steps.venueScores.updated).toBe(10);
+    expect(report.steps.axisWeights.updated).toBe(6);
+    expect(report.steps.reviewWeights.updated).toBe(60 * 3);
+    expect(report.steps.venueScores.updated).toBe(6);
     expect(report.durationMs).toBeGreaterThanOrEqual(0);
   });
 
@@ -158,8 +160,8 @@ describe("pipeline orchestration", () => {
     );
 
     // Row counts don't double, values stay the same (timestamps excluded).
-    expect(fake.tables.venue_axis_scores.length).toBe(10);
-    expect(fake.tables.review_weights.length).toBe(60 * 5);
+    expect(fake.tables.venue_axis_scores.length).toBe(6);
+    expect(fake.tables.review_weights.length).toBe(60 * 3);
     expect(firstVenueScores).toBe(secondVenueScores);
     expect(firstReviewWeights).toBe(secondReviewWeights);
   });
@@ -213,10 +215,12 @@ describe("pipeline orchestration", () => {
       const r = row as Record<string, unknown>;
       if (r.venue_id === "v1") {
         r.rating_overall = 1;
-        r.rating_coffee = 1;
         r.rating_ambience = 1;
         r.rating_service = 1;
         r.rating_value = 1;
+        r.rating_taste = 1;
+        r.rating_body = 1;
+        r.rating_aroma = 1;
       }
     }
 

@@ -62,6 +62,12 @@ export default async function VenueDetailPage({
   const displayScore = weightedScores?.displayable
     ? (weightedScores.axes.overall?.score ?? null)
     : null;
+  const coffeeScore = weightedScores?.displayable
+    ? (weightedScores.axes.coffee?.score ?? null)
+    : null;
+  const experienceScore = weightedScores?.displayable
+    ? (weightedScores.axes.experience?.score ?? null)
+    : null;
   const explain =
     weightedScores?.displayable
       ? await explainVenueScore(supabase, venueRow.id, "overall")
@@ -99,6 +105,9 @@ export default async function VenueDetailPage({
           <div className="text-2xl font-semibold">{formatRating(displayScore)}</div>
           <div className="text-xs text-[var(--color-muted-foreground)]">
             {count} review{count === 1 ? "" : "s"}
+          </div>
+          <div className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+            Coffee {formatRating(coffeeScore)} · Experience {formatRating(experienceScore)}
           </div>
         </div>
       </div>
@@ -147,7 +156,7 @@ export default async function VenueDetailPage({
                         {r.reviewer?.display_name ?? "Unknown reviewer"}
                       </CardTitle>
                       <div className="text-sm font-medium">
-                        {r.rating_overall}/10
+                        {r.rating_overall}/10 overall
                       </div>
                     </div>
                     <CardDescription>
@@ -160,7 +169,9 @@ export default async function VenueDetailPage({
                   <CardContent className="space-y-3">
                     <p className="whitespace-pre-line text-sm">{r.body}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted-foreground)]">
-                      <span>Coffee {r.rating_coffee}</span>
+                      <span>Taste {r.rating_taste ?? "—"}</span>
+                      <span>Body {r.rating_body ?? "—"}</span>
+                      <span>Aroma {r.rating_aroma ?? "—"}</span>
                       <span>Ambience {r.rating_ambience}</span>
                       <span>Service {r.rating_service}</span>
                       <span>Value {r.rating_value}</span>
