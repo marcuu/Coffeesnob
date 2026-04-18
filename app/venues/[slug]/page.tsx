@@ -12,9 +12,12 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
 import { formatRating } from "@/lib/venues";
+import { getVenueScores } from "@/lib/aggregation";
 
 import { deleteReview } from "./actions";
 import { ReviewForm } from "./review-form";
+
+const SCORING_USE_WEIGHTED = process.env.SCORING_USE_WEIGHTED === "true";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +63,14 @@ export default async function VenueDetailPage({
       ? null
       : reviews.reduce((s, r) => s + r.rating_overall, 0) / count;
 
+  let displayScore: number | null = avg;
+  if (SCORING_USE_WEIGHTED) {
+    const weightedScores = await getVenueScores(supabase, venueRow.id);
+    displayScore = weightedScores?.displayable
+      ? (weightedScores.axes.overall?.score ?? null)
+      : null;
+  }
+
   const alreadyReviewedToday = user
     ? reviews.some(
         (r) =>
@@ -89,7 +100,7 @@ export default async function VenueDetailPage({
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold">{formatRating(avg)}</div>
+          <div className="text-2xl font-semibold">{formatRating(displayScore)}</div>
           <div className="text-xs text-[var(--color-muted-foreground)]">
             {count} review{count === 1 ? "" : "s"}
           </div>
