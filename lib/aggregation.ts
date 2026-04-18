@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { deriveCoffeeScore, deriveExperienceScore } from "@/lib/review-scoring";
 import { AXES, SCORING_CONSTANTS, type Axis } from "@/lib/scoring/weights";
 
 export type AxisScore = {
@@ -81,12 +82,6 @@ export async function getVenueOverallScores(
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// Explain endpoint (docs/scoring.md Section 5). Surfaces how a venue's
-// weighted score for one axis decomposes into reviewer contributions,
-// recency, and the prior's pull. Read-only; does not recompute.
-// ---------------------------------------------------------------------------
-
 export type VenueScoreExplanation = {
   displayedScore: number;
   confidence: number;
@@ -106,13 +101,33 @@ export type VenueScoreExplanation = {
   priorPull: number;
 };
 
-const AXIS_COLUMN: Record<Axis, string> = {
-  overall: "rating_overall",
-  coffee: "rating_coffee",
-  ambience: "rating_ambience",
-  service: "rating_service",
-  value: "rating_value",
-};
+function resolveAxisScore(
+  row: Record<string, number | string | null>,
+  axis: Axis,
+): number | null {
+  if (axis === "overall") return Number(row.rating_overall ?? null);
+
+  if (axis === "coffee") {
+    if (
+      typeof row.rating_taste === "number" &&
+      typeof row.rating_body === "number" &&
+      typeof row.rating_aroma === "number"
+    ) {
+      return deriveCoffeeScore({
+        rating_taste: row.rating_taste,
+        rating_body: row.rating_body,
+        rating_aroma: row.rating_aroma,
+      });
+    }
+    return null;
+  }
+
+  return deriveExperienceScore({
+    rating_ambience: Number(row.rating_ambience ?? 0),
+    rating_service: Number(row.rating_service ?? 0),
+    rating_value: Number(row.rating_value ?? 0),
+  });
+}
 
 export async function explainVenueScore(
   supabase: SupabaseClient,
@@ -131,11 +146,10 @@ export async function explainVenueScore(
   if (scoreErr) throw scoreErr;
   if (!scoreRow) return null;
 
-  const ratingColumn = AXIS_COLUMN[axis];
   const { data: reviewRows, error: reviewsErr } = await supabase
     .from("reviews")
     .select(
-      `id, visited_on, reviewer_id, ${ratingColumn}, reviewer:reviewers(display_name)`,
+      "id, visited_on, reviewer_id, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma, reviewer:reviewers(display_name)",
     )
     .eq("venue_id", venueId);
   if (reviewsErr) throw reviewsErr;
@@ -166,22 +180,18 @@ export async function explainVenueScore(
     );
   }
 
-  const contributors = reviews.map((r) => {
-    const w = weightByReviewId.get(r.id) ?? 0;
-    const score = Number(r[ratingColumn] ?? 0);
-    return {
-      reviewerDisplayName: r.reviewer?.display_name ?? "Unknown",
-      weightContribution: w,
-      score,
-      visitedOn: r.visited_on,
-    };
-  });
+  const contributors = reviews.map((r) => ({
+    reviewerDisplayName: r.reviewer?.display_name ?? "Unknown",
+    weightContribution: weightByReviewId.get(r.id) ?? 0,
+    score: Number(resolveAxisScore(r, axis) ?? 0),
+    visitedOn: r.visited_on,
+  }));
 
   const effective = contributors.filter(
     (c) => c.weightContribution > MIN_EFFECTIVE_WEIGHT,
   );
   const totalEffectiveWeight = effective.reduce(
-    (s, c) => s + c.weightContribution,
+    (sum, c) => sum + c.weightContribution,
     0,
   );
 
@@ -189,17 +199,16 @@ export async function explainVenueScore(
     .sort((a, b) => b.weightContribution - a.weightContribution)
     .slice(0, 5);
 
-  // Recency buckets by weight share.
   let w6 = 0;
   let w18 = 0;
   let wOlder = 0;
   for (const c of effective) {
-    const days =
-      (now.getTime() - new Date(c.visitedOn).getTime()) / MS_PER_DAY;
+    const days = (now.getTime() - new Date(c.visitedOn).getTime()) / MS_PER_DAY;
     if (days <= 183) w6 += c.weightContribution;
     else if (days <= 548) w18 += c.weightContribution;
     else wOlder += c.weightContribution;
   }
+
   const recencyProfile =
     totalEffectiveWeight > 0
       ? {
@@ -209,19 +218,15 @@ export async function explainVenueScore(
         }
       : { last6Months: 0, sixTo18Months: 0, older: 0 };
 
-  // priorPull = |weightedMean(effective reviews) − posterior|.
   const priorScore = SCORING_CONSTANTS.PRIOR_SCORE_BY_AXIS[axis];
   const posterior = Number(scoreRow.score);
-  let priorPull = 0;
+
+  let priorPull = Math.abs(priorScore - posterior);
   if (totalEffectiveWeight > 0) {
-    const weightedSum = effective.reduce(
-      (s, c) => s + c.score * c.weightContribution,
-      0,
-    );
-    const weightedMean = weightedSum / totalEffectiveWeight;
+    const weightedMean =
+      effective.reduce((sum, c) => sum + c.score * c.weightContribution, 0) /
+      totalEffectiveWeight;
     priorPull = Math.abs(weightedMean - posterior);
-  } else {
-    priorPull = Math.abs(priorScore - posterior);
   }
 
   return {
@@ -234,4 +239,3 @@ export async function explainVenueScore(
     priorPull,
   };
 }
-

@@ -51,7 +51,9 @@ export interface Review {
   venue_id: string;
   reviewer_id: string;
   rating_overall: number;
-  rating_coffee: number;
+  rating_taste: number | null;
+  rating_body: number | null;
+  rating_aroma: number | null;
   rating_ambience: number;
   rating_service: number;
   rating_value: number;
@@ -63,14 +65,18 @@ export interface Review {
 
 export type RatingAxis =
   | "rating_overall"
-  | "rating_coffee"
+  | "rating_taste"
+  | "rating_body"
+  | "rating_aroma"
   | "rating_ambience"
   | "rating_service"
   | "rating_value";
 
 export const RATING_AXES: readonly RatingAxis[] = [
   "rating_overall",
-  "rating_coffee",
+  "rating_taste",
+  "rating_body",
+  "rating_aroma",
   "rating_ambience",
   "rating_service",
   "rating_value",

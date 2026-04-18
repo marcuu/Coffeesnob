@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,12 @@ import { createReview, type ReviewFormState } from "./actions";
 const initial: ReviewFormState = { status: "idle" };
 
 const AXES = [
-  { name: "rating_overall", label: "Overall" },
-  { name: "rating_coffee", label: "Coffee" },
   { name: "rating_ambience", label: "Ambience" },
   { name: "rating_service", label: "Service" },
   { name: "rating_value", label: "Value" },
+  { name: "rating_taste", label: "Taste" },
+  { name: "rating_body", label: "Body" },
+  { name: "rating_aroma", label: "Aroma" },
 ] as const;
 
 function today(): string {
@@ -32,9 +33,27 @@ export function ReviewForm({
 }) {
   const [state, formAction, pending] = useActionState(createReview, initial);
   const formRef = useRef<HTMLFormElement>(null);
+  const [values, setValues] = useState<Record<(typeof AXES)[number]["name"], number>>({
+    rating_ambience: 7,
+    rating_service: 7,
+    rating_value: 7,
+    rating_taste: 7,
+    rating_body: 7,
+    rating_aroma: 7,
+  });
 
   useEffect(() => {
-    if (state.status === "success") formRef.current?.reset();
+    if (state.status === "success") {
+      formRef.current?.reset();
+      setValues({
+        rating_ambience: 7,
+        rating_service: 7,
+        rating_value: 7,
+        rating_taste: 7,
+        rating_body: 7,
+        rating_aroma: 7,
+      });
+    }
   }, [state.status]);
 
   return (
@@ -42,19 +61,27 @@ export function ReviewForm({
       <input type="hidden" name="venue_id" value={venueId} />
       <input type="hidden" name="slug" value={slug} />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2">
         {AXES.map(({ name, label }) => (
           <div key={name} className="grid gap-1.5">
-            <Label htmlFor={name}>{label}</Label>
+            <Label htmlFor={name} className="flex items-center justify-between">
+              <span>{label}</span>
+              <span className="text-xs text-[var(--color-muted-foreground)]">
+                {values[name]}/10
+              </span>
+            </Label>
             <Input
               id={name}
               name={name}
-              type="number"
+              type="range"
               min={1}
               max={10}
               step={1}
               required
               defaultValue={7}
+              onChange={(e) =>
+                setValues((prev) => ({ ...prev, [name]: Number(e.target.value) }))
+              }
             />
           </div>
         ))}
@@ -87,14 +114,10 @@ export function ReviewForm({
       </div>
 
       {state.status === "error" ? (
-        <p className="text-sm text-[var(--color-destructive)]">
-          {state.message}
-        </p>
+        <p className="text-sm text-[var(--color-destructive)]">{state.message}</p>
       ) : null}
       {state.status === "success" ? (
-        <p className="text-sm text-[var(--color-muted-foreground)]">
-          Review posted.
-        </p>
+        <p className="text-sm text-[var(--color-muted-foreground)]">Review posted.</p>
       ) : null}
 
       <div>

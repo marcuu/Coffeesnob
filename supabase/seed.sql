@@ -134,28 +134,28 @@ begin
 
   insert into public.reviews
     (venue_id, reviewer_id,
-     rating_overall, rating_coffee, rating_ambience, rating_service, rating_value,
+     rating_overall, rating_coffee, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma,
      body, visited_on)
   values
-    (prufrock, alice, 9, 10, 8, 9, 7,
+    (prufrock, alice, 9, null, 8, 9, 7, 10, 9, 10,
      'Square Mile filter was spot on. Loud at lunchtime but the bar staff keep it moving.',
      current_date - 7),
-    (prufrock, bob, 8, 9, 7, 8, 7,
+    (prufrock, bob, 8, null, 7, 8, 7, 9, 8, 9,
      'Espresso is consistently good. Seats fill up fast past 9am.',
      current_date - 3),
-    (kaffeine, alice, 7, 8, 6, 8, 7,
+    (kaffeine, alice, 7, null, 6, 8, 7, 8, 7, 8,
      'Reliable Fitzrovia stop. Tight room, quick turnover, no surprises either way.',
      current_date - 14),
-    (ozone, alice, 8, 8, 9, 8, 6,
+    (ozone, alice, 8, null, 9, 8, 6, 8, 8, 8,
      'Room is the selling point. Beans are solid, food raised the bill.',
      current_date - 21),
-    (ozone, carol, 9, 9, 9, 8, 7,
+    (ozone, carol, 9, null, 9, 8, 7, 9, 9, 9,
      'Own roast shines on filter. Busy at weekends, worth the wait.',
      current_date - 2),
-    (northstar, bob, 9, 9, 9, 9, 8,
+    (northstar, bob, 9, null, 9, 9, 8, 9, 9, 9,
      'Best pour-over experience I''ve had outside Melbourne. Staff knew every lot.',
      current_date - 30),
-    (northstar, carol, 10, 10, 9, 10, 9,
+    (northstar, carol, 10, null, 9, 10, 9, 10, 10, 10,
      'Local bias noted, but it''s the real deal. Try the single-origin flight.',
      current_date - 5);
 end $$;

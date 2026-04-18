@@ -3,15 +3,9 @@
 //
 // See docs/scoring.md Section 2 for the specification and rationale.
 
-export type Axis = "overall" | "coffee" | "ambience" | "service" | "value";
+export type Axis = "overall" | "coffee" | "experience";
 
-export const AXES: readonly Axis[] = [
-  "overall",
-  "coffee",
-  "ambience",
-  "service",
-  "value",
-];
+export const AXES: readonly Axis[] = ["overall", "coffee", "experience"];
 
 export type ReviewerStatus = "seeded" | "invited" | "active";
 
@@ -50,9 +44,7 @@ export const SCORING_CONSTANTS = {
   PRIOR_SCORE_BY_AXIS: {
     overall: 6.0,
     coffee: 6.0,
-    ambience: 6.0,
-    service: 6.5,
-    value: 6.0,
+    experience: 6.0,
   } as Record<Axis, number>,
   PRIOR_STRENGTH: 3.0,
 };
@@ -96,8 +88,7 @@ export function computeReviewWeight(
   // multipliers that otherwise penalise new accounts, so their first review
   // can anchor an unreviewed venue. Recency and completeness still apply —
   // stale or partial reviews should still count less.
-  const tenureMult =
-    reviewer.status === "seeded" ? 1.0 : reviewer.tenureScore;
+  const tenureMult = reviewer.status === "seeded" ? 1.0 : reviewer.tenureScore;
   const consistencyMult =
     reviewer.status === "seeded" ? 1.0 : reviewer.consistencyScore;
 
@@ -116,10 +107,6 @@ export function computeReviewerAxisWeight(
   validationsNegative: number,
 ): number {
   const base = SCORING_CONSTANTS.STATUS_BASE_WEIGHT[_reviewer.status];
-  // Seeded reviewers skip the count-based saturation once they've written
-  // at least one review — they're pre-selected for expertise, so 1 review
-  // in an axis is enough to count fully. A seeded reviewer with 0 reviews
-  // still returns 0.
   const countMult =
     _reviewer.status === "seeded" && reviewsInAxis >= 1
       ? SCORING_CONSTANTS.AXIS_COUNT_MAX_MULTIPLIER

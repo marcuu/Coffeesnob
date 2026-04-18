@@ -46,12 +46,13 @@ describe("venueCreateSchema", () => {
 
 describe("reviewCreateSchema", () => {
   const base = {
-    venue_id: "00000000-0000-0000-0000-000000000001",
-    rating_overall: 8,
-    rating_coffee: 9,
+    venue_id: "123e4567-e89b-42d3-a456-426614174000",
     rating_ambience: 7,
     rating_service: 8,
     rating_value: 7,
+    rating_taste: 9,
+    rating_body: 8,
+    rating_aroma: 9,
     body: "Solid filter, friendly bar staff.",
     visited_on: "2026-04-17",
   };
@@ -62,10 +63,10 @@ describe("reviewCreateSchema", () => {
 
   it("rejects ratings outside 1-10", () => {
     expect(
-      reviewCreateSchema.safeParse({ ...base, rating_overall: 11 }).success,
+      reviewCreateSchema.safeParse({ ...base, rating_taste: 11 }).success,
     ).toBe(false);
     expect(
-      reviewCreateSchema.safeParse({ ...base, rating_coffee: 0 }).success,
+      reviewCreateSchema.safeParse({ ...base, rating_body: 0 }).success,
     ).toBe(false);
   });
 
