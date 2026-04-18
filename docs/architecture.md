@@ -87,7 +87,9 @@ Mutations go through server actions that:
 5. `revalidatePath` on affected routes, then `redirect` or return state.
 
 Actions used with `useActionState` return a `{ status, message, fieldErrors }`
-shape so forms can render inline Zod messages without round-tripping.
+shape so forms can render inline Zod messages without round-tripping. The
+review form's six rating sliders initialise to a neutral `5/10` before any
+user changes.
 
 ## Testing
 
