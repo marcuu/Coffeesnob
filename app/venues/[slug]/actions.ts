@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/utils/supabase/server";
+import { deriveOverallRatingInt } from "@/lib/review-scoring";
 import { formNumber, formString, reviewCreateSchema } from "@/lib/validators";
 
 export type ReviewFormState =
@@ -27,11 +28,12 @@ export async function createReview(
 
   const raw = {
     venue_id,
-    rating_overall: formNumber(formData.get("rating_overall")),
-    rating_coffee: formNumber(formData.get("rating_coffee")),
     rating_ambience: formNumber(formData.get("rating_ambience")),
     rating_service: formNumber(formData.get("rating_service")),
     rating_value: formNumber(formData.get("rating_value")),
+    rating_taste: formNumber(formData.get("rating_taste")),
+    rating_body: formNumber(formData.get("rating_body")),
+    rating_aroma: formNumber(formData.get("rating_aroma")),
     body: formString(formData.get("body")),
     visited_on: formString(formData.get("visited_on")),
   };
@@ -50,9 +52,11 @@ export async function createReview(
     };
   }
 
+  const derivedOverall = deriveOverallRatingInt(parsed.data);
+
   const { error } = await supabase
     .from("reviews")
-    .insert({ ...parsed.data, reviewer_id: user.id });
+    .insert({ ...parsed.data, rating_overall: derivedOverall, reviewer_id: user.id });
 
   if (error) return { status: "error", message: error.message };
 

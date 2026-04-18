@@ -28,16 +28,12 @@ function fullReviewer(overrides: Partial<ReviewerState> = {}): ReviewerState {
   const axisWeights: Record<Axis, number> = {
     overall: 3,
     coffee: 3,
-    ambience: 3,
-    service: 3,
-    value: 3,
+    experience: 3,
   };
   const reviewsByAxis: Record<Axis, number> = {
     overall: 10,
     coffee: 10,
-    ambience: 10,
-    service: 10,
-    value: 10,
+    experience: 10,
   };
   return {
     id: "r1",
@@ -57,7 +53,7 @@ function fullReview(overrides: Partial<ReviewForWeighting> = {}): ReviewForWeigh
     id: "rev1",
     reviewerId: "r1",
     visitedOn: NOW,
-    scores: { overall: 8, coffee: 8, ambience: 7, service: 9, value: 6 },
+    scores: { overall: 8, coffee: 8, experience: 7 },
     ...overrides,
   };
 }
@@ -227,9 +223,7 @@ describe("computeReviewWeight", () => {
       axisWeights: {
         overall: 10,
         coffee: 10,
-        ambience: 10,
-        service: 10,
-        value: 10,
+        experience: 10,
       },
     });
     const rev = fullReview();
@@ -241,9 +235,7 @@ describe("computeReviewWeight", () => {
       axisWeights: {
         overall: 0,
         coffee: 3,
-        ambience: 3,
-        service: 3,
-        value: 3,
+        experience: 3,
       },
     });
     const rev = fullReview();
@@ -262,7 +254,7 @@ describe("computeReviewWeight", () => {
 
   it("does not penalise completeness when exactly 3 axes are scored", () => {
     const r = fullReviewer();
-    const rev = fullReview({ scores: { overall: 8, coffee: 7, ambience: 6 } });
+    const rev = fullReview({ scores: { overall: 8, coffee: 7, experience: 6 } });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(1, 5);
   });
 
@@ -285,9 +277,7 @@ describe("computeReviewWeight", () => {
       scores: {
         overall: 8,
         coffee: undefined,
-        ambience: undefined,
-        service: undefined,
-        value: undefined,
+        experience: undefined,
       },
     });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
@@ -298,7 +288,7 @@ describe("computeReviewWeight", () => {
 });
 
 describe("AXES", () => {
-  it("contains exactly the five documented axes in spec order", () => {
-    expect(AXES).toEqual(["overall", "coffee", "ambience", "service", "value"]);
+  it("contains exactly the three documented axes in spec order", () => {
+    expect(AXES).toEqual(["overall", "coffee", "experience"]);
   });
 });

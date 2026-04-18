@@ -52,8 +52,9 @@ export type VenueUpdateInput = z.infer<typeof venueUpdateSchema>;
 
 export const reviewCreateSchema = z.object({
   venue_id: z.string().uuid(),
-  rating_overall: rating,
-  rating_coffee: rating,
+  rating_taste: rating,
+  rating_body: rating,
+  rating_aroma: rating,
   rating_ambience: rating,
   rating_service: rating,
   rating_value: rating,

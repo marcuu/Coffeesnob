@@ -20,6 +20,7 @@ import {
   type ReviewerState,
   type ReviewerStatus,
 } from "@/lib/scoring/weights";
+import { deriveCoffeeScore, deriveExperienceScore, deriveOverallScore } from "@/lib/review-scoring";
 import { aggregateVenueAxis } from "@/lib/scoring/aggregation";
 
 // Score-movement threshold for `venuesMovedOverall` in the run report.
@@ -43,17 +44,6 @@ export type PipelineRunReport = {
 };
 
 // ---------------------------------------------------------------------------
-// Column mapping between the rating_* columns on reviews and Axis values.
-// ---------------------------------------------------------------------------
-const AXIS_COLUMN: Record<Axis, string> = {
-  overall: "rating_overall",
-  coffee: "rating_coffee",
-  ambience: "rating_ambience",
-  service: "rating_service",
-  value: "rating_value",
-};
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -71,10 +61,12 @@ type ReviewRow = {
   reviewer_id: string;
   visited_on: string;
   rating_overall: number;
-  rating_coffee: number;
   rating_ambience: number;
   rating_service: number;
   rating_value: number;
+  rating_taste: number | null;
+  rating_body: number | null;
+  rating_aroma: number | null;
 };
 
 async function fetchReviewers(
@@ -96,7 +88,7 @@ async function fetchReviewsByReviewers(
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee, rating_ambience, rating_service, rating_value",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
     )
     .in("reviewer_id", reviewerIds);
   if (error) throw error;
@@ -111,7 +103,7 @@ async function fetchReviewsByVenues(
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee, rating_ambience, rating_service, rating_value",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
     )
     .in("venue_id", venueIds);
   if (error) throw error;
@@ -123,7 +115,7 @@ async function fetchReviewsByIds(sb: Sb, ids: string[]): Promise<ReviewRow[]> {
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee, rating_ambience, rating_service, rating_value",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
     )
     .in("id", ids);
   if (error) throw error;
@@ -143,13 +135,32 @@ async function fetchAllVenueIds(sb: Sb): Promise<string[]> {
 }
 
 function reviewScores(r: ReviewRow): Record<Axis, number> {
-  return {
-    overall: r.rating_overall,
-    coffee: r.rating_coffee,
-    ambience: r.rating_ambience,
-    service: r.rating_service,
-    value: r.rating_value,
-  };
+  const taste = r.rating_taste;
+  const body = r.rating_body;
+  const aroma = r.rating_aroma;
+  const hasCoffeeInputs =
+    typeof taste === "number" && typeof body === "number" && typeof aroma === "number";
+
+  const coffee = hasCoffeeInputs
+    ? deriveCoffeeScore({ rating_taste: taste, rating_body: body, rating_aroma: aroma })
+    : r.rating_overall;
+  const experience = deriveExperienceScore({
+    rating_ambience: r.rating_ambience,
+    rating_service: r.rating_service,
+    rating_value: r.rating_value,
+  });
+  const overall = hasCoffeeInputs
+    ? deriveOverallScore({
+        rating_ambience: r.rating_ambience,
+        rating_service: r.rating_service,
+        rating_value: r.rating_value,
+        rating_taste: taste,
+        rating_body: body,
+        rating_aroma: aroma,
+      })
+    : r.rating_overall;
+
+  return { overall, coffee, experience };
 }
 
 // ---------------------------------------------------------------------------
@@ -179,7 +190,7 @@ export async function updateReviewerMetrics(
   for (const rev of reviews) {
     const list = scoresByReviewer.get(rev.reviewer_id);
     if (!list) continue;
-    for (const axis of AXES) list.push(rev[AXIS_COLUMN[axis] as keyof ReviewRow] as number);
+    for (const axis of AXES) list.push(reviewScores(rev)[axis]);
     countByReviewer.set(
       rev.reviewer_id,
       (countByReviewer.get(rev.reviewer_id) ?? 0) + 1,
@@ -235,16 +246,14 @@ export async function updateReviewerAxisWeights(
     perReviewerAxisCount.set(r.id, {
       overall: 0,
       coffee: 0,
-      ambience: 0,
-      service: 0,
-      value: 0,
+      experience: 0,
     });
   }
   for (const rev of reviews) {
     const per = perReviewerAxisCount.get(rev.reviewer_id);
     if (!per) continue;
     for (const axis of AXES) {
-      const v = rev[AXIS_COLUMN[axis] as keyof ReviewRow];
+      const v = reviewScores(rev)[axis];
       if (typeof v === "number") per[axis]++;
     }
   }
@@ -394,16 +403,12 @@ async function loadReviewerStates(
         weights: {
           overall: 0,
           coffee: 0,
-          ambience: 0,
-          service: 0,
-          value: 0,
+          experience: 0,
         },
         counts: {
           overall: 0,
           coffee: 0,
-          ambience: 0,
-          service: 0,
-          value: 0,
+          experience: 0,
         },
       };
       axisByReviewer.set(row.reviewer_id, entry);
@@ -480,7 +485,7 @@ export async function recomputeVenueScores(
     const venueReviews = reviewsByVenue.get(venueId) ?? [];
     for (const axis of AXES) {
       const weighted = venueReviews.map((rev) => ({
-        score: rev[AXIS_COLUMN[axis] as keyof ReviewRow] as number,
+        score: reviewScores(rev)[axis],
         weight: weightsByReview.get(rev.id)?.[axis] ?? 0,
       }));
       const agg = aggregateVenueAxis(
@@ -542,9 +547,7 @@ async function loadReviewWeights(
         entry = {
           overall: 0,
           coffee: 0,
-          ambience: 0,
-          service: 0,
-          value: 0,
+          experience: 0,
         };
         out.set(row.review_id, entry);
       }
@@ -575,9 +578,7 @@ async function loadVenueAxisScores(
       entry = {
         overall: 0,
         coffee: 0,
-        ambience: 0,
-        service: 0,
-        value: 0,
+        experience: 0,
       };
       out.set(row.venue_id, entry);
     }

@@ -85,3 +85,11 @@ See `.env.example`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+
+## Scoring model
+
+Reviews capture six slider inputs (ambience, service, value, taste, body, aroma).
+`rating_overall` is derived from weighted inputs (10/10/10/25/20/25), and the
+scoring pipeline computes weighted venue composites for `overall`, `coffee`, and
+`experience`.
