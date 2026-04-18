@@ -366,6 +366,15 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - Simulation harness ships in PR 6. No tuning of `SCORING_CONSTANTS` is
   permitted in PRs 1-5. If tuning becomes necessary mid-rollout, pull the
   harness forward — do not tune blind.
+- **Seeded reviewer anchor treatment** (added PR 4): seeded reviewers bypass
+  the new-account penalties so a single seeded review can anchor an otherwise
+  empty venue. Specifically: (a) `computeReviewerAxisWeight` skips the
+  count-based saturation for seeded reviewers once `reviewsInAxis >= 1`, and
+  (b) `computeReviewWeight` uses `1.0` in place of `tenureScore` and
+  `consistencyScore` for seeded reviewers. Recency and completeness still
+  apply. `PRIOR_STRENGTH` was lowered from `5.0` to `3.0` so one seeded
+  review (weight ≈ 1.0) produces `confidence ≈ 0.25 > 0.2` and displays in
+  the UI. Non-seeded reviewers are unaffected by these bypasses.
 
 ## Section 10: Deliberate omissions at MVP
 

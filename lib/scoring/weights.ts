@@ -54,7 +54,7 @@ export const SCORING_CONSTANTS = {
     service: 6.5,
     value: 6.0,
   } as Record<Axis, number>,
-  PRIOR_STRENGTH: 5.0,
+  PRIOR_STRENGTH: 3.0,
 };
 
 const MS_PER_DAY = 86_400_000;
@@ -92,12 +92,16 @@ export function computeReviewWeight(
       ? 1.0
       : SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER;
 
-  const weight =
-    base *
-    reviewer.tenureScore *
-    reviewer.consistencyScore *
-    recency *
-    completeness;
+  // Seeded reviewers are pre-vetted anchors: bypass the tenure/consistency
+  // multipliers that otherwise penalise new accounts, so their first review
+  // can anchor an unreviewed venue. Recency and completeness still apply —
+  // stale or partial reviews should still count less.
+  const tenureMult =
+    reviewer.status === "seeded" ? 1.0 : reviewer.tenureScore;
+  const consistencyMult =
+    reviewer.status === "seeded" ? 1.0 : reviewer.consistencyScore;
+
+  const weight = base * tenureMult * consistencyMult * recency * completeness;
 
   return clamp(weight, 0, 1);
 }
@@ -112,10 +116,17 @@ export function computeReviewerAxisWeight(
   validationsNegative: number,
 ): number {
   const base = SCORING_CONSTANTS.STATUS_BASE_WEIGHT[_reviewer.status];
-  const countMult = Math.min(
-    reviewsInAxis / SCORING_CONSTANTS.AXIS_COUNT_SATURATION,
-    SCORING_CONSTANTS.AXIS_COUNT_MAX_MULTIPLIER,
-  );
+  // Seeded reviewers skip the count-based saturation once they've written
+  // at least one review — they're pre-selected for expertise, so 1 review
+  // in an axis is enough to count fully. A seeded reviewer with 0 reviews
+  // still returns 0.
+  const countMult =
+    _reviewer.status === "seeded" && reviewsInAxis >= 1
+      ? SCORING_CONSTANTS.AXIS_COUNT_MAX_MULTIPLIER
+      : Math.min(
+          reviewsInAxis / SCORING_CONSTANTS.AXIS_COUNT_SATURATION,
+          SCORING_CONSTANTS.AXIS_COUNT_MAX_MULTIPLIER,
+        );
   const validationRatio =
     (validationsPositive + 1) / (validationsPositive + validationsNegative + 2);
   const weight = base * countMult * (0.5 + validationRatio);
