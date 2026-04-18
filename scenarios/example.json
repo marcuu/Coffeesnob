@@ -1,0 +1,4 @@
+{
+  "description": "Test halving the recency half-life",
+  "overrides": { "RECENCY_HALF_LIFE_DAYS": 270 }
+}

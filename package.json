@@ -14,7 +14,8 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "scoring:run": "tsx scripts/scoring-run.ts",
-    "scoring:backfill": "tsx scripts/scoring-backfill.ts"
+    "scoring:backfill": "tsx scripts/scoring-backfill.ts",
+    "scoring:simulate": "tsx scripts/simulate.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
