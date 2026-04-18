@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
-import { buildCityFilterOptions, formatRating } from "@/lib/venues";
+import {
+  buildCityFilterOptions,
+  formatRating,
+  sortVenuesForListing,
+} from "@/lib/venues";
 import { getVenueOverallScores } from "@/lib/aggregation";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +22,9 @@ export const dynamic = "force-dynamic";
 export default async function VenuesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ city?: string }>;
+  searchParams: Promise<{ city?: string; sort?: string }>;
 }) {
-  const { city } = await searchParams;
+  const { city, sort } = await searchParams;
   const cityFilter = city?.trim() ?? "";
 
   const supabase = await createClient();
@@ -61,6 +65,7 @@ export default async function VenuesPage({
           venues.map((v) => v.id),
         )
       : new Map();
+  const sortedVenues = sortVenuesForListing(venues, weightedScores, sort);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -113,7 +118,7 @@ export default async function VenuesPage({
         ) : null}
       </form>
 
-      {venues.length === 0 ? (
+      {sortedVenues.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
           {selectedCity
             ? `No venues matched "${selectedCity}".`
@@ -121,7 +126,7 @@ export default async function VenuesPage({
         </p>
       ) : (
         <ul className="grid gap-4">
-          {venues.map((v) => {
+          {sortedVenues.map((v) => {
             const ws = weightedScores.get(v.id);
             const displayScore = ws?.displayable ? ws.score : null;
             const reviewCount = ws?.rawReviewCount ?? 0;
