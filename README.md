@@ -89,7 +89,8 @@ See `.env.example`:
 
 ## Scoring model
 
-Reviews capture six slider inputs (ambience, service, value, taste, body, aroma).
+Reviews capture six slider inputs (ambience, service, value, taste, body, aroma),
+and each slider defaults to **5/10** until the reviewer changes it.
 `rating_overall` is derived from weighted inputs (10/10/10/25/20/25), and the
 scoring pipeline computes weighted venue composites for `overall`, `coffee`, and
 `experience`.

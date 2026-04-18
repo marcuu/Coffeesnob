@@ -20,6 +20,8 @@ const AXES = [
   { name: "rating_aroma", label: "Aroma" },
 ] as const;
 
+const DEFAULT_RATING = 5;
+
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -34,24 +36,24 @@ export function ReviewForm({
   const [state, formAction, pending] = useActionState(createReview, initial);
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<Record<(typeof AXES)[number]["name"], number>>({
-    rating_ambience: 7,
-    rating_service: 7,
-    rating_value: 7,
-    rating_taste: 7,
-    rating_body: 7,
-    rating_aroma: 7,
+    rating_ambience: DEFAULT_RATING,
+    rating_service: DEFAULT_RATING,
+    rating_value: DEFAULT_RATING,
+    rating_taste: DEFAULT_RATING,
+    rating_body: DEFAULT_RATING,
+    rating_aroma: DEFAULT_RATING,
   });
 
   useEffect(() => {
     if (state.status === "success") {
       formRef.current?.reset();
       setValues({
-        rating_ambience: 7,
-        rating_service: 7,
-        rating_value: 7,
-        rating_taste: 7,
-        rating_body: 7,
-        rating_aroma: 7,
+        rating_ambience: DEFAULT_RATING,
+        rating_service: DEFAULT_RATING,
+        rating_value: DEFAULT_RATING,
+        rating_taste: DEFAULT_RATING,
+        rating_body: DEFAULT_RATING,
+        rating_aroma: DEFAULT_RATING,
       });
     }
   }, [state.status]);
@@ -78,7 +80,7 @@ export function ReviewForm({
               max={10}
               step={1}
               required
-              defaultValue={7}
+              defaultValue={DEFAULT_RATING}
               onChange={(e) =>
                 setValues((prev) => ({ ...prev, [name]: Number(e.target.value) }))
               }
