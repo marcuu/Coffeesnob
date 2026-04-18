@@ -51,7 +51,9 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
 - **reviewers** extends `auth.users`. A trigger on user signup auto-creates a
   stub profile so review FKs are always satisfied.
 - **venues** are user-submitted by any allowlisted user. The submitter owns
-  edits/deletes until we introduce an admin role.
+  edits/deletes until we introduce an admin role. The `/venues` listing page
+  supports an exact-match city dropdown filter populated from known venue
+  cities.
 - **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
   Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
   the same venue on different visits.
