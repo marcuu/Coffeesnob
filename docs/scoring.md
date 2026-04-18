@@ -341,7 +341,7 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - **PR 4** (merged): Switch read path to `venue_axis_scores`. Behind feature flag
   `SCORING_USE_WEIGHTED`. Compare for a week. Keep old aggregation code
   intact under flag — do not clean up in this PR.
-- **PR 5**: Remove feature flag and old aggregation. Add explain UI.
+- **PR 5** (merged): Remove feature flag and old aggregation. Add explain UI.
 - **PR 6**: Simulation harness.
 
 ## Section 9: Non-negotiables
