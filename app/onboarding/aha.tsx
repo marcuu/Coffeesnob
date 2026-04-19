@@ -1,20 +1,33 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 
-import { FLAVOUR_PAIRS, rankVenues, type Prefs } from "./data";
+import {
+  FLAVOUR_PAIRS,
+  rankVenues,
+  type OnboardingVenue,
+  type Prefs,
+} from "./data";
 
 type AhaRevealProps = {
   open: boolean;
   prefs: Prefs;
+  venues: OnboardingVenue[];
   onClose: () => void;
   onDone: () => void;
 };
 
-export function AhaReveal({ open, prefs, onClose, onDone }: AhaRevealProps) {
+export function AhaReveal({
+  open,
+  prefs,
+  venues,
+  onClose,
+  onDone,
+}: AhaRevealProps) {
   const top = useMemo(
-    () => (open ? rankVenues(prefs)[0] : null),
-    [open, prefs],
+    () => (open ? rankVenues(venues, prefs)[0] : null),
+    [open, venues, prefs],
   );
   const picks = useMemo(() => {
     if (!prefs.pairPicks) return [];
@@ -104,7 +117,9 @@ export function AhaReveal({ open, prefs, onClose, onDone }: AhaRevealProps) {
         >
           <MatchDial pct={top.match} />
           <div style={{ fontSize: 13, color: "var(--color-foreground)" }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Why this one?</div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+              Why this one?
+            </div>
             <div
               style={{
                 color: "var(--color-muted-foreground)",
@@ -178,8 +193,8 @@ export function AhaReveal({ open, prefs, onClose, onDone }: AhaRevealProps) {
         )}
 
         <div style={{ marginTop: 24, display: "flex", gap: 10 }}>
-          <button
-            type="button"
+          <Link
+            href={`/venues/${top.slug}`}
             onClick={onDone}
             style={{
               height: 42,
@@ -187,15 +202,17 @@ export function AhaReveal({ open, prefs, onClose, onDone }: AhaRevealProps) {
               borderRadius: "var(--radius)",
               background: "var(--color-primary)",
               color: "var(--color-primary-foreground)",
-              border: "none",
               fontFamily: "var(--font-sans)",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              textDecoration: "none",
             }}
           >
             Take me there →
-          </button>
+          </Link>
           <button
             type="button"
             onClick={onClose}

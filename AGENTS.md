@@ -36,7 +36,7 @@ app/
   api/scoring/run/      # POST-only cron endpoint (SCORING_CRON_SECRET bearer)
   auth/callback/        # OAuth + magic-link callback handler
   login/                # Login page (Google OAuth + magic-link) + server actions
-  onboarding/           # Public "show-then-ask" feed-first onboarding (data.ts + feed/sidebar/aha client components)
+  onboarding/           # Authenticated "show-then-ask" feed. page.tsx SSR-fetches venues + weighted overall scores from Supabase and maps them via venue-mapping.ts; feed/sidebar/aha client components personalise ranking from localStorage prefs.
   venues/
     page.tsx            # Venue listing with avg rating, score-desc default sort, + selectable ?city= filter
     new/                # Create venue form

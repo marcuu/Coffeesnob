@@ -43,7 +43,7 @@ displayed score (high to low).
 ### Useful URLs when the stack is up
 
 - App: http://localhost:3000
-- Onboarding (public): http://localhost:3000/onboarding
+- Onboarding (requires sign-in): http://localhost:3000/onboarding
 - Supabase Studio: http://localhost:54323
 - Inbucket (emails): http://localhost:54324
 - Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`

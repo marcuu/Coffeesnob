@@ -1,4 +1,5 @@
-// v2 data — anchored flavour pairs, concrete examples, no level question.
+// Onboarding domain types + pure ranking helpers.
+// Venues are supplied at runtime (fetched from Supabase by the server page).
 
 export type AxisKey =
   | "floral"
@@ -36,10 +37,12 @@ export type FlavourPair = {
 
 export type City = { id: string; name: string; venues: number };
 
-export type Venue = {
+export type OnboardingVenue = {
   slug: string;
   name: string;
+  /** Human-readable city line (e.g. "London Fields"). */
   city: string;
+  /** City id used for matching — lowercased DB city. */
   area: string;
   roaster: string;
   axes: Axes;
@@ -129,167 +132,6 @@ export const FLAVOUR_PAIRS: FlavourPair[] = [
   },
 ];
 
-export const CITIES: City[] = [
-  { id: "london", name: "London", venues: 128 },
-  { id: "manchester", name: "Manchester", venues: 41 },
-  { id: "leeds", name: "Leeds", venues: 29 },
-  { id: "bristol", name: "Bristol", venues: 34 },
-  { id: "brighton", name: "Brighton", venues: 22 },
-  { id: "bath", name: "Bath", venues: 14 },
-  { id: "edinburgh", name: "Edinburgh", venues: 26 },
-  { id: "glasgow", name: "Glasgow", venues: 24 },
-];
-
-export const VENUES: Venue[] = [
-  {
-    slug: "la-cabra",
-    name: "La Cabra",
-    city: "London Fields",
-    area: "london",
-    roaster: "La Cabra (DK)",
-    axes: { floral: 0.9, fruit: 0.8 },
-    drinks: ["filter", "espresso"],
-    score: 8.9,
-    reviews: 47,
-    pitch:
-      "The Geisha filter tastes like jasmine tea gatecrashed an orange grove.",
-    proof: "Last 20 filter reviews: 9.1 avg on 'floral', 8.8 on 'clarity'.",
-  },
-  {
-    slug: "prufrock",
-    name: "Prufrock",
-    city: "Leather Lane, EC1",
-    area: "london",
-    roaster: "Square Mile",
-    axes: { fruit: 0.9, floral: 0.6, classic: 0.5 },
-    drinks: ["filter", "espresso"],
-    score: 8.7,
-    reviews: 118,
-    pitch: "A washed Kenyan that drinks like blackcurrant cordial. Still.",
-    proof: "Top-rated third-wave venue in EC1 for the last 18 months.",
-  },
-  {
-    slug: "kaffeine",
-    name: "Kaffeine",
-    city: "Fitzrovia",
-    area: "london",
-    roaster: "Workshop",
-    axes: { choc: 0.8, nutty: 0.7, classic: 0.9 },
-    drinks: ["milky", "espresso"],
-    score: 8.4,
-    reviews: 204,
-    pitch: "Flat white benchmark. The texture is silk.",
-    proof: "Milk drink reviews: 8.9 avg on 'texture', highest in London.",
-  },
-  {
-    slug: "north-star",
-    name: "North Star",
-    city: "Leeds",
-    area: "leeds",
-    roaster: "North Star",
-    axes: { choc: 0.9, nutty: 0.8, classic: 0.7 },
-    drinks: ["milky", "espresso", "cold"],
-    score: 8.2,
-    reviews: 88,
-    pitch: "Cortado with cocoa and hazelnut. A proper hug in a cup.",
-    proof: "Leeds' #1 for milk drinks, 3 years running.",
-  },
-  {
-    slug: "colonna",
-    name: "Colonna & Small's",
-    city: "Bath",
-    area: "bath",
-    roaster: "Colonna",
-    axes: { fruit: 1, floral: 0.7, spice: 0.6 },
-    drinks: ["cold", "filter"],
-    score: 8.8,
-    reviews: 63,
-    pitch:
-      "Maxwell Colonna-Dashwood's lab. Cold brew from another planet.",
-    proof: "Highest-rated experimental brews on Coffeesnob.",
-  },
-  {
-    slug: "blossom",
-    name: "Blossom Coffee Brewers",
-    city: "Manchester",
-    area: "manchester",
-    roaster: "Heart & Graft",
-    axes: { floral: 0.7, classic: 0.8 },
-    drinks: ["non_coffee", "milky"],
-    score: 8.1,
-    reviews: 42,
-    pitch: "Ceremonial matcha next to a flat white that holds its own.",
-    proof: "Only venue in MCR scoring 8+ on both coffee and matcha.",
-  },
-  {
-    slug: "laynes",
-    name: "Laynes Espresso",
-    city: "Leeds",
-    area: "leeds",
-    roaster: "Square Mile",
-    axes: { classic: 1, choc: 0.6 },
-    drinks: ["milky", "espresso"],
-    score: 8.3,
-    reviews: 76,
-    pitch: "A neighbourhood anchor. Do the cortado.",
-    proof: "Most-reviewed venue outside London.",
-  },
-  {
-    slug: "machina",
-    name: "Machina Coffee",
-    city: "Leeds",
-    area: "leeds",
-    roaster: "Friends of Ham",
-    axes: { fruit: 0.7, classic: 0.6, choc: 0.4 },
-    drinks: ["espresso", "milky"],
-    score: 8.0,
-    reviews: 54,
-    pitch: "Weekly-rotating single origins, no attitude about it.",
-    proof: "Consistent 8+ on 'value' across 50+ reviews.",
-  },
-  {
-    slug: "curators",
-    name: "Curators Coffee",
-    city: "Margaret St, W1",
-    area: "london",
-    roaster: "Nude",
-    axes: { spice: 1, fruit: 0.7 },
-    drinks: ["filter", "espresso"],
-    score: 8.0,
-    reviews: 31,
-    pitch: "Natural Ethiopians with clove on the finish. Unusual, correct.",
-    proof:
-      "Only venue rated 9+ on 'adventurous sourcing' by expert reviewers.",
-  },
-  {
-    slug: "artisan-r",
-    name: "Artisan Roast",
-    city: "Edinburgh",
-    area: "edinburgh",
-    roaster: "Artisan",
-    axes: { choc: 0.7, nutty: 0.6, classic: 0.8 },
-    drinks: ["milky", "espresso"],
-    score: 8.5,
-    reviews: 69,
-    pitch:
-      "Edinburgh's oldest third-wave anchor. Flat white benchmark north of the border.",
-    proof: "Top-rated milk drinks in Scotland since 2023.",
-  },
-  {
-    slug: "papercup",
-    name: "Papercup Coffee",
-    city: "Glasgow",
-    area: "glasgow",
-    roaster: "Papercup",
-    axes: { fruit: 0.8, floral: 0.6 },
-    drinks: ["filter", "espresso"],
-    score: 8.4,
-    reviews: 52,
-    pitch: "Glasgow's go-to for delicate filter. Don't order oat milk here.",
-    proof: "Filter reviews: 8.9 avg on 'clarity'.",
-  },
-];
-
 export function drinkLabel(id: string): string {
   const map: Record<string, string> = {
     espresso: "espresso",
@@ -302,9 +144,9 @@ export function drinkLabel(id: string): string {
   return map[id] ?? id;
 }
 
-export type RankedVenue = Venue & { _s: number; match: number };
+export type RankedVenue = OnboardingVenue & { _s: number; match: number };
 
-export function scoreVenueFor(v: Venue, prefs: Prefs): number {
+export function scoreVenueFor(v: OnboardingVenue, prefs: Prefs): number {
   let s = 0;
   if (prefs.axes) {
     for (const k in v.axes) {
@@ -322,7 +164,7 @@ export function scoreVenueFor(v: Venue, prefs: Prefs): number {
   return s;
 }
 
-export function confidenceFor(v: Venue, prefs: Prefs): number {
+export function confidenceFor(v: OnboardingVenue, prefs: Prefs): number {
   let c = 62;
   if (prefs.axes) {
     const shared = (Object.keys(v.axes) as AxisKey[]).filter(
@@ -340,8 +182,11 @@ export function confidenceFor(v: Venue, prefs: Prefs): number {
   return Math.min(97, c);
 }
 
-export function rankVenues(prefs: Prefs): RankedVenue[] {
-  const scored: RankedVenue[] = VENUES.map((v) => ({
+export function rankVenues(
+  venues: OnboardingVenue[],
+  prefs: Prefs,
+): RankedVenue[] {
+  const scored: RankedVenue[] = venues.map((v) => ({
     ...v,
     _s: scoreVenueFor(v, prefs),
     match: confidenceFor(v, prefs),
@@ -350,10 +195,14 @@ export function rankVenues(prefs: Prefs): RankedVenue[] {
   return scored;
 }
 
-export function reasonsFor(v: Venue, prefs: Prefs): string[] {
+export function reasonsFor(
+  v: OnboardingVenue,
+  prefs: Prefs,
+  cities: City[],
+): string[] {
   const r: string[] = [];
   if (prefs.city && v.area === prefs.city) {
-    const c = CITIES.find((c) => c.id === prefs.city);
+    const c = cities.find((c) => c.id === prefs.city);
     r.push(`in ${c ? c.name : "your city"}`);
   }
   if (prefs.axes) {
