@@ -24,8 +24,11 @@ browser ──▶ middleware.ts ──▶ utils/supabase/middleware.ts
 
 - **Provider:** Google OAuth through Supabase Auth.
 - **Gate:** `middleware.ts` calls `updateSession()` which validates the session
-  cookie with `getSession()` (no network round-trip). Page requests for
-  unauthenticated users are redirected to `/login`.
+  cookie with `getSession()` (no network round-trip). Unauthenticated requests
+  to protected routes are redirected to `/login`.
+- **Public routes:** `/` (exact match), `/login`, and `/auth/callback` are
+  accessible without a session. All `/venues/*` routes are auth-gated.
+  `_next` static assets and `/favicon.ico` are also exempt from the check.
 - **Authoritative check:** Server actions and API route handlers must call
   `supabase.auth.getUser()` before mutating. `getSession()` is fast but only
   trusts the local JWT — don't use it for authorization in mutations.
@@ -54,9 +57,16 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
   edits/deletes until we introduce an admin role. The `/venues` listing page
   supports an exact-match city dropdown filter populated from known venue
   cities and defaults to ranking by displayed weighted score (high to low).
+  The "Add venue" CTA lives only in the `/venues` page header.
 - **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
   Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
   the same venue on different visits.
+- **landing page** (`/`) doubles as the personalised venue feed for signed-in
+  users and a public leaderboard for visitors. Server component detects auth
+  via `getUser()` and branches: signed-in users get `<OnboardingApp>` with
+  sidebar/localStorage/aha; visitors get `<Leaderboard>` (score-desc,
+  no personalisation). The `app/onboarding/` directory is kept intact for test
+  imports; `app/onboarding/page.tsx` issues a 308 redirect to `/`.
 - **onboarding ranking** starts with `prefs.city = ""` (no city boost) so first
   render is effectively UK-wide; city weighting is applied only after the user
   explicitly selects a location.

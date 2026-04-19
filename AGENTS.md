@@ -32,15 +32,28 @@ shadcn/ui (Radix primitives).
 
 ```
 app/
-  page.tsx              # Home
+  page.tsx              # Landing page — score-desc leaderboard for visitors; personalised feed for signed-in users.
+                        # Routing note: the /onboarding experience was moved here. app/onboarding/page.tsx now
+                        # issues a 308 permanent redirect to / so existing links and bookmarks stay valid.
+                        # Files in app/onboarding/ (data.ts, venue-mapping.ts, etc.) are kept in place so that
+                        # test imports from @/app/onboarding/* continue to resolve without changes.
   api/scoring/run/      # POST-only cron endpoint (SCORING_CRON_SECRET bearer)
   auth/callback/        # OAuth + magic-link callback handler
   login/                # Login page (Google OAuth + magic-link) + server actions
-  onboarding/           # Authenticated "show-then-ask" feed. page.tsx SSR-fetches venues + weighted overall scores from Supabase and maps them via venue-mapping.ts; feed/sidebar/aha client components personalise ranking from localStorage prefs.
+  onboarding/
+    page.tsx            # 308 permanentRedirect to /
+    data.ts             # Ranking types + pure functions (scoreVenueFor, rankVenues, etc.)
+    venue-mapping.ts    # DB→onboarding shape conversion + city helpers
+    onboarding-app.tsx  # Client root for signed-in users: sidebar, localStorage prefs, aha reveal, nudge
+    leaderboard.tsx     # Client renderer for logged-out visitors: score-desc feed, no personalisation
+    feed.tsx            # Ranked venue cards (used inside OnboardingApp)
+    sidebar.tsx         # Preference panel (city / drink / taste) for signed-in users
+    aha.tsx             # Top-pick reveal modal for signed-in users
   venues/
     page.tsx            # Venue listing with avg rating, score-desc default sort, + selectable ?city= filter
-    new/                # Create venue form
-    [slug]/             # Venue detail, reviews, and add-review form
+                        # "Add venue" button lives here (and only here).
+    new/                # Create venue form (auth-gated)
+    [slug]/             # Venue detail, reviews, and add-review form (auth-gated)
     actions.ts          # Venue server actions (createVenue, deleteVenue)
 components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
@@ -56,11 +69,13 @@ __tests__/              # Vitest tests
 ## Key Patterns
 
 - **Server vs. Client Supabase clients:** Always use `utils/supabase/server.ts` in server components/actions and `utils/supabase/client.ts` in client components. Never import the wrong one.
-- **Auth guard:** Middleware uses `getSession()` (JWT-only, no network call) to redirect unauthenticated page requests to `/login`. The middleware matcher excludes public routes (`/login`, `/auth/callback`, static assets) and `/api/*`, so API routes do not return HTML redirects. Server actions and API routes must still call `supabase.auth.getUser()` explicitly for authoritative validation — middleware alone is not sufficient for API protection.
+- **Auth guard:** Middleware uses `getSession()` (JWT-only, no network call) to redirect unauthenticated page requests to `/login`. The middleware marks `/`, `/login`, `/auth/callback`, and static assets as public; everything else (including `/venues`, `/venues/new`, `/venues/[slug]`, `/venues/[slug]/review`) is auth-gated. The middleware matcher excludes `/api/*` so API routes do not return HTML redirects. Server actions and API routes must still call `supabase.auth.getUser()` explicitly for authoritative validation — middleware alone is not sufficient for API protection.
 - **Server Actions:** Use server actions for mutations. Always verify `user` is non-null before mutating.
 - **RLS as defense-in-depth:** All tables have RLS enabled. The `is_allowed_email()` function gates access. Do not rely on RLS as the sole auth check in application code.
 - **Component conventions:** Client components use `"use client"`. shadcn/ui components live in `components/ui/` and should not be modified directly. App-level components live in `components/`.
 - **Onboarding defaults:** `prefs.city` should default to an empty string on first load so ranking starts UK-wide; apply city boost only after explicit user selection.
+- **Landing page routing:** `/` is the personalised feed for signed-in users and a public leaderboard for visitors. The `app/onboarding/` directory remains intact for test imports; `app/onboarding/page.tsx` issues a 308 to `/`. "Add venue" CTA lives only in the `/venues` page header — do not add it to the landing page.
+- **Public routes:** Only `/` (exact match), `/login`, and `/auth/callback` are publicly accessible. All `/venues/*` routes are auth-gated by middleware.
 - **Theme tokens:** Use semantic CSS variables from `app/globals.css` for onboarding and modal UI states; ensure new accent/soft-accent backgrounds include dark-mode-safe contrast.
 
 ## Local Development

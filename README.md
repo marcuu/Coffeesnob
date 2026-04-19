@@ -42,10 +42,11 @@ displayed score (high to low).
 
 ### Useful URLs when the stack is up
 
-- App: http://localhost:3000
-- Onboarding (requires sign-in): http://localhost:3000/onboarding
-  - First load starts from a UK-wide ranking (no default city boost) until the
-    user picks a location in the sidebar.
+- App / leaderboard (public): http://localhost:3000
+  - Logged-out visitors see the score-desc leaderboard with "Sign in to personalise".
+  - Signed-in users see the personalised ranked feed with sidebar, aha reveal, and nudge.
+  - `/onboarding` redirects to `/` with a 308.
+- Venues (auth-gated): http://localhost:3000/venues
 - Supabase Studio: http://localhost:54323
 - Inbucket (emails): http://localhost:54324
 - Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`
