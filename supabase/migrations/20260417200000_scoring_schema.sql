@@ -6,16 +6,16 @@
 -- ---------------------------------------------------------------------------
 -- Reviewer status
 -- ---------------------------------------------------------------------------
--- SQL-managed tier: 'beaned' (trusted curators, manually promoted), 'invited'
+-- SQL-managed tier: 'seeded' (trusted curators, manually promoted), 'invited'
 -- (vetted joiners), 'active' (default self-signed-up). Feeds
 -- STATUS_BASE_WEIGHT in the scoring formula.
 
 alter table public.reviewers
   add column if not exists status text not null default 'active'
-    check (status in ('beaned', 'invited', 'active'));
+    check (status in ('seeded', 'invited', 'active'));
 
 -- Partial index: the vast majority of reviewers will be 'active', so we only
--- index the rarer tiers (beaned / invited) that the pipeline needs to look up.
+-- index the rarer tiers (seeded / invited) that the pipeline needs to look up.
 create index if not exists reviewers_status_idx
   on public.reviewers (status)
   where status != 'active';

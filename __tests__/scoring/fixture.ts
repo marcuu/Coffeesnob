@@ -1,5 +1,5 @@
 // Deterministic in-memory fixture for the scoring golden-regression test.
-// Generates 30 reviewers × 50 venues × 500 reviews from a beaned PRNG so the
+// Generates 30 reviewers × 50 venues × 500 reviews from a seeded PRNG so the
 // exact numbers asserted by golden.test.ts are reproducible across machines.
 //
 // Changing any value below will shift the golden assertions and force a

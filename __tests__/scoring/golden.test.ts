@@ -4,7 +4,7 @@ import { AXES, type Axis } from "@/lib/scoring/weights";
 
 import { buildFixture } from "./fixture";
 
-// Golden regression test. The fixture is deterministic (beaned PRNG), so
+// Golden regression test. The fixture is deterministic (seeded PRNG), so
 // these numbers must stay stable unless the scoring formulas or fixture
 // generator change. If a PR shifts any value, update the expectations here
 // and explain why in the PR description (see docs/scoring.md Section 7).
