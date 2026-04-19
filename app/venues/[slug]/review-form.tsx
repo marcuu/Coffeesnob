@@ -138,7 +138,7 @@ export function ReviewForm({
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0 || pending}
           >
