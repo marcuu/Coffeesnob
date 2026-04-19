@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,13 @@ const AXES = [
 ] as const;
 
 const DEFAULT_RATING = 5;
+const MAX_STEP = AXES.length - 1;
+const RATING_GUIDE = [
+  { score: "5/10", note: "Good for third-wave coffee." },
+  { score: "7/10", note: "Worth travelling 30 minutes for." },
+  { score: "8/10", note: "Worth travelling 60 minutes for." },
+  { score: "9/10", note: "Worth travelling 3 hours for." },
+] as const;
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -35,6 +43,7 @@ export function ReviewForm({
 }) {
   const [state, formAction, pending] = useActionState(createReview, initial);
   const formRef = useRef<HTMLFormElement>(null);
+  const [step, setStep] = useState(0);
   const [values, setValues] = useState<Record<(typeof AXES)[number]["name"], number>>({
     rating_ambience: DEFAULT_RATING,
     rating_service: DEFAULT_RATING,
@@ -55,38 +64,94 @@ export function ReviewForm({
         rating_body: DEFAULT_RATING,
         rating_aroma: DEFAULT_RATING,
       });
+      setStep(0);
     }
   }, [state.status]);
 
+  const currentAxis = AXES[step];
+  const progress = ((step + 1) / AXES.length) * 100;
+
   return (
-    <form ref={formRef} action={formAction} className="grid gap-4">
+    <form ref={formRef} action={formAction} className="grid gap-6">
       <input type="hidden" name="venue_id" value={venueId} />
       <input type="hidden" name="slug" value={slug} />
+      {AXES.map(({ name }) => (
+        <input key={name} type="hidden" name={name} value={values[name]} />
+      ))}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {AXES.map(({ name, label }) => (
-          <div key={name} className="grid gap-1.5">
-            <Label htmlFor={name} className="flex items-center justify-between">
-              <span>{label}</span>
-              <span className="text-xs text-[var(--color-muted-foreground)]">
-                {values[name]}/10
-              </span>
-            </Label>
-            <Input
-              id={name}
-              name={name}
-              type="range"
-              min={1}
-              max={10}
-              step={1}
-              required
-              defaultValue={DEFAULT_RATING}
-              onChange={(e) =>
-                setValues((prev) => ({ ...prev, [name]: Number(e.target.value) }))
-              }
+      <div className="grid gap-3 rounded-xl border border-[var(--color-border)] p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium">
+            Step {step + 1} of {AXES.length}: {currentAxis.label}
+          </p>
+          <p className="text-sm text-[var(--color-muted-foreground)]">
+            {values[currentAxis.name]}/10
+          </p>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-[var(--color-muted)]">
+          <div
+            className="h-full rounded-full bg-[var(--color-primary)] transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex gap-2">
+          {AXES.map((axis, axisIndex) => (
+            <span
+              key={axis.name}
+              className="h-2 flex-1 rounded-full"
+              style={{
+                backgroundColor:
+                  axisIndex <= step
+                    ? "var(--color-primary)"
+                    : "var(--color-border)",
+              }}
             />
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label htmlFor={currentAxis.name}>{currentAxis.label}</Label>
+          <Input
+            id={currentAxis.name}
+            type="range"
+            min={1}
+            max={10}
+            step={1}
+            value={values[currentAxis.name]}
+            onChange={(e) =>
+              setValues((prev) => ({
+                ...prev,
+                [currentAxis.name]: Number(e.target.value),
+              }))
+            }
+          />
+        </div>
+
+        <ul className="grid gap-1 text-xs text-[var(--color-muted-foreground)]">
+          {RATING_GUIDE.map((guide) => (
+            <li key={guide.score}>
+              <span className="font-medium">{guide.score}</span> — {guide.note}
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0 || pending}
+          >
+            Back
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setStep((s) => Math.min(MAX_STEP, s + 1))}
+            disabled={step === MAX_STEP || pending}
+          >
+            Next step
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-1.5">
@@ -122,7 +187,10 @@ export function ReviewForm({
         <p className="text-sm text-[var(--color-muted-foreground)]">Review posted.</p>
       ) : null}
 
-      <div>
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="outline" asChild>
+          <Link href={`/venues/${slug}`}>Cancel</Link>
+        </Button>
         <Button type="submit" disabled={pending}>
           {pending ? "Posting…" : "Post review"}
         </Button>

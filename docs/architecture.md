@@ -54,7 +54,8 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
   edits/deletes until we introduce an admin role. The `/venues` listing page
   supports an exact-match city dropdown filter populated from known venue
   cities.
-- **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
+- **reviews** store six user-entered 1-10 axes (ambience, service, value,
+  taste, body, aroma) and derive `rating_overall` server-side.
   Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
   the same venue on different visits.
 
@@ -90,8 +91,9 @@ Mutations go through server actions that:
 
 Actions used with `useActionState` return a `{ status, message, fieldErrors }`
 shape so forms can render inline Zod messages without round-tripping. The
-review form's six rating sliders initialise to a neutral `5/10` before any
-user changes.
+review flow lives on `/venues/[slug]/review` as a six-step experience with
+progress indicators; each slider starts at `5/10` and includes travel-time
+calibration hints for third-wave expectations.
 
 ## Testing
 
