@@ -11,8 +11,9 @@ import { Sidebar } from "./sidebar";
 const KEY = "coffeesnob.v2.prefs";
 
 function initialPrefs(cities: City[]): Prefs {
+  void cities;
   return {
-    city: cities[0]?.id ?? "",
+    city: "",
     drink: [],
     pairPicks: {},
     axes: null,

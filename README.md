@@ -44,6 +44,8 @@ displayed score (high to low).
 
 - App: http://localhost:3000
 - Onboarding (requires sign-in): http://localhost:3000/onboarding
+  - First load starts from a UK-wide ranking (no default city boost) until the
+    user picks a location in the sidebar.
 - Supabase Studio: http://localhost:54323
 - Inbucket (emails): http://localhost:54324
 - Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`

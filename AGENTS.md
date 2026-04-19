@@ -60,6 +60,7 @@ __tests__/              # Vitest tests
 - **Server Actions:** Use server actions for mutations. Always verify `user` is non-null before mutating.
 - **RLS as defense-in-depth:** All tables have RLS enabled. The `is_allowed_email()` function gates access. Do not rely on RLS as the sole auth check in application code.
 - **Component conventions:** Client components use `"use client"`. shadcn/ui components live in `components/ui/` and should not be modified directly. App-level components live in `components/`.
+- **Onboarding defaults:** `prefs.city` should default to an empty string on first load so ranking starts UK-wide; apply city boost only after explicit user selection.
 - **Theme tokens:** Use semantic CSS variables from `app/globals.css` for onboarding and modal UI states; ensure new accent/soft-accent backgrounds include dark-mode-safe contrast.
 
 ## Local Development

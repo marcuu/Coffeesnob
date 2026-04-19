@@ -78,6 +78,11 @@ describe("onboarding/data rankers", () => {
     expect(ranked[0].area).toBe("leeds");
   });
 
+  it("rankVenues falls back to weighted score when city is unset", () => {
+    const ranked = rankVenues([london, leeds], emptyPrefs);
+    expect(ranked[0].slug).toBe("la-cabra");
+  });
+
   it("rankVenues surfaces a floral venue for a floral flavour profile", () => {
     const prefs: Prefs = {
       city: "london",
