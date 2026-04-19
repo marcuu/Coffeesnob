@@ -23,7 +23,7 @@ not edit the existing init migration.
 
 Add to `reviewers` table:
 
-- `status text not null default 'active' check (status in ('seeded', 'invited', 'active'))`
+- `status text not null default 'active' check (status in ('beaned', 'invited', 'active'))`
 - Partial index: `create index reviewers_status_idx on public.reviewers(status) where status != 'active'`
 
 New table `reviewer_axis_weights`:
@@ -86,7 +86,7 @@ export type Axis = 'overall' | 'coffee' | 'experience';
 
 export type ReviewerState = {
   id: string;
-  status: 'seeded' | 'invited' | 'active';
+  status: 'beaned' | 'invited' | 'active';
   createdAt: Date;
   reviewCount: number;
   tenureScore: number;
@@ -106,7 +106,7 @@ export const SCORING_CONSTANTS = {
   RECENCY_HALF_LIFE_DAYS: 540,
   COMPLETENESS_FULL_THRESHOLD: 3,
   COMPLETENESS_PARTIAL_MULTIPLIER: 0.7,
-  STATUS_BASE_WEIGHT: { seeded: 3.0, invited: 1.0, active: 0.5 },
+  STATUS_BASE_WEIGHT: { beaned: 3.0, invited: 1.0, active: 0.5 },
   AXIS_COUNT_SATURATION: 20,
   AXIS_COUNT_MAX_MULTIPLIER: 1.5,
   TENURE_MONTHS_WEIGHT: 0.5,
@@ -357,23 +357,23 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 ## Section 9a: Decisions locked in
 
 - Reviewer status is SQL-managed: `status text not null default 'active'
-  check (status in ('seeded', 'invited', 'active'))` on `reviewers`.
-  Promotion to `seeded` via SQL, no admin UI.
+  check (status in ('beaned', 'invited', 'active'))` on `reviewers`.
+  Promotion to `beaned` via SQL, no admin UI.
 - New reviewer consistency default is `0.500`. Reviewers with fewer than 5
   scored values across their review history receive this default from
   `computeReviewerConsistency`, independent of tenure.
 - Simulation harness ships in PR 6. No tuning of `SCORING_CONSTANTS` is
   permitted in PRs 1-5. If tuning becomes necessary mid-rollout, pull the
   harness forward — do not tune blind.
-- **Seeded reviewer anchor treatment** (added PR 4): seeded reviewers bypass
-  the new-account penalties so a single seeded review can anchor an otherwise
+- **Seeded reviewer anchor treatment** (added PR 4): beaned reviewers bypass
+  the new-account penalties so a single beaned review can anchor an otherwise
   empty venue. Specifically: (a) `computeReviewerAxisWeight` skips the
-  count-based saturation for seeded reviewers once `reviewsInAxis >= 1`, and
+  count-based saturation for beaned reviewers once `reviewsInAxis >= 1`, and
   (b) `computeReviewWeight` uses `1.0` in place of `tenureScore` and
-  `consistencyScore` for seeded reviewers. Recency and completeness still
-  apply. `PRIOR_STRENGTH` was lowered from `5.0` to `3.0` so one seeded
+  `consistencyScore` for beaned reviewers. Recency and completeness still
+  apply. `PRIOR_STRENGTH` was lowered from `5.0` to `3.0` so one beaned
   review (weight ≈ 1.0) produces `confidence ≈ 0.25 > 0.2` and displays in
-  the UI. Non-seeded reviewers are unaffected by these bypasses.
+  the UI. Non-beaned reviewers are unaffected by these bypasses.
 
 ## Section 10: Deliberate omissions at MVP
 

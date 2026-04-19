@@ -55,7 +55,7 @@ npm run db:reset
 
 ### Signing in locally
 
-The login page offers a magic-link flow. Enter one of the seeded emails (or
+The login page offers a magic-link flow. Enter one of the beaned emails (or
 any email — Supabase local accepts all), click **Send magic link**, then open
 Inbucket at http://localhost:54324 and click the link in the received email.
 Google OAuth on the same page is disabled locally unless you configure
