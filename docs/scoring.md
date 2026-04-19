@@ -68,6 +68,15 @@ All four new tables: readable by any allowlisted user via `is_allowed_email()`
 Writable only by the service role — populated by the scoring pipeline, never
 by user actions. RLS policies must be in the same migration as the table DDL.
 
+**Exception — public leaderboard:** `public.venues` and
+`public.venue_axis_scores` additionally carry an `anon`-role SELECT policy
+(`venues_anon_select` and `venue_axis_scores_anon_select`, added in
+`20260419110000_anon_select_venues.sql`) so that the landing page (`/`) can
+render a score-desc leaderboard for unauthenticated visitors. All other tables
+— `reviews`, `reviewers`, `reviewer_axis_weights`, `reviewer_tenure`,
+`review_weights`, `scoring_dirty_queue` — remain allowlist-gated and are not
+readable by the `anon` role.
+
 ### No triggers
 
 Do not add triggers that recompute scores on review insert. Scoring is batched

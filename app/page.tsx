@@ -1,37 +1,76 @@
-import Link from "next/link";
+// Landing page — also the personalised venue feed for signed-in users.
+//
+// Routing note: the /onboarding experience previously lived at app/onboarding/
+// and is now served from / (this file). The app/onboarding/ directory is kept
+// intact so that test imports from @/app/onboarding/data and
+// @/app/onboarding/venue-mapping continue to resolve without changes.
+// app/onboarding/page.tsx issues a 308 permanent redirect to / instead.
+//
+// Auth branching:
+//   Logged-in  → <OnboardingApp> with full personalisation (sidebar, localStorage,
+//                aha reveal, nudge).
+//   Logged-out → <Leaderboard> with score-desc feed only; no personalisation.
+//
+// The middleware marks "/" as public so unauthenticated requests are not
+// redirected to /login before reaching this page.
 
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+
+import { getVenueOverallScores } from "@/lib/aggregation";
+import type { Venue as DbVenue } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
+
+import { Leaderboard } from "./onboarding/leaderboard";
+import { OnboardingApp } from "./onboarding/onboarding-app";
+import {
+  buildCityOptions,
+  mapDbVenuesToOnboarding,
+} from "./onboarding/venue-mapping";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Coffeesnob — UK third-wave coffee, reviewed honestly",
+  description:
+    "The UK third-wave coffee leaderboard, ranked by weighted reviewer scores. Sign in to personalise the feed for your taste.",
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Coffeesnob</h1>
-      <p className="mt-3 text-[var(--color-muted-foreground)]">
-        UK third-wave coffee, reviewed by people who drink a lot of it.
-      </p>
-      <p className="mt-6 text-sm text-[var(--color-muted-foreground)]">
-        Signed in as {user?.email ?? "anonymous"}.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button asChild>
-          <Link href="/onboarding">Get started</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/venues">Browse venues</Link>
-        </Button>
-        <Button asChild variant="ghost">
-          <Link href="/venues/new">Add venue</Link>
-        </Button>
-      </div>
-      <p className="mt-3 text-xs text-[var(--color-muted-foreground)]">
-        New here? Start with a personalised shortlist.
-      </p>
-    </main>
-  );
+  const [{ data: { user } }, { data, error }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("venues").select("*").order("name", { ascending: true }),
+  ]);
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-xl px-6 py-16">
+        <h1 className="text-2xl font-semibold">Coffeesnob</h1>
+        <p className="mt-4 text-sm text-[var(--color-destructive)]">
+          Couldn&rsquo;t load venues: {error.message}
+        </p>
+      </main>
+    );
+  }
+
+  const dbVenues = (data ?? []) as DbVenue[];
+  const scores =
+    dbVenues.length > 0
+      ? await getVenueOverallScores(
+          supabase,
+          dbVenues.map((v) => v.id),
+        )
+      : new Map();
+
+  const venues = mapDbVenuesToOnboarding(dbVenues, scores);
+
+  if (user) {
+    const cities = buildCityOptions(venues);
+    return <OnboardingApp venues={venues} cities={cities} />;
+  }
+
+  // Logged-out path: sort by weighted score descending for the leaderboard.
+  const sorted = [...venues].sort((a, b) => b.score - a.score);
+  return <Leaderboard venues={sorted} />;
 }

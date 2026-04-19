@@ -88,17 +88,17 @@ export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
           No venues yet.
         </h1>
         <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
-          Onboarding lights up once the first venue is added. Head to{" "}
+          The feed lights up once the first venue is added. Head to{" "}
           <Link
-            href="/venues/new"
+            href="/venues"
             style={{
               color: "var(--color-accent)",
               textDecoration: "underline",
             }}
           >
-            add a venue
+            venues
           </Link>{" "}
-          to get started.
+          to add one.
         </p>
       </main>
     );
@@ -140,6 +140,17 @@ export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <Link
+              href="/venues"
+              style={{
+                fontSize: 13,
+                color: "var(--color-muted-foreground)",
+                textDecoration: "none",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Browse venues
+            </Link>
             {hasPrefs && (
               <button
                 type="button"
