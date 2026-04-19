@@ -57,6 +57,9 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
 - **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
   Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
   the same venue on different visits.
+- **onboarding ranking** starts with `prefs.city = ""` (no city boost) so first
+  render is effectively UK-wide; city weighting is applied only after the user
+  explicitly selects a location.
 
 ### Reviewer stats
 
