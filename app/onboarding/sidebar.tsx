@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 import {
-  CITIES,
   DRINKS,
   FLAVOUR_PAIRS,
+  type City,
   type FlavourOption,
   type FlavourPair,
   type Prefs,
@@ -16,6 +16,7 @@ type SidebarProps = {
   onClose: () => void;
   prefs: Prefs;
   setPrefs: (p: Prefs) => void;
+  cities: City[];
   onReveal: () => void;
 };
 
@@ -26,6 +27,7 @@ export function Sidebar({
   onClose,
   prefs,
   setPrefs,
+  cities,
   onReveal,
 }: SidebarProps) {
   const [section, setSection] = useState<SectionId>("city");
@@ -201,6 +203,7 @@ export function Sidebar({
             <CityPanel
               prefs={prefs}
               setPrefs={setPrefs}
+              cities={cities}
               onNext={() => setSection("drink")}
             />
           )}
@@ -276,7 +279,9 @@ type PanelProps = {
   onNext: () => void;
 };
 
-function CityPanel({ prefs, setPrefs, onNext }: PanelProps) {
+type CityPanelProps = PanelProps & { cities: City[] };
+
+function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
   const [geo, setGeo] = useState<"idle" | "locating" | "error" | "done">(
     "idle",
   );
@@ -288,7 +293,13 @@ function CityPanel({ prefs, setPrefs, onNext }: PanelProps) {
         setGeo("error");
         return;
       }
-      setPrefs({ ...prefs, city: "london" });
+      const london = cities.find((c) => c.id === "london");
+      const fallback = london ?? cities[0];
+      if (!fallback) {
+        setGeo("error");
+        return;
+      }
+      setPrefs({ ...prefs, city: fallback.id });
       setGeo("done");
     }, 700);
   }
@@ -354,7 +365,7 @@ function CityPanel({ prefs, setPrefs, onNext }: PanelProps) {
           gap: 6,
         }}
       >
-        {CITIES.map((c) => (
+        {cities.map((c) => (
           <button
             type="button"
             key={c.id}
@@ -383,7 +394,7 @@ function CityPanel({ prefs, setPrefs, onNext }: PanelProps) {
                 fontFamily: "var(--font-mono)",
               }}
             >
-              {c.venues} venues
+              {c.venues} venue{c.venues === 1 ? "" : "s"}
             </div>
           </button>
         ))}

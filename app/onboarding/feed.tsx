@@ -1,20 +1,24 @@
 "use client";
 
-import { CITIES, rankVenues, reasonsFor } from "./data";
-import type { Prefs, RankedVenue } from "./data";
+import Link from "next/link";
+
+import { rankVenues, reasonsFor } from "./data";
+import type { City, OnboardingVenue, Prefs, RankedVenue } from "./data";
 
 type FeedProps = {
+  venues: OnboardingVenue[];
+  cities: City[];
   prefs: Prefs;
   onOpenSidebar: () => void;
 };
 
-export function Feed({ prefs, onOpenSidebar }: FeedProps) {
-  const ranked = rankVenues(prefs);
+export function Feed({ venues, cities, prefs, onOpenSidebar }: FeedProps) {
+  const ranked = rankVenues(venues, prefs);
   const top = ranked[0];
   const rest = ranked.slice(1, 7);
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
   const cityName = prefs.city
-    ? CITIES.find((c) => c.id === prefs.city)?.name
+    ? cities.find((c) => c.id === prefs.city)?.name
     : undefined;
 
   return (
@@ -63,9 +67,11 @@ export function Feed({ prefs, onOpenSidebar }: FeedProps) {
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
-        {top ? <VenueRow v={top} prefs={prefs} primary /> : null}
+        {top ? (
+          <VenueRow v={top} prefs={prefs} cities={cities} primary />
+        ) : null}
         {rest.map((v) => (
-          <VenueRow key={v.slug} v={v} prefs={prefs} />
+          <VenueRow key={v.slug} v={v} prefs={prefs} cities={cities} />
         ))}
       </div>
 
@@ -77,15 +83,16 @@ export function Feed({ prefs, onOpenSidebar }: FeedProps) {
 type VenueRowProps = {
   v: RankedVenue;
   prefs: Prefs;
+  cities: City[];
   primary?: boolean;
 };
 
-function VenueRow({ v, prefs, primary }: VenueRowProps) {
-  const reasons = reasonsFor(v, prefs);
+function VenueRow({ v, prefs, cities, primary }: VenueRowProps) {
+  const reasons = reasonsFor(v, prefs, cities);
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
   return (
-    <button
-      type="button"
+    <Link
+      href={`/venues/${v.slug}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr auto",
@@ -107,6 +114,7 @@ function VenueRow({ v, prefs, primary }: VenueRowProps) {
         cursor: "pointer",
         fontFamily: "var(--font-sans)",
         transition: "background 160ms, border-color 160ms",
+        textDecoration: "none",
       }}
       onMouseEnter={(e) => {
         if (!primary) e.currentTarget.style.background = "var(--color-muted)";
@@ -149,7 +157,8 @@ function VenueRow({ v, prefs, primary }: VenueRowProps) {
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city} · {v.roaster} · {v.reviews} reviews
+          {v.city} · {v.roaster} · {v.reviews} review
+          {v.reviews === 1 ? "" : "s"}
         </div>
         {primary && (
           <div
@@ -223,7 +232,7 @@ function VenueRow({ v, prefs, primary }: VenueRowProps) {
             fontWeight: 600,
           }}
         >
-          {v.score.toFixed(1)}
+          {v.score > 0 ? v.score.toFixed(1) : "—"}
         </div>
         {hasPrefs && (
           <div
@@ -238,7 +247,7 @@ function VenueRow({ v, prefs, primary }: VenueRowProps) {
           </div>
         )}
       </div>
-    </button>
+    </Link>
   );
 }
 

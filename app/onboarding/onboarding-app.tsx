@@ -1,23 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import { AhaReveal } from "./aha";
-import type { Prefs } from "./data";
+import type { City, OnboardingVenue, Prefs } from "./data";
 import { Feed } from "./feed";
 import { Sidebar } from "./sidebar";
 
 const KEY = "coffeesnob.v2.prefs";
 
-const INITIAL: Prefs = {
-  city: "london",
-  drink: [],
-  pairPicks: {},
-  axes: null,
+function initialPrefs(cities: City[]): Prefs {
+  return {
+    city: cities[0]?.id ?? "",
+    drink: [],
+    pairPicks: {},
+    axes: null,
+  };
+}
+
+type OnboardingAppProps = {
+  venues: OnboardingVenue[];
+  cities: City[];
 };
 
-export function OnboardingApp() {
-  const [prefs, setPrefs] = useState<Prefs>(INITIAL);
+export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
+  const initial = useMemo(() => initialPrefs(cities), [cities]);
+  const [prefs, setPrefs] = useState<Prefs>(initial);
   const [hydrated, setHydrated] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ahaOpen, setAhaOpen] = useState(false);
@@ -28,13 +37,16 @@ export function OnboardingApp() {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<Prefs>;
-        setPrefs({ ...INITIAL, ...stored });
+        const cityIds = new Set(cities.map((c) => c.id));
+        const safeCity =
+          stored.city && cityIds.has(stored.city) ? stored.city : initial.city;
+        setPrefs({ ...initial, ...stored, city: safeCity });
       }
     } catch {
       // ignore
     }
     setHydrated(true);
-  }, []);
+  }, [cities, initial]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -45,7 +57,6 @@ export function OnboardingApp() {
     }
   }, [prefs, hydrated]);
 
-  // Fire the aha reveal the FIRST time flavour axes become defined.
   useEffect(() => {
     if (prefs.axes && !seenAha) {
       setSeenAha(true);
@@ -56,11 +67,41 @@ export function OnboardingApp() {
   }, [prefs.axes, seenAha]);
 
   function reset() {
-    setPrefs(INITIAL);
+    setPrefs(initial);
     setSeenAha(false);
   }
 
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
+
+  if (venues.length === 0) {
+    return (
+      <main className="mx-auto max-w-xl px-6 py-20">
+        <h1
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: 34,
+            fontWeight: 500,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          No venues yet.
+        </h1>
+        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+          Onboarding lights up once the first venue is added. Head to{" "}
+          <Link
+            href="/venues/new"
+            style={{
+              color: "var(--color-accent)",
+              textDecoration: "underline",
+            }}
+          >
+            add a venue
+          </Link>{" "}
+          to get started.
+        </p>
+      </main>
+    );
+  }
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
@@ -85,13 +126,7 @@ export function OnboardingApp() {
             justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span
               style={{
                 fontFamily: "var(--font-serif)",
@@ -103,13 +138,7 @@ export function OnboardingApp() {
               Coffeesnob
             </span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {hasPrefs && (
               <button
                 type="button"
@@ -168,7 +197,12 @@ export function OnboardingApp() {
           padding: "40px 28px 120px",
         }}
       >
-        <Feed prefs={prefs} onOpenSidebar={() => setSidebarOpen(true)} />
+        <Feed
+          venues={venues}
+          cities={cities}
+          prefs={prefs}
+          onOpenSidebar={() => setSidebarOpen(true)}
+        />
       </main>
 
       <Sidebar
@@ -176,6 +210,7 @@ export function OnboardingApp() {
         onClose={() => setSidebarOpen(false)}
         prefs={prefs}
         setPrefs={setPrefs}
+        cities={cities}
         onReveal={() => {
           setSidebarOpen(false);
           if (prefs.axes) {
@@ -188,6 +223,7 @@ export function OnboardingApp() {
       <AhaReveal
         open={ahaOpen}
         prefs={prefs}
+        venues={venues}
         onClose={() => setAhaOpen(false)}
         onDone={() => setAhaOpen(false)}
       />

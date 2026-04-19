@@ -18,14 +18,20 @@ export default async function HomePage() {
       <p className="mt-6 text-sm text-[var(--color-muted-foreground)]">
         Signed in as {user?.email ?? "anonymous"}.
       </p>
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8 flex flex-wrap gap-3">
         <Button asChild>
-          <Link href="/venues">Browse venues</Link>
+          <Link href="/onboarding">Get started</Link>
         </Button>
         <Button asChild variant="outline">
+          <Link href="/venues">Browse venues</Link>
+        </Button>
+        <Button asChild variant="ghost">
           <Link href="/venues/new">Add venue</Link>
         </Button>
       </div>
+      <p className="mt-3 text-xs text-[var(--color-muted-foreground)]">
+        New here? Start with a personalised shortlist.
+      </p>
     </main>
   );
 }
