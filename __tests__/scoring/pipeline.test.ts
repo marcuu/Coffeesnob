@@ -26,19 +26,19 @@ function monthsAgo(n: number): string {
   return iso(new Date(NOW.getTime() - n * 30 * MS_PER_DAY));
 }
 
-// Deterministic fixture. Two seeded reviewers, each writing 30 reviews
+// Deterministic fixture. Two beaned reviewers, each writing 30 reviews
 // across two venues, so per-axis review counts saturate past the 20-review
 // threshold and weights comfortably exceed the 0.05 filter.
 function seedTables(): Tables {
   const reviews: Record<string, unknown>[] = [];
   const scoreRing = [2, 4, 5, 6, 7, 8, 9, 10, 3, 5, 6, 7, 8, 9, 4];
   let seq = 0;
-  for (const reviewerId of ["r-seeded-1", "r-seeded-2"] as const) {
+  for (const reviewerId of ["r-beaned-1", "r-beaned-2"] as const) {
     for (let v = 0; v < 2; v++) {
       const venueId = v === 0 ? "v1" : "v2";
       for (let i = 0; i < 15; i++) {
         const s = scoreRing[(seq + i) % scoreRing.length];
-        const bump = reviewerId === "r-seeded-1" ? 1 : 0;
+        const bump = reviewerId === "r-beaned-1" ? 1 : 0;
         reviews.push({
           id: `rev-${reviewerId}-${venueId}-${i}`,
           venue_id: venueId,
@@ -59,14 +59,14 @@ function seedTables(): Tables {
   return {
     reviewers: [
       {
-        id: "r-seeded-1",
-        status: "seeded",
+        id: "r-beaned-1",
+        status: "beaned",
         created_at: monthsAgo(24),
         review_count: 30,
       },
       {
-        id: "r-seeded-2",
-        status: "seeded",
+        id: "r-beaned-2",
+        status: "beaned",
         created_at: monthsAgo(24),
         review_count: 30,
       },
@@ -81,7 +81,7 @@ function seedTables(): Tables {
       {
         id: 1,
         review_id: reviews[0].id,
-        reviewer_id: "r-seeded-1",
+        reviewer_id: "r-beaned-1",
         venue_id: "v1",
         enqueued_at: daysAgo(0),
       },

@@ -66,7 +66,7 @@ describe("scoring golden fixture", () => {
 // document the reason in the PR description.
 // ---------------------------------------------------------------------------
 
-// Refreshed for seeded-reviewer bypass + PRIOR_STRENGTH drop from 5.0 → 3.0.
+// Refreshed for beaned-reviewer bypass + PRIOR_STRENGTH drop from 5.0 → 3.0.
 const GOLDEN_OVERALL: Record<string, number> = {
   "venue-00": 5.92,
   "venue-01": 5.89,
