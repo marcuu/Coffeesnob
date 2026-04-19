@@ -41,7 +41,7 @@ function makePrng(seed: number): () => number {
 
 function pickStatus(rand: () => number): ReviewerStatus {
   const r = rand();
-  if (r < 0.05) return "seeded";
+  if (r < 0.05) return "beaned";
   if (r < 0.2) return "invited";
   return "active";
 }

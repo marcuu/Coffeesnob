@@ -7,7 +7,7 @@ export type Axis = "overall" | "coffee" | "experience";
 
 export const AXES: readonly Axis[] = ["overall", "coffee", "experience"];
 
-export type ReviewerStatus = "seeded" | "invited" | "active";
+export type ReviewerStatus = "beaned" | "invited" | "active";
 
 export type ReviewerState = {
   id: string;
@@ -31,7 +31,7 @@ export const SCORING_CONSTANTS = {
   RECENCY_HALF_LIFE_DAYS: 540,
   COMPLETENESS_FULL_THRESHOLD: 3,
   COMPLETENESS_PARTIAL_MULTIPLIER: 0.7,
-  STATUS_BASE_WEIGHT: { seeded: 3.0, invited: 1.0, active: 0.5 } as Record<
+  STATUS_BASE_WEIGHT: { beaned: 3.0, invited: 1.0, active: 0.5 } as Record<
     ReviewerStatus,
     number
   >,
@@ -88,9 +88,9 @@ export function computeReviewWeight(
   // multipliers that otherwise penalise new accounts, so their first review
   // can anchor an unreviewed venue. Recency and completeness still apply —
   // stale or partial reviews should still count less.
-  const tenureMult = reviewer.status === "seeded" ? 1.0 : reviewer.tenureScore;
+  const tenureMult = reviewer.status === "beaned" ? 1.0 : reviewer.tenureScore;
   const consistencyMult =
-    reviewer.status === "seeded" ? 1.0 : reviewer.consistencyScore;
+    reviewer.status === "beaned" ? 1.0 : reviewer.consistencyScore;
 
   const weight = base * tenureMult * consistencyMult * recency * completeness;
 
@@ -108,7 +108,7 @@ export function computeReviewerAxisWeight(
 ): number {
   const base = SCORING_CONSTANTS.STATUS_BASE_WEIGHT[_reviewer.status];
   const countMult =
-    _reviewer.status === "seeded" && reviewsInAxis >= 1
+    _reviewer.status === "beaned" && reviewsInAxis >= 1
       ? SCORING_CONSTANTS.AXIS_COUNT_MAX_MULTIPLIER
       : Math.min(
           reviewsInAxis / SCORING_CONSTANTS.AXIS_COUNT_SATURATION,

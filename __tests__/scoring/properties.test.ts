@@ -18,7 +18,7 @@ const NOW = new Date("2026-04-17T00:00:00Z");
 const MS_PER_DAY = 86_400_000;
 
 const reviewerStatus: fc.Arbitrary<ReviewerStatus> = fc.constantFrom(
-  "seeded",
+  "beaned",
   "invited",
   "active",
 );

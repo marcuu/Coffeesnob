@@ -144,12 +144,12 @@ describe("computeReviewerConsistency", () => {
 
 describe("computeReviewerAxisWeight", () => {
   const activeNow = { status: "active" as const, createdAt: NOW };
-  const seededNow = { status: "seeded" as const, createdAt: NOW };
+  const beanedNow = { status: "beaned" as const, createdAt: NOW };
   const invitedNow = { status: "invited" as const, createdAt: NOW };
 
   it("returns 0 when reviewer has no reviews in the axis", () => {
     expect(computeReviewerAxisWeight(activeNow, 0, 0, 0)).toBe(0);
-    expect(computeReviewerAxisWeight(seededNow, 0, 0, 0)).toBe(0);
+    expect(computeReviewerAxisWeight(beanedNow, 0, 0, 0)).toBe(0);
   });
 
   it("applies neutral validation multiplier (=1.0) when validations are 0/0", () => {
@@ -169,9 +169,9 @@ describe("computeReviewerAxisWeight", () => {
     );
   });
 
-  it("clamps final weight to 3.0 for seeded reviewers past saturation", () => {
-    // seeded base=3, countMult cap=1.5, neutral=1.0 → 4.5 → clamp 3.0
-    expect(computeReviewerAxisWeight(seededNow, 40, 0, 0)).toBe(3.0);
+  it("clamps final weight to 3.0 for beaned reviewers past saturation", () => {
+    // beaned base=3, countMult cap=1.5, neutral=1.0 → 4.5 → clamp 3.0
+    expect(computeReviewerAxisWeight(beanedNow, 40, 0, 0)).toBe(3.0);
   });
 
   it("uses Laplace smoothing on validation ratio", () => {
