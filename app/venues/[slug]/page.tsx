@@ -15,7 +15,6 @@ import { formatRating } from "@/lib/venues";
 import { explainVenueScore, getVenueScores } from "@/lib/aggregation";
 
 import { deleteReview } from "./actions";
-import { ReviewForm } from "./review-form";
 import { ScoreExplain } from "./score-explain";
 
 export const dynamic = "force-dynamic";
@@ -207,7 +206,9 @@ export default async function VenueDetailPage({
           </p>
         ) : null}
         <div className="mt-4">
-          <ReviewForm venueId={venueRow.id} slug={slug} />
+          <Button asChild>
+            <Link href={`/venues/${slug}/review`}>Start 6-step review</Link>
+          </Button>
         </div>
       </section>
     </main>

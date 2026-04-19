@@ -8,17 +8,14 @@ vi.mock("@/app/venues/[slug]/actions", () => ({
 }));
 
 describe("ReviewForm", () => {
-  it("defaults all rating sliders to 5/10 before user input", () => {
+  it("starts the 6-step flow at ambience with third-wave score guidance", () => {
     render(<ReviewForm venueId="venue-1" slug="test-venue" />);
 
-    const sliders = screen.getAllByRole("slider");
-    expect(sliders).toHaveLength(6);
+    const slider = screen.getByRole("slider");
+    expect(slider).toHaveValue("5");
 
-    for (const slider of sliders) {
-      expect(slider).toHaveValue("5");
-    }
-
-    const defaultValueLabels = screen.getAllByText("5/10");
-    expect(defaultValueLabels).toHaveLength(6);
+    expect(screen.getByText("Step 1 of 6: Ambience")).toBeInTheDocument();
+    expect(screen.getByText(/third.?wave coffee/i)).toBeInTheDocument();
+    expect(screen.getByText(/travelling 3 hours/i)).toBeInTheDocument();
   });
 });

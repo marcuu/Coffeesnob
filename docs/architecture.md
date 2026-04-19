@@ -90,8 +90,9 @@ Mutations go through server actions that:
 
 Actions used with `useActionState` return a `{ status, message, fieldErrors }`
 shape so forms can render inline Zod messages without round-tripping. The
-review form's six rating sliders initialise to a neutral `5/10` before any
-user changes.
+review flow lives on `/venues/[slug]/review` as a six-step experience with
+progress indicators; each slider starts at `5/10` and includes travel-time
+calibration hints for third-wave expectations.
 
 ## Testing
 
