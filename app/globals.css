@@ -57,9 +57,12 @@
     --color-foreground: hsl(60 9.1% 97.8%);
     --color-muted: hsl(12 6.5% 15.1%);
     --color-muted-foreground: hsl(24 5.4% 63.9%);
-    --color-border: hsl(12 6.5% 15.1%);
+    --color-border: hsl(12 6.5% 21%);
     --color-primary: hsl(60 9.1% 97.8%);
     --color-primary-foreground: hsl(24 9.8% 10%);
+    --color-accent: oklch(0.75 0.11 44);
+    --color-accent-soft: oklch(0.27 0.035 44);
+    --color-accent-ring: oklch(0.75 0.11 44 / 0.32);
   }
 }
 

@@ -255,9 +255,11 @@ export function Sidebar({
               borderRadius: "var(--radius)",
               background: prefs.axes
                 ? "var(--color-primary)"
-                : "var(--color-muted-foreground)",
-              color: "var(--color-primary-foreground)",
-              border: "none",
+                : "var(--color-muted)",
+              color: prefs.axes
+                ? "var(--color-primary-foreground)"
+                : "var(--color-foreground)",
+              border: `1px solid ${prefs.axes ? "var(--color-primary)" : "var(--color-border)"}`,
               fontFamily: "var(--font-sans)",
               fontSize: 12,
               fontWeight: 600,
