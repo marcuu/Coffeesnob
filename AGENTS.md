@@ -36,6 +36,7 @@ app/
   api/scoring/run/      # POST-only cron endpoint (SCORING_CRON_SECRET bearer)
   auth/callback/        # OAuth + magic-link callback handler
   login/                # Login page (Google OAuth + magic-link) + server actions
+  onboarding/           # Public "show-then-ask" feed-first onboarding (data.ts + feed/sidebar/aha client components)
   venues/
     page.tsx            # Venue listing with avg rating, score-desc default sort, + selectable ?city= filter
     new/                # Create venue form
