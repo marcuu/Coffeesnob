@@ -74,7 +74,10 @@ iterate without schema migrations; the DB only stores the signals.
 ## Styling
 
 - Tailwind v4 via `@tailwindcss/postcss`. Theme tokens live in `@theme` blocks
-  in `app/globals.css`.
+  in `app/globals.css`, including dark-mode overrides for accent and soft-accent
+  onboarding surfaces.
+- Prefer semantic tokens over hardcoded light values so cards, pills, and modal
+  callouts keep sufficient contrast in both themes.
 - shadcn/ui components are generated into `components/ui/` and should not be
   modified in place — extend with wrapper components in `components/` instead.
 

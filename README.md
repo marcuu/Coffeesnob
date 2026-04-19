@@ -90,6 +90,13 @@ See `.env.example`:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
+## Theme notes
+
+- Color tokens are defined in `app/globals.css` via `@theme` and have dedicated
+  dark-mode overrides in `@media (prefers-color-scheme: dark)`.
+- When adding new UI states, use semantic tokens (`--color-muted`,
+  `--color-foreground`, `--color-accent-soft`, etc.) instead of hardcoded light
+  values so onboarding and modal surfaces remain legible in both themes.
 
 ## Scoring model
 
