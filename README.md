@@ -47,8 +47,6 @@ displayed score (high to low).
   - Signed-in users see the personalised ranked feed with sidebar, aha reveal, and nudge.
   - `/onboarding` redirects to `/` with a 308.
 - Venues (auth-gated): http://localhost:3000/venues
-- Venue map (auth-gated): http://localhost:3000/venues/map
-  - Seeded venues only include postcodes; run `npm run venues:geocode` to populate first pins locally.
 - Supabase Studio: http://localhost:54323
 - Inbucket (emails): http://localhost:54324
 - Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`
@@ -86,7 +84,6 @@ npm run test:watch  # vitest watch
 npm run db:start    # supabase start (local stack)
 npm run db:stop     # supabase stop
 npm run db:reset    # re-apply migrations + re-seed
-npm run venues:geocode # postcode -> latitude/longitude backfill for venues
 ```
 
 ## Environment variables
@@ -95,8 +92,6 @@ See `.env.example`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — browser API key for `/venues/map`.
-- `GOOGLE_MAPS_API_KEY` — server API key for postcode geocoding on venue create and `npm run venues:geocode`.
 
 ## Theme notes
 

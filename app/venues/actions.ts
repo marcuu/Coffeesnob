@@ -3,8 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { geocodeUkPostcode } from "@/lib/geocoding/google";
-
 import { createClient } from "@/utils/supabase/server";
 import {
   formNumber,
@@ -84,25 +82,9 @@ export async function createVenue(
     };
   }
 
-  const insertPayload = { ...parsed.data, created_by: user.id };
-  let geocodeFailed = false;
-
-  if (insertPayload.latitude === null || insertPayload.longitude === null) {
-    const geocode = await geocodeUkPostcode(insertPayload.postcode);
-    if (geocode.status === "ok") {
-      insertPayload.latitude = geocode.result.latitude;
-      insertPayload.longitude = geocode.result.longitude;
-    } else {
-      geocodeFailed = true;
-      console.warn(
-        `[venues.createVenue] Postcode geocoding skipped for ${insertPayload.slug}: ${geocode.status}`,
-      );
-    }
-  }
-
   const { data: inserted, error } = await supabase
     .from("venues")
-    .insert(insertPayload)
+    .insert({ ...parsed.data, created_by: user.id })
     .select("slug")
     .single();
 
@@ -111,10 +93,7 @@ export async function createVenue(
   }
 
   revalidatePath("/venues");
-  const destination = geocodeFailed
-    ? `/venues/${inserted.slug}?map=geocode-pending`
-    : `/venues/${inserted.slug}`;
-  redirect(destination);
+  redirect(`/venues/${inserted.slug}`);
 }
 
 export async function deleteVenue(formData: FormData) {
