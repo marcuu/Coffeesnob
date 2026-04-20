@@ -18,42 +18,9 @@ type VenuesMapProps = {
 const DEFAULT_CENTER = { lat: 54.2, lng: -2.7 };
 const DEFAULT_ZOOM = 6;
 
-type GoogleMapsLatLngLiteral = { lat: number; lng: number };
-type GoogleMapsMapInstance = {
-  fitBounds(bounds: GoogleMapsLatLngBoundsInstance, padding?: number): void;
-};
-type GoogleMapsLatLngBoundsInstance = {
-  extend(latLng: GoogleMapsLatLngLiteral): void;
-};
-type GoogleMapsMarkerInstance = {
-  addListener(eventName: "click", handler: () => void): void;
-};
-type GoogleMapsNamespace = {
-  Map: new (
-    element: HTMLElement,
-    options: {
-      center: GoogleMapsLatLngLiteral;
-      zoom: number;
-      mapTypeControl: boolean;
-      streetViewControl: boolean;
-      fullscreenControl: boolean;
-    },
-  ) => GoogleMapsMapInstance;
-  Marker: new (options: {
-    map: GoogleMapsMapInstance;
-    position: GoogleMapsLatLngLiteral;
-    title: string;
-  }) => GoogleMapsMarkerInstance;
-  LatLngBounds: new () => GoogleMapsLatLngBoundsInstance;
-};
-
-type GoogleWindow = Window & {
-  google?: { maps?: GoogleMapsNamespace };
-};
-
 function loadGoogleMapsApi(apiKey: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
-  if ((window as GoogleWindow).google) {
+  if ((window as typeof window & { google?: unknown }).google) {
     return Promise.resolve();
   }
 
@@ -107,13 +74,12 @@ export function VenuesMap({ venues }: VenuesMapProps) {
         await loadGoogleMapsApi(apiKey);
         if (cancelled || !mapRef.current) return;
 
-        const googleObj = (window as GoogleWindow).google;
+        const googleObj = (window as typeof window & { google?: any }).google;
         if (!googleObj?.maps) {
           throw new Error("Google Maps API unavailable");
         }
-        const maps = googleObj.maps;
 
-        const map = new maps.Map(mapRef.current, {
+        const map = new googleObj.maps.Map(mapRef.current, {
           center: DEFAULT_CENTER,
           zoom: DEFAULT_ZOOM,
           mapTypeControl: false,
@@ -121,10 +87,10 @@ export function VenuesMap({ venues }: VenuesMapProps) {
           fullscreenControl: true,
         });
 
-        const bounds = new maps.LatLngBounds();
+        const bounds = new googleObj.maps.LatLngBounds();
 
         for (const pin of pins) {
-          const marker = new maps.Marker({
+          const marker = new googleObj.maps.Marker({
             map,
             position: { lat: pin.latitude, lng: pin.longitude },
             title: pin.name,
