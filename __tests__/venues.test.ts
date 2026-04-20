@@ -20,20 +20,38 @@ describe("formatRating", () => {
 });
 
 describe("buildRegionFilterOptions", () => {
-  it("maps cities to regions, deduplicates, and sorts by region name", () => {
-    expect(
-      buildRegionFilterOptions([
-        "Leeds",
-        " London ",
-        "Leeds",
-        "",
-        null,
-        undefined,
-      ]),
-    ).toEqual([
-      { id: "london", name: "London" },
-      { id: "yorkshire", name: "Yorkshire" },
+  it("maps known cities to regions, deduplicates, carries city list, and sorts by name", () => {
+    const result = buildRegionFilterOptions([
+      "Leeds",
+      " London ",
+      "Leeds",
+      "Sheffield",
+      "",
+      null,
+      undefined,
     ]);
+    expect(result).toHaveLength(2);
+    const london = result.find((r) => r.id === "london");
+    expect(london).toEqual({ id: "london", name: "London", cities: ["London"] });
+    const yorkshire = result.find((r) => r.id === "yorkshire");
+    expect(yorkshire?.name).toBe("Yorkshire");
+    expect(yorkshire?.cities).toEqual(expect.arrayContaining(["Leeds", "Sheffield"]));
+  });
+
+  it("handles unmapped cities as single-city regions with correct filter", () => {
+    const result = buildRegionFilterOptions(["Margate", "Whitstable"]);
+    // Both are mapped to south-east
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("south-east");
+    expect(result[0].cities).toEqual(expect.arrayContaining(["Margate", "Whitstable"]));
+  });
+
+  it("treats a genuinely unknown city as its own region with proper display name", () => {
+    const result = buildRegionFilterOptions(["Atlantis"]);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("atlantis");
+    expect(result[0].name).toBe("Atlantis");
+    expect(result[0].cities).toEqual(["Atlantis"]);
   });
 });
 

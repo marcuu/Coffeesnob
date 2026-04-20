@@ -79,9 +79,9 @@ export function VenueForm() {
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1.5">
           <Label htmlFor="city">City</Label>
-          <Input id="city" name="city" required placeholder="e.g. Leeds, London" defaultValue={vals?.city} />
+          <Input id="city" name="city" required placeholder="e.g. Manchester, Bristol" defaultValue={vals?.city} />
           <p className="text-xs text-[var(--color-muted-foreground)]">
-            Yorkshire: Leeds, Sheffield, York, Huddersfield, Harrogate, Holmfirth, Wakefield.
+            Enter the actual city. It will be grouped into the right region automatically.
           </p>
           <FieldError state={state} field="city" />
         </div>

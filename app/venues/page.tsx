@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
-import { REGION_TO_CITIES } from "@/lib/regions";
 import {
   buildRegionFilterOptions,
   formatRating,
@@ -36,17 +35,15 @@ export default async function VenuesPage({
     .select("city")
     .order("city", { ascending: true });
   const regions = buildRegionFilterOptions((cityRows ?? []).map((r) => r.city));
-  const selectedRegion = regions.find((r) => r.id === regionFilter)?.id ?? "";
+  const selectedRegionData = regions.find((r) => r.id === regionFilter);
+  const selectedRegion = selectedRegionData?.id ?? "";
 
   let query = supabase
     .from("venues")
     .select("*")
     .order("created_at", { ascending: false });
-  if (selectedRegion) {
-    const citiesForRegion = REGION_TO_CITIES[selectedRegion];
-    if (citiesForRegion) {
-      query = query.in("city", citiesForRegion);
-    }
+  if (selectedRegionData) {
+    query = query.in("city", selectedRegionData.cities);
   }
   const { data, error } = await query;
 
