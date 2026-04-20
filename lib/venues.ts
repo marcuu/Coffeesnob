@@ -1,25 +1,27 @@
 import type { OverallScoreSummary } from "@/lib/aggregation";
+import { REGION_NAMES, regionIdFromCityName } from "@/lib/regions";
 import type { Venue } from "@/lib/types";
 
 export function formatRating(avg: number | null): string {
   return avg === null ? "—" : avg.toFixed(1);
 }
 
-export function buildCityFilterOptions(
+export function buildRegionFilterOptions(
   cities: Array<string | null | undefined>,
-): string[] {
-  const unique = new Set<string>();
+): { id: string; name: string }[] {
+  const seen = new Map<string, string>();
 
   for (const city of cities) {
     const trimmed = city?.trim();
-    if (!trimmed) {
-      continue;
-    }
-
-    unique.add(trimmed);
+    if (!trimmed) continue;
+    const regionId = regionIdFromCityName(trimmed);
+    const regionName = REGION_NAMES[regionId] ?? trimmed;
+    seen.set(regionId, regionName);
   }
 
-  return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  return Array.from(seen.entries())
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function sortVenuesForListing(

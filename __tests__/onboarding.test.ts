@@ -6,12 +6,12 @@ import {
   rankVenues,
   reasonsFor,
   scoreVenueFor,
-  type City,
   type OnboardingVenue,
   type Prefs,
+  type Region,
 } from "@/app/onboarding/data";
 import {
-  buildCityOptions,
+  buildRegionOptions,
   cityIdFromName,
   mapBrewMethodsToDrinks,
   mapDbVenuesToOnboarding,
@@ -20,7 +20,7 @@ import type { OverallScoreSummary } from "@/lib/aggregation";
 import type { Venue as DbVenue } from "@/lib/types";
 
 const emptyPrefs: Prefs = {
-  city: "",
+  region: "",
   drink: [],
   pairPicks: {},
   axes: null,
@@ -44,7 +44,7 @@ const leeds: OnboardingVenue = {
   slug: "north-star",
   name: "North Star",
   city: "Leeds",
-  area: "leeds",
+  area: "yorkshire",
   roaster: "North Star",
   axes: { choc: 0.9, nutty: 0.8 },
   drinks: ["milky", "espresso"],
@@ -54,9 +54,9 @@ const leeds: OnboardingVenue = {
   proof: "88 reviews, weighted score 8.2.",
 };
 
-const cities: City[] = [
+const regions: Region[] = [
   { id: "london", name: "London", venues: 1 },
-  { id: "leeds", name: "Leeds", venues: 1 },
+  { id: "yorkshire", name: "Yorkshire", venues: 1 },
 ];
 
 describe("onboarding/data rankers", () => {
@@ -67,25 +67,25 @@ describe("onboarding/data rankers", () => {
     }
   });
 
-  it("scoreVenueFor rewards matching city", () => {
+  it("scoreVenueFor rewards matching region", () => {
     const baseline = scoreVenueFor(london, emptyPrefs);
-    const boosted = scoreVenueFor(london, { ...emptyPrefs, city: "london" });
+    const boosted = scoreVenueFor(london, { ...emptyPrefs, region: "london" });
     expect(boosted).toBeGreaterThan(baseline);
   });
 
-  it("rankVenues puts a city-local venue on top when only city is set", () => {
-    const ranked = rankVenues([london, leeds], { ...emptyPrefs, city: "leeds" });
-    expect(ranked[0].area).toBe("leeds");
+  it("rankVenues puts a region-local venue on top when only region is set", () => {
+    const ranked = rankVenues([london, leeds], { ...emptyPrefs, region: "yorkshire" });
+    expect(ranked[0].area).toBe("yorkshire");
   });
 
-  it("rankVenues falls back to weighted score when city is unset", () => {
+  it("rankVenues falls back to weighted score when region is unset", () => {
     const ranked = rankVenues([london, leeds], emptyPrefs);
     expect(ranked[0].slug).toBe("la-cabra");
   });
 
   it("rankVenues surfaces a floral venue for a floral flavour profile", () => {
     const prefs: Prefs = {
-      city: "london",
+      region: "london",
       drink: ["filter"],
       pairPicks: { round1: "yirg" },
       axes: { floral: 1, fruit: 0.6 },
@@ -97,7 +97,7 @@ describe("onboarding/data rankers", () => {
   it("confidenceFor increases with matched signals and is capped at 97", () => {
     const baseline = confidenceFor(london, emptyPrefs);
     const full = confidenceFor(london, {
-      city: "london",
+      region: "london",
       drink: ["filter", "espresso"],
       pairPicks: {},
       axes: { floral: 1, fruit: 1 },
@@ -107,13 +107,13 @@ describe("onboarding/data rankers", () => {
   });
 
   it("reasonsFor falls back to 'community favourite' when no signals overlap", () => {
-    expect(reasonsFor(london, emptyPrefs, cities)).toEqual([
+    expect(reasonsFor(london, emptyPrefs, regions)).toEqual([
       "community favourite",
     ]);
   });
 
-  it("reasonsFor names the city when the venue is local", () => {
-    const reasons = reasonsFor(london, { ...emptyPrefs, city: "london" }, cities);
+  it("reasonsFor names the region when the venue is local", () => {
+    const reasons = reasonsFor(london, { ...emptyPrefs, region: "london" }, regions);
     expect(reasons).toContain("in London");
   });
 });
@@ -191,9 +191,36 @@ describe("onboarding/venue-mapping", () => {
     expect(venue.axes.fruit).toBeGreaterThan(0);
   });
 
-  it("mapDbVenuesToOnboarding zeroes score when review signal is not displayable", () => {
+  it("mapDbVenuesToOnboarding maps Leeds to the yorkshire region", () => {
     const dbVenue: DbVenue = {
       id: "v2",
+      slug: "north-star-leeds",
+      name: "North Star",
+      address_line1: "Leeds Dock",
+      address_line2: null,
+      city: "Leeds",
+      postcode: "LS10 1PZ",
+      country: "GB",
+      latitude: null,
+      longitude: null,
+      website: null,
+      instagram: null,
+      roasters: ["North Star"],
+      brew_methods: ["espresso", "filter"],
+      has_decaf: true,
+      has_plant_milk: true,
+      notes: null,
+      created_by: "user",
+      created_at: "2025-01-01",
+      updated_at: "2025-01-01",
+    };
+    const [venue] = mapDbVenuesToOnboarding([dbVenue], new Map());
+    expect(venue.area).toBe("yorkshire");
+  });
+
+  it("mapDbVenuesToOnboarding zeroes score when review signal is not displayable", () => {
+    const dbVenue: DbVenue = {
+      id: "v3",
       slug: "newbie",
       name: "Newbie",
       address_line1: "",
@@ -221,12 +248,12 @@ describe("onboarding/venue-mapping", () => {
     expect(venue.pitch).toContain("Newbie");
   });
 
-  it("buildCityOptions groups venues by area and counts them", () => {
+  it("buildRegionOptions groups venues by region and counts them", () => {
     const venues: OnboardingVenue[] = [london, leeds, { ...leeds, slug: "x2" }];
-    const result = buildCityOptions(venues);
-    const leedsOpt = result.find((c) => c.id === "leeds");
-    expect(leedsOpt?.venues).toBe(2);
-    const londonOpt = result.find((c) => c.id === "london");
+    const result = buildRegionOptions(venues);
+    const yorkshireOpt = result.find((r) => r.id === "yorkshire");
+    expect(yorkshireOpt?.venues).toBe(2);
+    const londonOpt = result.find((r) => r.id === "london");
     expect(londonOpt?.venues).toBe(1);
   });
 });

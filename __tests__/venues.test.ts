@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { OverallScoreSummary } from "@/lib/aggregation";
 import type { Venue } from "@/lib/types";
 import {
-  buildCityFilterOptions,
+  buildRegionFilterOptions,
   formatRating,
   sortVenuesForListing,
 } from "@/lib/venues";
@@ -19,10 +19,10 @@ describe("formatRating", () => {
   });
 });
 
-describe("buildCityFilterOptions", () => {
-  it("deduplicates, trims, and sorts city names", () => {
+describe("buildRegionFilterOptions", () => {
+  it("maps cities to regions, deduplicates, and sorts by region name", () => {
     expect(
-      buildCityFilterOptions([
+      buildRegionFilterOptions([
         "Leeds",
         " London ",
         "Leeds",
@@ -30,7 +30,10 @@ describe("buildCityFilterOptions", () => {
         null,
         undefined,
       ]),
-    ).toEqual(["Leeds", "London"]);
+    ).toEqual([
+      { id: "london", name: "London" },
+      { id: "yorkshire", name: "Yorkshire" },
+    ]);
   });
 });
 

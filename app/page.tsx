@@ -23,7 +23,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Leaderboard } from "./onboarding/leaderboard";
 import { OnboardingApp } from "./onboarding/onboarding-app";
 import {
-  buildCityOptions,
+  buildRegionOptions,
   mapDbVenuesToOnboarding,
 } from "./onboarding/venue-mapping";
 
@@ -66,8 +66,8 @@ export default async function HomePage() {
   const venues = mapDbVenuesToOnboarding(dbVenues, scores);
 
   if (user) {
-    const cities = buildCityOptions(venues);
-    return <OnboardingApp venues={venues} cities={cities} />;
+    const regions = buildRegionOptions(venues);
+    return <OnboardingApp venues={venues} regions={regions} />;
   }
 
   // Logged-out path: sort by weighted score descending for the leaderboard.

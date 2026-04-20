@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
+import { REGION_TO_CITIES } from "@/lib/regions";
 import {
-  buildCityFilterOptions,
+  buildRegionFilterOptions,
   formatRating,
   sortVenuesForListing,
 } from "@/lib/venues";
@@ -22,27 +23,30 @@ export const dynamic = "force-dynamic";
 export default async function VenuesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ city?: string; sort?: string }>;
+  searchParams: Promise<{ region?: string; sort?: string }>;
 }) {
-  const { city, sort } = await searchParams;
-  const cityFilter = city?.trim() ?? "";
+  const { region, sort } = await searchParams;
+  const regionFilter = region?.trim() ?? "";
 
   const supabase = await createClient();
 
-  // Full list of distinct cities for the select, independent of the filter.
+  // Full list of distinct cities for deriving regions, independent of the filter.
   const { data: cityRows } = await supabase
     .from("venues")
     .select("city")
     .order("city", { ascending: true });
-  const cities = buildCityFilterOptions((cityRows ?? []).map((r) => r.city));
-  const selectedCity = cities.includes(cityFilter) ? cityFilter : "";
+  const regions = buildRegionFilterOptions((cityRows ?? []).map((r) => r.city));
+  const selectedRegion = regions.find((r) => r.id === regionFilter)?.id ?? "";
 
   let query = supabase
     .from("venues")
     .select("*")
     .order("created_at", { ascending: false });
-  if (selectedCity) {
-    query = query.eq("city", selectedCity);
+  if (selectedRegion) {
+    const citiesForRegion = REGION_TO_CITIES[selectedRegion];
+    if (citiesForRegion) {
+      query = query.in("city", citiesForRegion);
+    }
   }
   const { data, error } = await query;
 
@@ -87,23 +91,23 @@ export default async function VenuesPage({
         className="mb-6 flex flex-wrap items-end gap-3"
       >
         <div className="grid flex-1 gap-1.5">
-          <label htmlFor="city" className="text-xs font-medium">
-            Filter by city
+          <label htmlFor="region" className="text-xs font-medium">
+            Filter by region
           </label>
           <select
-            id="city"
-            name="city"
-            defaultValue={selectedCity}
+            id="region"
+            name="region"
+            defaultValue={selectedRegion}
             className="flex h-10 w-full rounded-md border border-[var(--color-input)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)] ring-offset-background dark:[color-scheme:dark]"
           >
-            <option value="">All cities</option>
-            {cities.map((cityOption) => (
+            <option value="">All regions</option>
+            {regions.map((r) => (
               <option
-                key={cityOption}
-                value={cityOption}
+                key={r.id}
+                value={r.id}
                 className="bg-[var(--color-background)] text-[var(--color-foreground)]"
               >
-                {cityOption}
+                {r.name}
               </option>
             ))}
           </select>
@@ -111,7 +115,7 @@ export default async function VenuesPage({
         <Button type="submit" variant="outline">
           Apply
         </Button>
-        {selectedCity ? (
+        {selectedRegion ? (
           <Button asChild variant="ghost">
             <Link href="/venues">Clear</Link>
           </Button>
@@ -120,8 +124,8 @@ export default async function VenuesPage({
 
       {sortedVenues.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          {selectedCity
-            ? `No venues matched "${selectedCity}".`
+          {selectedRegion
+            ? `No venues found in "${regions.find((r) => r.id === selectedRegion)?.name ?? selectedRegion}".`
             : "No venues yet — add the first."}
         </p>
       ) : (
