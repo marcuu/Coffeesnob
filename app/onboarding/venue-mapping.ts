@@ -6,7 +6,9 @@
 import type { OverallScoreSummary } from "@/lib/aggregation";
 import type { BrewMethod, Venue as DbVenue } from "@/lib/types";
 
-import type { Axes, City, DrinkId, OnboardingVenue } from "./data";
+import { REGION_NAMES, regionIdFromCityName } from "@/lib/regions";
+
+import type { Axes, DrinkId, OnboardingVenue, Region } from "./data";
 
 export function cityIdFromName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, "-");
@@ -72,7 +74,7 @@ export function mapDbVenuesToOnboarding(
     const displayable = !!ws?.displayable;
     const score = displayable ? ws!.score : 0;
     const reviews = ws?.rawReviewCount ?? 0;
-    const area = cityIdFromName(v.city);
+    const area = regionIdFromCityName(v.city);
     const axes = FLAVOUR_OVERLAY[v.slug] ?? {};
     return {
       slug: v.slug,
@@ -90,14 +92,15 @@ export function mapDbVenuesToOnboarding(
   });
 }
 
-export function buildCityOptions(venues: OnboardingVenue[]): City[] {
-  const byId = new Map<string, City>();
+export function buildRegionOptions(venues: OnboardingVenue[]): Region[] {
+  const byId = new Map<string, Region>();
   for (const v of venues) {
     const existing = byId.get(v.area);
     if (existing) {
       existing.venues += 1;
     } else {
-      byId.set(v.area, { id: v.area, name: v.city, venues: 1 });
+      const name = REGION_NAMES[v.area] ?? v.city;
+      byId.set(v.area, { id: v.area, name, venues: 1 });
     }
   }
   return Array.from(byId.values()).sort((a, b) =>

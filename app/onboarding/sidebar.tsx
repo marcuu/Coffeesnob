@@ -5,10 +5,10 @@ import { useState } from "react";
 import {
   DRINKS,
   FLAVOUR_PAIRS,
-  type City,
   type FlavourOption,
   type FlavourPair,
   type Prefs,
+  type Region,
 } from "./data";
 
 type SidebarProps = {
@@ -16,7 +16,7 @@ type SidebarProps = {
   onClose: () => void;
   prefs: Prefs;
   setPrefs: (p: Prefs) => void;
-  cities: City[];
+  regions: Region[];
   onReveal: () => void;
 };
 
@@ -27,7 +27,7 @@ export function Sidebar({
   onClose,
   prefs,
   setPrefs,
-  cities,
+  regions,
   onReveal,
 }: SidebarProps) {
   const [section, setSection] = useState<SectionId>("city");
@@ -67,7 +67,7 @@ export function Sidebar({
   }
 
   const sections: { id: SectionId; label: string; done: boolean }[] = [
-    { id: "city", label: "Location", done: !!prefs.city },
+    { id: "city", label: "Location", done: !!prefs.region },
     {
       id: "drink",
       label: "Drink",
@@ -203,7 +203,7 @@ export function Sidebar({
             <CityPanel
               prefs={prefs}
               setPrefs={setPrefs}
-              cities={cities}
+              regions={regions}
               onNext={() => setSection("drink")}
             />
           )}
@@ -281,9 +281,9 @@ type PanelProps = {
   onNext: () => void;
 };
 
-type CityPanelProps = PanelProps & { cities: City[] };
+type CityPanelProps = PanelProps & { regions: Region[] };
 
-function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
+function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
   const [geo, setGeo] = useState<"idle" | "locating" | "error" | "done">(
     "idle",
   );
@@ -295,13 +295,13 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
         setGeo("error");
         return;
       }
-      const london = cities.find((c) => c.id === "london");
-      const fallback = london ?? cities[0];
+      const london = regions.find((r) => r.id === "london");
+      const fallback = london ?? regions[0];
       if (!fallback) {
         setGeo("error");
         return;
       }
-      setPrefs({ ...prefs, city: fallback.id });
+      setPrefs({ ...prefs, region: fallback.id });
       setGeo("done");
     }, 700);
   }
@@ -309,7 +309,7 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
   return (
     <div>
       <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
-        Where do you drink?
+        Which region do you drink in?
       </h3>
       <p
         style={{
@@ -319,7 +319,7 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
           color: "var(--color-muted-foreground)",
         }}
       >
-        We&rsquo;ll boost venues nearby.
+        We&rsquo;ll boost venues in your area.
       </p>
 
       <button
@@ -367,20 +367,20 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
           gap: 6,
         }}
       >
-        {cities.map((c) => (
+        {regions.map((r) => (
           <button
             type="button"
-            key={c.id}
+            key={r.id}
             onClick={() => {
-              setPrefs({ ...prefs, city: c.id });
+              setPrefs({ ...prefs, region: r.id });
               onNext();
             }}
             style={{
               padding: "10px 12px",
               textAlign: "left",
-              border: `1px solid ${prefs.city === c.id ? "var(--color-accent)" : "var(--color-border)"}`,
+              border: `1px solid ${prefs.region === r.id ? "var(--color-accent)" : "var(--color-border)"}`,
               background:
-                prefs.city === c.id
+                prefs.region === r.id
                   ? "var(--color-accent-soft)"
                   : "var(--color-background)",
               borderRadius: "var(--radius)",
@@ -388,7 +388,7 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
               fontFamily: "var(--font-sans)",
             }}
           >
-            <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{r.name}</div>
             <div
               style={{
                 fontSize: 11,
@@ -396,7 +396,7 @@ function CityPanel({ prefs, setPrefs, cities, onNext }: CityPanelProps) {
                 fontFamily: "var(--font-mono)",
               }}
             >
-              {c.venues} venue{c.venues === 1 ? "" : "s"}
+              {r.venues} venue{r.venues === 1 ? "" : "s"}
             </div>
           </button>
         ))}

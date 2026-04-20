@@ -3,22 +3,22 @@
 import Link from "next/link";
 
 import { rankVenues, reasonsFor } from "./data";
-import type { City, OnboardingVenue, Prefs, RankedVenue } from "./data";
+import type { OnboardingVenue, Prefs, RankedVenue, Region } from "./data";
 
 type FeedProps = {
   venues: OnboardingVenue[];
-  cities: City[];
+  regions: Region[];
   prefs: Prefs;
   onOpenSidebar: () => void;
 };
 
-export function Feed({ venues, cities, prefs, onOpenSidebar }: FeedProps) {
+export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
   const ranked = rankVenues(venues, prefs);
   const top = ranked[0];
   const rest = ranked.slice(1, 7);
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
-  const cityName = prefs.city
-    ? cities.find((c) => c.id === prefs.city)?.name
+  const regionName = prefs.region
+    ? regions.find((r) => r.id === prefs.region)?.name
     : undefined;
 
   return (
@@ -34,7 +34,7 @@ export function Feed({ venues, cities, prefs, onOpenSidebar }: FeedProps) {
             marginBottom: 12,
           }}
         >
-          {hasPrefs ? "Ranked for you" : `Best in ${cityName ?? "the UK"}`}
+          {hasPrefs ? "Ranked for you" : `Best in ${regionName ?? "the UK"}`}
         </div>
         <h1
           style={{
@@ -68,10 +68,10 @@ export function Feed({ venues, cities, prefs, onOpenSidebar }: FeedProps) {
 
       <div style={{ display: "grid", gap: 10 }}>
         {top ? (
-          <VenueRow v={top} prefs={prefs} cities={cities} primary />
+          <VenueRow v={top} prefs={prefs} regions={regions} primary />
         ) : null}
         {rest.map((v) => (
-          <VenueRow key={v.slug} v={v} prefs={prefs} cities={cities} />
+          <VenueRow key={v.slug} v={v} prefs={prefs} regions={regions} />
         ))}
       </div>
 
@@ -83,12 +83,12 @@ export function Feed({ venues, cities, prefs, onOpenSidebar }: FeedProps) {
 type VenueRowProps = {
   v: RankedVenue;
   prefs: Prefs;
-  cities: City[];
+  regions: Region[];
   primary?: boolean;
 };
 
-function VenueRow({ v, prefs, cities, primary }: VenueRowProps) {
-  const reasons = reasonsFor(v, prefs, cities);
+function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
+  const reasons = reasonsFor(v, prefs, regions);
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
   return (
     <Link

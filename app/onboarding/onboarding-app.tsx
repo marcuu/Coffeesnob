@@ -4,16 +4,16 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { AhaReveal } from "./aha";
-import type { City, OnboardingVenue, Prefs } from "./data";
+import type { OnboardingVenue, Prefs, Region } from "./data";
 import { Feed } from "./feed";
 import { Sidebar } from "./sidebar";
 
 const KEY = "coffeesnob.v2.prefs";
 
-function initialPrefs(cities: City[]): Prefs {
-  void cities;
+function initialPrefs(regions: Region[]): Prefs {
+  void regions;
   return {
-    city: "",
+    region: "",
     drink: [],
     pairPicks: {},
     axes: null,
@@ -22,11 +22,11 @@ function initialPrefs(cities: City[]): Prefs {
 
 type OnboardingAppProps = {
   venues: OnboardingVenue[];
-  cities: City[];
+  regions: Region[];
 };
 
-export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
-  const initial = useMemo(() => initialPrefs(cities), [cities]);
+export function OnboardingApp({ venues, regions }: OnboardingAppProps) {
+  const initial = useMemo(() => initialPrefs(regions), [regions]);
   const [prefs, setPrefs] = useState<Prefs>(initial);
   const [hydrated, setHydrated] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -38,16 +38,16 @@ export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<Prefs>;
-        const cityIds = new Set(cities.map((c) => c.id));
-        const safeCity =
-          stored.city && cityIds.has(stored.city) ? stored.city : initial.city;
-        setPrefs({ ...initial, ...stored, city: safeCity });
+        const regionIds = new Set(regions.map((r) => r.id));
+        const safeRegion =
+          stored.region && regionIds.has(stored.region) ? stored.region : initial.region;
+        setPrefs({ ...initial, ...stored, region: safeRegion });
       }
     } catch {
       // ignore
     }
     setHydrated(true);
-  }, [cities, initial]);
+  }, [regions, initial]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -211,7 +211,7 @@ export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
       >
         <Feed
           venues={venues}
-          cities={cities}
+          regions={regions}
           prefs={prefs}
           onOpenSidebar={() => setSidebarOpen(true)}
         />
@@ -222,7 +222,7 @@ export function OnboardingApp({ venues, cities }: OnboardingAppProps) {
         onClose={() => setSidebarOpen(false)}
         prefs={prefs}
         setPrefs={setPrefs}
-        cities={cities}
+        regions={regions}
         onReveal={() => {
           setSidebarOpen(false);
           if (prefs.axes) {

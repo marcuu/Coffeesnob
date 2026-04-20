@@ -35,14 +35,14 @@ export type FlavourPair = {
   options: [FlavourOption, FlavourOption];
 };
 
-export type City = { id: string; name: string; venues: number };
+export type Region = { id: string; name: string; venues: number };
 
 export type OnboardingVenue = {
   slug: string;
   name: string;
-  /** Human-readable city line (e.g. "London Fields"). */
+  /** Human-readable city name (e.g. "Leeds"). */
   city: string;
-  /** City id used for matching — lowercased DB city. */
+  /** Region id used for matching (e.g. "yorkshire", "london"). */
   area: string;
   roaster: string;
   axes: Axes;
@@ -54,7 +54,7 @@ export type OnboardingVenue = {
 };
 
 export type Prefs = {
-  city: string;
+  region: string;
   drink: DrinkId[];
   pairPicks: Record<string, string>;
   axes: Axes | null;
@@ -159,7 +159,7 @@ export function scoreVenueFor(v: OnboardingVenue, prefs: Prefs): number {
       if (prefs.drink.includes(d) || prefs.drink.includes("any")) s += 1.5;
     });
   }
-  if (prefs.city && v.area === prefs.city) s += 4;
+  if (prefs.region && v.area === prefs.region) s += 4;
   s += v.score / 10;
   return s;
 }
@@ -178,7 +178,7 @@ export function confidenceFor(v: OnboardingVenue, prefs: Prefs): number {
   ) {
     c += 5;
   }
-  if (prefs.city && v.area === prefs.city) c += 6;
+  if (prefs.region && v.area === prefs.region) c += 6;
   return Math.min(97, c);
 }
 
@@ -198,12 +198,12 @@ export function rankVenues(
 export function reasonsFor(
   v: OnboardingVenue,
   prefs: Prefs,
-  cities: City[],
+  regions: Region[],
 ): string[] {
   const r: string[] = [];
-  if (prefs.city && v.area === prefs.city) {
-    const c = cities.find((c) => c.id === prefs.city);
-    r.push(`in ${c ? c.name : "your city"}`);
+  if (prefs.region && v.area === prefs.region) {
+    const reg = regions.find((r) => r.id === prefs.region);
+    r.push(`in ${reg ? reg.name : "your region"}`);
   }
   if (prefs.axes) {
     const top = Object.entries(prefs.axes).sort(
