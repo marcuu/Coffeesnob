@@ -52,6 +52,7 @@ app/
   venues/
     page.tsx            # Venue listing with avg rating, score-desc default sort, + selectable ?city= filter
                         # "Add venue" button lives here (and only here).
+    map/                # Auth-gated map view with pins for geocoded venues + external navigation
     new/                # Create venue form (auth-gated)
     [slug]/             # Venue detail, reviews, and add-review form (auth-gated)
     actions.ts          # Venue server actions (createVenue, deleteVenue)
@@ -59,7 +60,7 @@ components/             # Shared React components (shadcn/ui in components/ui/)
 hooks/                  # Custom React hooks
 lib/                    # Types, validators, aggregation helpers
   scoring/              # Pure weighted-scoring functions + pipeline (see docs/scoring.md)
-scripts/                # Node CLIs (scoring:run, scoring:backfill)
+scripts/                # Node CLIs (scoring:run, scoring:backfill, venues:geocode)
 utils/supabase/         # Supabase client factories (server, client, middleware, service)
 supabase/               # config.toml, migrations/, seed.sql
 docs/                   # Documentation
@@ -69,7 +70,7 @@ __tests__/              # Vitest tests
 ## Key Patterns
 
 - **Server vs. Client Supabase clients:** Always use `utils/supabase/server.ts` in server components/actions and `utils/supabase/client.ts` in client components. Never import the wrong one.
-- **Auth guard:** Middleware uses `getSession()` (JWT-only, no network call) to redirect unauthenticated page requests to `/login`. The middleware marks `/`, `/login`, `/auth/callback`, and static assets as public; everything else (including `/venues`, `/venues/new`, `/venues/[slug]`, `/venues/[slug]/review`) is auth-gated. The middleware matcher excludes `/api/*` so API routes do not return HTML redirects. Server actions and API routes must still call `supabase.auth.getUser()` explicitly for authoritative validation — middleware alone is not sufficient for API protection.
+- **Auth guard:** Middleware uses `getSession()` (JWT-only, no network call) to redirect unauthenticated page requests to `/login`. The middleware marks `/`, `/login`, `/auth/callback`, and static assets as public; everything else (including `/venues`, `/venues/map`, `/venues/new`, `/venues/[slug]`, `/venues/[slug]/review`) is auth-gated. The middleware matcher excludes `/api/*` so API routes do not return HTML redirects. Server actions and API routes must still call `supabase.auth.getUser()` explicitly for authoritative validation — middleware alone is not sufficient for API protection.
 - **Server Actions:** Use server actions for mutations. Always verify `user` is non-null before mutating.
 - **RLS as defense-in-depth:** All tables have RLS enabled. The `is_allowed_email()` function gates access. Do not rely on RLS as the sole auth check in application code.
 - **Component conventions:** Client components use `"use client"`. shadcn/ui components live in `components/ui/` and should not be modified directly. App-level components live in `components/`.
@@ -151,6 +152,8 @@ See `.env.example`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — browser key for rendering `/venues/map`.
+- `GOOGLE_MAPS_API_KEY` — server key for postcode geocoding on venue create + `npm run venues:geocode`.
 - `SUPABASE_SERVICE_ROLE_KEY` — used by the scoring pipeline (server-only, never exposed to the browser).
 - `SCORING_CRON_SECRET` — bearer token required by `POST /api/scoring/run`.
 

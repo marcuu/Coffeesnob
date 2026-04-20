@@ -25,10 +25,13 @@ type ReviewWithReviewer = Review & {
 
 export default async function VenueDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ map?: string }>;
 }) {
   const { slug } = await params;
+  const { map } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -110,6 +113,18 @@ export default async function VenueDetailPage({
           </div>
         </div>
       </div>
+
+      {map === "geocode-pending" ? (
+        <p className="mt-3 rounded-md border border-amber-400/60 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          Saved, but we could not geocode this postcode yet. This venue may not
+          appear on the map until geocoding is retried.
+        </p>
+      ) : null}
+      {venueRow.latitude === null || venueRow.longitude === null ? (
+        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+          Map location pending for this venue. Check back after geocoding.
+        </p>
+      ) : null}
 
       {venueRow.roasters.length || venueRow.brew_methods.length ? (
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--color-muted-foreground)]">
