@@ -80,9 +80,14 @@ export default async function VenuesPage({
             UK third-wave coffee spots rated by the community.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/venues/new">Add venue</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/venues/map">Map</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/venues/new">Add venue</Link>
+          </Button>
+        </div>
       </div>
 
       <form

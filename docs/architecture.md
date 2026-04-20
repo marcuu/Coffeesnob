@@ -56,7 +56,9 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
 - **venues** are user-submitted by any allowlisted user. The submitter owns
   edits/deletes until we introduce an admin role. The `/venues` listing page
   supports an exact-match city dropdown filter populated from known venue
-  cities and defaults to ranking by displayed weighted score (high to low).
+  cities and defaults to ranking by displayed weighted score (high to low). The
+  auth-gated `/venues/map` route renders Google Maps pins for venues with
+  non-null `latitude`/`longitude`.
   The "Add venue" CTA lives only in the `/venues` page header.
 - **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
   Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
@@ -103,6 +105,11 @@ Mutations go through server actions that:
 3. `schema.safeParse` via the Zod validators in `lib/validators.ts`.
 4. Supabase write. RLS is layered underneath as defense-in-depth.
 5. `revalidatePath` on affected routes, then `redirect` or return state.
+
+For map rendering, keep data access in a Server Component
+(`app/venues/map/page.tsx`) that passes serializable venue rows to the client
+map component (`components/venues-map.tsx`) rather than fetching via
+`useEffect`.
 
 Actions used with `useActionState` return a `{ status, message, fieldErrors }`
 shape so forms can render inline Zod messages without round-tripping. The
