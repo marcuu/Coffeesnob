@@ -53,6 +53,6 @@ export async function loginWithEmail(
   return {
     status: "sent",
     message:
-      "Magic link sent. Locally, open http://localhost:54324 to grab it from Inbucket.",
+      "Magic link sent. Check your email for the link.",
   };
 }
