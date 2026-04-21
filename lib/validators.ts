@@ -66,6 +66,37 @@ export const reviewCreateSchema = z.object({
 
 export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;
 
+export const profileUpdateSchema = z.object({
+  display_name: z.string().trim().min(1, "Display name is required").max(60),
+  username: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(2, "Username must be at least 2 characters")
+    .max(30, "Username must be 30 characters or fewer")
+    .regex(
+      /^[a-z0-9][a-z0-9_-]{1,29}$/,
+      "Use lowercase letters, numbers, underscores or hyphens",
+    )
+    .optional()
+    .or(z.literal("")),
+  bio: z.string().trim().max(300, "Bio must be 300 characters or fewer").optional(),
+  home_city: z
+    .string()
+    .trim()
+    .max(80, "City must be 80 characters or fewer")
+    .optional(),
+  avatar_url: z
+    .string()
+    .trim()
+    .url("Must be a valid URL")
+    .max(500)
+    .optional()
+    .or(z.literal("")),
+});
+
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+
 // Parses a comma-separated text input into a trimmed string[].
 export function parseCsv(value: FormDataEntryValue | null): string[] {
   if (typeof value !== "string") return [];

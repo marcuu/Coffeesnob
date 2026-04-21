@@ -13,8 +13,11 @@ export type BrewMethod =
 export interface Reviewer {
   id: string;
   display_name: string;
+  username: string | null;
+  avatar_url: string | null;
   bio: string | null;
   home_city: string | null;
+  status: "beaned" | "invited" | "active";
   review_count: number;
   venues_reviewed_count: number;
   first_review_at: string | null;

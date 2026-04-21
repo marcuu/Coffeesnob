@@ -43,6 +43,17 @@ export default async function HomePage() {
     supabase.from("venues").select("*").order("name", { ascending: true }),
   ]);
 
+  // Resolve profile URL for the nav link (only needed for the signed-in path).
+  let profileHref = "/profile";
+  if (user) {
+    const { data: reviewer } = await supabase
+      .from("reviewers")
+      .select("username")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (reviewer?.username) profileHref = `/profile/${reviewer.username}`;
+  }
+
   if (error) {
     return (
       <main className="mx-auto max-w-xl px-6 py-16">
@@ -67,7 +78,7 @@ export default async function HomePage() {
 
   if (user) {
     const regions = buildRegionOptions(venues);
-    return <OnboardingApp venues={venues} regions={regions} />;
+    return <OnboardingApp venues={venues} regions={regions} profileHref={profileHref} />;
   }
 
   // Logged-out path: sort by weighted score descending for the leaderboard.
