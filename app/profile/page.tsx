@@ -33,7 +33,7 @@ export default async function OwnProfilePage() {
             href={`/profile/${data.reviewer.username}`}
             className="text-sm text-[var(--color-muted-foreground)] hover:underline"
           >
-            Public view →
+            Shared profile link →
           </Link>
         )}
       </div>

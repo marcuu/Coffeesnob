@@ -42,11 +42,11 @@ const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 // Returns the number of consecutive calendar weeks (rolling 7-day buckets)
 // with at least one review, counting back from the most recent week.
 // A break of more than 1 week resets the streak.
-export function computeStreak(visitedDates: string[]): number {
+// `now` defaults to the current time; pass an explicit value in tests.
+export function computeStreak(visitedDates: string[], now: Date = new Date()): number {
   if (visitedDates.length === 0) return 0;
 
-  const now = Date.now();
-  const currentWeekIndex = Math.floor(now / MS_PER_WEEK);
+  const currentWeekIndex = Math.floor(now.getTime() / MS_PER_WEEK);
 
   const weekIndices = new Set<number>();
   for (const dateStr of visitedDates) {
@@ -202,9 +202,9 @@ export function computeReputationTier(
 // Relative date formatting
 // ---------------------------------------------------------------------------
 
-export function formatRelativeDate(isoDate: string): string {
+// `now` defaults to the current time; pass an explicit value in tests.
+export function formatRelativeDate(isoDate: string, now: Date = new Date()): string {
   const date = new Date(isoDate);
-  const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 

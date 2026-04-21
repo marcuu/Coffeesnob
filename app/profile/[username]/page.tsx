@@ -7,7 +7,9 @@ import { ProfileView } from "@/app/profile/_components/profile-view";
 
 export const dynamic = "force-dynamic";
 
-export default async function PublicProfilePage({
+// Visible to any signed-in (allowlisted) user. Auth is required because
+// reviewer data is gated by the is_allowed_email() RLS policy.
+export default async function SharedProfilePage({
   params,
 }: {
   params: Promise<{ username: string }>;
