@@ -23,9 +23,10 @@ function initialPrefs(regions: Region[]): Prefs {
 type OnboardingAppProps = {
   venues: OnboardingVenue[];
   regions: Region[];
+  profileHref: string;
 };
 
-export function OnboardingApp({ venues, regions }: OnboardingAppProps) {
+export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppProps) {
   const initial = useMemo(() => initialPrefs(regions), [regions]);
   const [prefs, setPrefs] = useState<Prefs>(initial);
   const [hydrated, setHydrated] = useState(false);
@@ -150,6 +151,17 @@ export function OnboardingApp({ venues, regions }: OnboardingAppProps) {
               }}
             >
               Browse venues
+            </Link>
+            <Link
+              href={profileHref}
+              style={{
+                fontSize: 13,
+                color: "var(--color-muted-foreground)",
+                textDecoration: "none",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              My profile
             </Link>
             {hasPrefs && (
               <button
