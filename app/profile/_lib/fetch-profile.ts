@@ -59,7 +59,10 @@ export async function fetchProfileByUserId(
   if (!reviewerResult.data) return null;
 
   const reviewer = reviewerResult.data as Reviewer;
-  const reviews = (reviewsResult.data ?? []) as ReviewWithVenue[];
+  // Supabase types the joined relation as an array because it doesn't inspect
+  // FK constraints, but the runtime value is always a single object for a
+  // many-to-one join (review → venue). Cast via unknown to bridge the gap.
+  const reviews = (reviewsResult.data ?? []) as unknown as ReviewWithVenue[];
   const tenure = tenureResult.data ?? null;
 
   const cities = new Set(reviews.map((r) => r.venue?.city).filter(Boolean));
