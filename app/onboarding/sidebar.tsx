@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { regionIdFromCityName } from "../../lib/regions";
+
 import {
   DRINKS,
   FLAVOUR_PAIRS,
@@ -289,21 +291,43 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
   );
 
   function tryGeo() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeo("error");
+      return;
+    }
     setGeo("locating");
-    setTimeout(() => {
-      if (typeof navigator === "undefined" || !navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } },
+          );
+          const data = await res.json();
+          const city: string =
+            data.address?.city ??
+            data.address?.town ??
+            data.address?.village ??
+            data.address?.county ??
+            "";
+          const regionId = regionIdFromCityName(city);
+          const matched = regions.find((r) => r.id === regionId);
+          if (matched) {
+            setPrefs({ ...prefs, region: matched.id });
+            setGeo("done");
+          } else {
+            setGeo("error");
+          }
+        } catch {
+          setGeo("error");
+        }
+      },
+      () => {
         setGeo("error");
-        return;
-      }
-      const london = regions.find((r) => r.id === "london");
-      const fallback = london ?? regions[0];
-      if (!fallback) {
-        setGeo("error");
-        return;
-      }
-      setPrefs({ ...prefs, region: fallback.id });
-      setGeo("done");
-    }, 700);
+      },
+      { timeout: 10000 },
+    );
   }
 
   return (
