@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { regionIdFromCityName } from "../../lib/regions";
-
 import {
   DRINKS,
   FLAVOUR_PAIRS,
@@ -290,6 +288,22 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
     "idle",
   );
 
+  function regionIdFromCoords(lat: number, lon: number): string | null {
+    if (lon < -5.4 && lat >= 54.0 && lat <= 55.4) return "northern-ireland";
+    if (lat >= 55.05) return "scotland";
+    if (lon < -3.0 && lat >= 51.3 && lat <= 53.5) return "wales";
+    if (lat >= 51.28 && lat <= 51.72 && lon >= -0.55 && lon <= 0.35) return "london";
+    if (lat >= 54.4 && lon >= -2.5 && lon <= -0.5) return "north-east";
+    if (lat >= 53.3 && lat <= 55.4 && lon < -2.3) return "north-west";
+    if (lat >= 53.3 && lat <= 54.6 && lon >= -2.3 && lon <= 0.1) return "yorkshire";
+    if (lat >= 51.9 && lat <= 53.2 && lon >= -3.1 && lon < -0.8) return "west-midlands";
+    if (lat >= 52.0 && lat <= 53.5 && lon >= -0.8 && lon <= 0.8) return "east-midlands";
+    if (lat >= 51.5 && lat <= 53.0 && lon > 0.0) return "east-of-england";
+    if (lon < -2.0 && lat <= 51.8) return "south-west";
+    if (lat >= 50.7 && lat <= 51.8) return "south-east";
+    return null;
+  }
+
   function tryGeo() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setGeo("error");
@@ -297,29 +311,16 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
     }
     setGeo("locating");
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-            { headers: { "Accept-Language": "en" } },
-          );
-          const data = await res.json();
-          const city: string =
-            data.address?.city ??
-            data.address?.town ??
-            data.address?.village ??
-            data.address?.county ??
-            "";
-          const regionId = regionIdFromCityName(city);
-          const matched = regions.find((r) => r.id === regionId);
-          if (matched) {
-            setPrefs({ ...prefs, region: matched.id });
-            setGeo("done");
-          } else {
-            setGeo("error");
-          }
-        } catch {
+        const regionId = regionIdFromCoords(latitude, longitude);
+        const matched = regionId
+          ? (regions.find((r) => r.id === regionId) ?? regions[0])
+          : regions[0];
+        if (matched) {
+          setPrefs({ ...prefs, region: matched.id });
+          setGeo("done");
+        } else {
           setGeo("error");
         }
       },
