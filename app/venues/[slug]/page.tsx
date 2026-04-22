@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
 import { formatRating } from "@/lib/venues";
@@ -81,7 +82,9 @@ export default async function VenueDetailPage({
     : false;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <>
+      <SiteHeader />
+      <main className="mx-auto max-w-3xl px-6 py-10">
       <Link
         href="/venues"
         className="text-sm text-[var(--color-muted-foreground)] hover:underline"
@@ -211,6 +214,7 @@ export default async function VenueDetailPage({
           </Button>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }

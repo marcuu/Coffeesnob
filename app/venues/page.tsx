@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
 import {
@@ -69,7 +70,9 @@ export default async function VenuesPage({
   const sortedVenues = sortVenuesForListing(venues, weightedScores, sort);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <>
+      <SiteHeader />
+      <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Venues</h1>
@@ -179,6 +182,7 @@ export default async function VenuesPage({
           })}
         </ul>
       )}
-    </main>
+      </main>
+    </>
   );
 }
