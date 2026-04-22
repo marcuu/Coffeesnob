@@ -18,6 +18,7 @@ type SidebarProps = {
   setPrefs: (p: Prefs) => void;
   regions: Region[];
   onReveal: () => void;
+  onReset?: () => void;
 };
 
 type SectionId = "city" | "drink" | "flavour";
@@ -29,6 +30,7 @@ export function Sidebar({
   setPrefs,
   regions,
   onReveal,
+  onReset,
 }: SidebarProps) {
   const [section, setSection] = useState<SectionId>("city");
 
@@ -40,6 +42,13 @@ export function Sidebar({
       ? FLAVOUR_PAIRS.length
       : Math.max(0, firstUnansweredIdx),
   );
+
+  function handleReset() {
+    onReset?.();
+    setPairIdx(0);
+  }
+
+  const hasAnything = !!(prefs.region || (prefs.drink && prefs.drink.length > 0) || prefs.axes);
 
   function pickPair(pair: FlavourPair, opt: FlavourOption) {
     const pairPicks: Record<string, string> = {
@@ -237,15 +246,36 @@ export function Sidebar({
             background: "var(--color-muted)",
           }}
         >
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--color-muted-foreground)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            {sections.filter((s) => s.done).length}/3 complete · all optional
-          </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--color-muted-foreground)",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              {sections.filter((s) => s.done).length}/3 complete · all optional
+            </span>
+            {hasAnything && (
+              <button
+                type="button"
+                onClick={handleReset}
+                style={{
+                  fontSize: 11,
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--color-muted-foreground)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  textDecoration: "underline",
+                  textAlign: "left",
+                }}
+              >
+                reset all
+              </button>
+            )}
+          </div>
           <button
             type="button"
             onClick={onReveal}
