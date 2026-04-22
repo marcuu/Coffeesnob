@@ -129,16 +129,19 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span
+            <Link
+              href="/"
               style={{
                 fontFamily: "var(--font-serif)",
                 fontSize: 19,
                 fontWeight: 500,
                 letterSpacing: "-0.01em",
+                textDecoration: "none",
+                color: "var(--color-foreground)",
               }}
             >
               Coffeesnob
-            </span>
+            </Link>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <Link
