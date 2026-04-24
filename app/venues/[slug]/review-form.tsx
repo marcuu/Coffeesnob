@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ export function ReviewForm({
   venueId: string;
   slug: string;
 }) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createReview, initial);
   const formRef = useRef<HTMLFormElement>(null);
   const [step, setStep] = useState(0);
@@ -55,18 +57,9 @@ export function ReviewForm({
 
   useEffect(() => {
     if (state.status === "success") {
-      formRef.current?.reset();
-      setValues({
-        rating_ambience: DEFAULT_RATING,
-        rating_service: DEFAULT_RATING,
-        rating_value: DEFAULT_RATING,
-        rating_taste: DEFAULT_RATING,
-        rating_body: DEFAULT_RATING,
-        rating_aroma: DEFAULT_RATING,
-      });
-      setStep(0);
+      router.push(`/venues/${slug}`);
     }
-  }, [state.status]);
+  }, [state.status, router, slug]);
 
   const currentAxis = AXES[step];
   const progress = ((step + 1) / AXES.length) * 100;
@@ -182,9 +175,6 @@ export function ReviewForm({
 
       {state.status === "error" ? (
         <p className="text-sm text-[var(--color-destructive)]">{state.message}</p>
-      ) : null}
-      {state.status === "success" ? (
-        <p className="text-sm text-[var(--color-muted-foreground)]">Review posted.</p>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
