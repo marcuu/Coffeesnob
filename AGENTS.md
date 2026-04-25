@@ -49,6 +49,7 @@ app/
     feed.tsx            # Ranked venue cards (used inside OnboardingApp)
     sidebar.tsx         # Preference panel (city / drink / taste) for signed-in users
     aha.tsx             # Top-pick reveal modal for signed-in users
+    top-nav.tsx         # Shared sticky nav chrome for logged-in + logged-out landing states
   venues/
     page.tsx            # Venue listing with avg rating, score-desc default sort, + selectable ?city= filter
                         # "Add venue" button lives here (and only here).

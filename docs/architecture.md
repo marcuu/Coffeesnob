@@ -91,6 +91,8 @@ iterate without schema migrations; the DB only stores the signals.
   onboarding surfaces.
 - Prefer semantic tokens over hardcoded light values so cards, pills, and modal
   callouts keep sufficient contrast in both themes.
+- Shared landing/feed header chrome lives in `app/onboarding/top-nav.tsx` to keep
+  nav icon affordances and CTA treatments aligned across auth states.
 - shadcn/ui components are generated into `components/ui/` and should not be
   modified in place — extend with wrapper components in `components/` instead.
 

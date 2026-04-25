@@ -97,6 +97,8 @@ See `.env.example`:
 
 - Color tokens are defined in `app/globals.css` via `@theme` and have dedicated
   dark-mode overrides in `@media (prefers-color-scheme: dark)`.
+- Landing page chrome for both logged-in and logged-out states is centralised in
+  `app/onboarding/top-nav.tsx` so icon links + CTA styling stay consistent.
 - When adding new UI states, use semantic tokens (`--color-muted`,
   `--color-foreground`, `--color-accent-soft`, etc.) instead of hardcoded light
   values so onboarding and modal surfaces remain legible in both themes.
