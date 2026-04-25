@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { RegionPicker } from "@/components/RegionPicker";
 import { SiteHeader } from "@/components/site-header";
 import {
   Card,
@@ -76,13 +77,16 @@ export default async function RankingsPage() {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Coffeesnob Rankings
-          </h1>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-            The top UK specialty coffee shops.
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Coffeesnob Rankings
+            </h1>
+            <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
+              The top UK specialty coffee shops.
+            </p>
+          </div>
+          <RegionPicker regions={activeRegions} />
         </div>
 
         {ranked.length === 0 && unranked.length === 0 ? (
@@ -155,27 +159,6 @@ export default async function RankingsPage() {
                   </li>
                 );
               })}
-            </ul>
-          </section>
-        ) : null}
-
-        {activeRegions.length > 0 ? (
-          <section aria-label="Browse by region" className="mt-12">
-            <h2 className="mb-4 text-base font-semibold tracking-tight">
-              Browse by region
-            </h2>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {activeRegions.map((r) => (
-                <li key={r.id}>
-                  <Link
-                    href={`/rankings/${r.id}`}
-                    className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--color-muted)]"
-                  >
-                    {r.name}
-                    <span className="text-[var(--color-muted-foreground)]">→</span>
-                  </Link>
-                </li>
-              ))}
             </ul>
           </section>
         ) : null}
