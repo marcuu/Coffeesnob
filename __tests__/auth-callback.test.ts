@@ -8,6 +8,10 @@ describe("sanitizeNext — open-redirect prevention", () => {
     ["/venues", "/venues"],
     ["/venues/prufrock-coffee", "/venues/prufrock-coffee"],
     ["/profile/edit", "/profile/edit"],
+    // Colons in path/query segments are benign: origin is always prepended,
+    // making the final URL https://host/... regardless of path content.
+    ["/search?q=time:10", "/search?q=time:10"],
+    ["/venues/cafe:espresso", "/venues/cafe:espresso"],
   ])("allows safe relative path %s", (input, expected) => {
     expect(sanitizeNext(input)).toBe(expected);
   });

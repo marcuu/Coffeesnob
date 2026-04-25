@@ -7,7 +7,10 @@ const cspValue = [
   // Next.js requires unsafe-inline/eval for hydration and dev HMR.
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' *.supabase.co data: blob:",
+  // lh3.googleusercontent.com serves Google OAuth profile avatars.
+  // avatar_url accepts any valid URL, so add known external sources here as
+  // they are identified rather than switching img-src to the broad https: scheme.
+  "img-src 'self' *.supabase.co lh3.googleusercontent.com data: blob:",
   "connect-src 'self' *.supabase.co wss://*.supabase.co",
   "font-src 'self'",
   "frame-ancestors 'none'",

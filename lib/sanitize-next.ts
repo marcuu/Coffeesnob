@@ -6,13 +6,11 @@ export function sanitizeNext(raw: string): string {
   } catch {
     return "/";
   }
-  // Must start with / but not // (protocol-relative).
-  // Reject backslashes (browsers may normalise \ to /) and any scheme: pattern.
-  if (
-    /^\/(?!\/)/.test(path) &&
-    !path.includes("\\") &&
-    !/[a-z][a-z+\-.]*:/i.test(path)
-  ) {
+  // Require a leading / (rules out bare schemes like "javascript:").
+  // Reject // (protocol-relative) and backslashes (some browsers normalise \ to /).
+  // A colon elsewhere in the path is safe: origin is always prepended, so the
+  // final URL is always https://real-host.com/... regardless of path content.
+  if (/^\/(?!\/)/.test(path) && !path.includes("\\")) {
     return path;
   }
   return "/";

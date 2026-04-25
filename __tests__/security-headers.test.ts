@@ -59,4 +59,18 @@ describe("next.config.ts security headers", () => {
     );
     expect(csp?.value).toContain("frame-ancestors 'none'");
   });
+
+  it("CSP img-src includes Google OAuth avatar host", async () => {
+    const rules = await nextConfig.headers!();
+    const headers = rules.flatMap((r) => r.headers);
+    const csp = headers.find(
+      (h) =>
+        h.key === "Content-Security-Policy" ||
+        h.key === "Content-Security-Policy-Report-Only",
+    );
+    // Google OAuth profile pictures are served from lh3.googleusercontent.com.
+    // If this assertion fails after adding a new identity provider, add its
+    // avatar CDN host here rather than broadening img-src to https:.
+    expect(csp?.value).toContain("lh3.googleusercontent.com");
+  });
 });
