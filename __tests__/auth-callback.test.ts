@@ -1,9 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-// Mock supabase so the route module can be imported without real credentials.
-vi.mock("@/utils/supabase/server", () => ({ createClient: vi.fn() }));
-
-import { sanitizeNext } from "@/app/auth/callback/route";
+import { sanitizeNext } from "@/lib/sanitize-next";
 
 describe("sanitizeNext — open-redirect prevention", () => {
   it.each([
