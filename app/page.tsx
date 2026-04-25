@@ -40,7 +40,10 @@ export default async function HomePage() {
 
   const [{ data: { user } }, { data, error }] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("venues").select("*").order("name", { ascending: true }),
+    supabase
+      .from("venues")
+      .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
+      .order("name", { ascending: true }),
   ]);
 
   // Resolve profile URL for the nav link (only needed for the signed-in path).

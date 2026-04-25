@@ -11,10 +11,8 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request): Promise<NextResponse> {
   const secret = process.env.SCORING_CRON_SECRET;
   if (!secret) {
-    return NextResponse.json(
-      { error: "SCORING_CRON_SECRET not configured" },
-      { status: 500 },
-    );
+    console.error("[scoring/run] SCORING_CRON_SECRET is not configured");
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
   }
 
   const header = request.headers.get("authorization") ?? "";
@@ -23,22 +21,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const requestId = crypto.randomUUID();
   const sb = createServiceRoleClient();
   try {
     const report = await runFullPipeline(sb);
     return NextResponse.json(report);
   } catch (err) {
-    return NextResponse.json({ error: serializeError(err) }, { status: 500 });
+    console.error(`[scoring/run] requestId=${requestId}`, err);
+    return NextResponse.json({ error: "internal_error", requestId }, { status: 500 });
   }
-}
-
-// Pipeline code re-throws raw Supabase PostgrestError objects ({ message,
-// details, hint, code }) — not Error instances. Flatten both shapes so the
-// response body carries actionable info instead of "[object Object]".
-function serializeError(err: unknown): unknown {
-  if (err instanceof Error) return { message: err.message, stack: err.stack };
-  if (err && typeof err === "object") return err;
-  return { message: String(err) };
 }
 
 // Constant-time string comparison to avoid secret leakage via timing.
