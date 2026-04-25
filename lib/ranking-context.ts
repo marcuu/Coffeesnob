@@ -54,7 +54,7 @@ export function buildVenueRankingSummary(
     ? rawReviewCount === 0
       ? "No reviews yet."
       : "Needs more trusted reviews to enter the rankings."
-    : "Think this ranking is wrong? Add your review.";
+    : "Think this ranking is wrong?";
 
   return {
     rank,
