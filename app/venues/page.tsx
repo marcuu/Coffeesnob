@@ -4,19 +4,20 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
+import { VenueRankingMeta } from "@/components/ranking/VenueRankingMeta";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
 import {
   buildRegionFilterOptions,
-  formatRating,
   sortVenuesForListing,
 } from "@/lib/venues";
 import { getVenueOverallScores } from "@/lib/aggregation";
+import { buildRankMap, buildVenueRankingSummary } from "@/lib/ranking-context";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,9 @@ export default async function VenuesPage({
   const regions = buildRegionFilterOptions((cityRows ?? []).map((r) => r.city));
   const selectedRegionData = regions.find((r) => r.id === regionFilter);
   const selectedRegion = selectedRegionData?.id ?? "";
+
+  // Scope label: region name when filtered, otherwise "UK".
+  const scopeLabel = selectedRegionData?.name ?? "UK";
 
   let query = supabase
     .from("venues")
@@ -67,6 +71,9 @@ export default async function VenuesPage({
           venues.map((v) => v.id),
         )
       : new Map();
+
+  // Rank map is scoped to the current venue set (region-filtered or all UK).
+  const rankMap = buildRankMap(weightedScores);
   const sortedVenues = sortVenuesForListing(venues, weightedScores, sort);
 
   return (
@@ -143,28 +150,33 @@ export default async function VenuesPage({
         <ul className="grid gap-4">
           {sortedVenues.map((v) => {
             const ws = weightedScores.get(v.id);
-            const displayScore = ws?.displayable ? ws.score : null;
-            const reviewCount = ws?.rawReviewCount ?? 0;
+            const rank = rankMap.get(v.id) ?? null;
+            const summary = buildVenueRankingSummary(v.id, ws, rank, scopeLabel);
+
             return (
               <li key={v.id}>
                 <Link href={`/venues/${v.slug}`} className="block">
                   <Card className="transition-colors hover:bg-[var(--color-muted)]">
                     <CardHeader>
-                      <div className="flex items-baseline justify-between gap-4">
-                        <CardTitle>{v.name}</CardTitle>
-                        <div className="text-right text-sm">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <CardTitle className="truncate">{v.name}</CardTitle>
+                          <CardDescription>
+                            {v.city} · {v.postcode}
+                          </CardDescription>
+                        </div>
+                        <div className="shrink-0 text-right text-sm">
                           <div className="font-medium">
-                            {formatRating(displayScore)}
+                            {summary.formattedScore}
                           </div>
                           <div className="text-xs text-[var(--color-muted-foreground)]">
-                            {reviewCount} review
-                            {reviewCount === 1 ? "" : "s"}
+                            {summary.rawReviewCount} review
+                            {summary.rawReviewCount === 1 ? "" : "s"}
                           </div>
                         </div>
                       </div>
-                      <CardDescription>
-                        {v.city} · {v.postcode}
-                      </CardDescription>
+                      {/* No reviewHref: card is already wrapped in <Link> */}
+                      <VenueRankingMeta summary={summary} />
                     </CardHeader>
                     {v.roasters.length || v.brew_methods.length ? (
                       <CardContent className="flex flex-wrap gap-2 text-xs text-[var(--color-muted-foreground)]">
