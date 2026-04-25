@@ -36,7 +36,7 @@ export default async function AddVenueReviewPage({
       <div className="mt-4 space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Review {venue.name}</h1>
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          Move through six scoring steps, then add your notes.
+          Move through six scoring questions, then add your visit date and notes.
         </p>
       </div>
 

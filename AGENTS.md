@@ -116,7 +116,7 @@ Zod schemas in `lib/validators.ts` back both create/update paths:
 - `venueCreateSchema` / `venueUpdateSchema` — venue fields plus allowlists
   for `brew_methods` (enum of `BREW_METHODS`) and a slug regex.
 - `reviewCreateSchema` — six 1-10 axes (`ambience`, `service`, `value`, `taste`, `body`, `aroma`), 10-5000 char body, `YYYY-MM-DD` visit date, UUID venue_id. `rating_overall` is derived server-side from weighted inputs.
-- Review scoring runs in a dedicated six-step flow at `app/venues/[slug]/review/page.tsx` (rendering `review-form.tsx`), and each slider starts at `5/10` before user interaction.
+- Review scoring runs in a dedicated eight-step flow at `app/venues/[slug]/review/page.tsx` (rendering `review-form.tsx`): six slider questions plus dedicated date and review-notes steps. Each slider starts at `5/10` before user interaction.
 
 Server actions parse `FormData` with the `formString` / `formNumber` /
 `parseCsv` helpers in the same file, then call `schema.safeParse`. On
