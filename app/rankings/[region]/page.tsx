@@ -25,9 +25,17 @@ type Props = { params: Promise<{ region: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const name = regionDisplayName(region);
+  const title = `${name} Coffee Rankings — Coffeesnob`;
+  const description = `The highest-ranked specialty coffee shops in ${name}, based on weighted reviewer scores.`;
   return {
-    title: `${name} Coffee Rankings — Coffeesnob`,
-    description: `The highest-ranked specialty coffee shops in ${name}, based on weighted reviewer scores.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: "Coffeesnob",
+    },
   };
 }
 

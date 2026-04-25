@@ -12,6 +12,7 @@ import {
 import { getVenueOverallScores } from "@/lib/aggregation";
 import { buildRankings } from "@/lib/rankings";
 import { getScoreDisplay } from "@/lib/scoring-display";
+import { buildRegionFilterOptions } from "@/lib/venues";
 import type { Venue } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 
@@ -21,6 +22,13 @@ export const metadata: Metadata = {
   title: "Coffeesnob Rankings — Top UK Specialty Coffee",
   description:
     "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
+  openGraph: {
+    title: "Coffeesnob Rankings — Top UK Specialty Coffee",
+    description:
+      "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
+    type: "website",
+    siteName: "Coffeesnob",
+  },
 };
 
 export default async function RankingsPage() {
@@ -29,9 +37,11 @@ export default async function RankingsPage() {
   const [
     { data: { user } },
     { data, error },
+    { data: cityRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from("venues").select("*").order("name", { ascending: true }),
+    supabase.from("venues").select("city").order("city", { ascending: true }),
   ]);
 
   if (error) {
@@ -49,6 +59,9 @@ export default async function RankingsPage() {
   }
 
   const venues = (data ?? []) as Venue[];
+  const activeRegions = buildRegionFilterOptions(
+    (cityRows ?? []).map((r) => r.city),
+  );
   const weightedScores =
     venues.length > 0
       ? await getVenueOverallScores(
@@ -142,6 +155,27 @@ export default async function RankingsPage() {
                   </li>
                 );
               })}
+            </ul>
+          </section>
+        ) : null}
+
+        {activeRegions.length > 0 ? (
+          <section aria-label="Browse by region" className="mt-12">
+            <h2 className="mb-4 text-base font-semibold tracking-tight">
+              Browse by region
+            </h2>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {activeRegions.map((r) => (
+                <li key={r.id}>
+                  <Link
+                    href={`/rankings/${r.id}`}
+                    className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--color-muted)]"
+                  >
+                    {r.name}
+                    <span className="text-[var(--color-muted-foreground)]">→</span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </section>
         ) : null}
