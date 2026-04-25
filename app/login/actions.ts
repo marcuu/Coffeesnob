@@ -1,18 +1,18 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createClient } from "@/utils/supabase/server";
+import { getBaseUrl } from "@/utils/get-base-url";
 
 export async function loginWithGoogle() {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const baseUrl = await getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
+    options: { redirectTo: `${baseUrl}/auth/callback` },
   });
 
   if (error) {
@@ -39,11 +39,11 @@ export async function loginWithEmail(
   }
 
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const baseUrl = await getBaseUrl();
 
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
+    options: { emailRedirectTo: `${baseUrl}/auth/callback` },
   });
 
   if (error) {
