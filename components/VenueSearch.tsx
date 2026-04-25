@@ -13,15 +13,15 @@ type VenueResult = {
 };
 
 export function VenueSearch() {
+  const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<VenueResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const supabase = useRef(createClient());
 
-  // Query from the first character, 150 ms debounce to avoid hammering on
-  // fast typing without feeling sluggish.
   useEffect(() => {
     const q = query.trim();
     if (!q) {
@@ -46,21 +46,34 @@ export function VenueSearch() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Close when clicking outside the component.
   useEffect(() => {
     function onPointerDown(e: PointerEvent) {
       if (!containerRef.current?.contains(e.target as Node)) {
-        setOpen(false);
+        collapse();
       }
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
 
+  function expand() {
+    setExpanded(true);
+    // Focus on next tick so the input is visible before focusing
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function collapse() {
+    setExpanded(false);
+    setQuery("");
+    setResults([]);
+    setOpen(false);
+  }
+
   function clear() {
     setQuery("");
     setResults([]);
     setOpen(false);
+    inputRef.current?.focus();
   }
 
   return (
@@ -69,33 +82,61 @@ export function VenueSearch() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
           height: 34,
-          padding: "0 10px",
-          border: "1px solid var(--color-border)",
+          border: expanded ? "1px solid var(--color-border)" : "none",
           borderRadius: "var(--radius)",
-          background: "var(--color-background)",
-          width: 180,
+          background: expanded ? "var(--color-background)" : "transparent",
+          overflow: "hidden",
+          transition: "width 200ms ease, border-color 200ms ease, background 200ms ease",
+          width: expanded ? 180 : 34,
         }}
       >
-        <svg
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ flexShrink: 0, color: "var(--color-muted-foreground)" }}
+        <button
+          type="button"
+          aria-label="Search venues"
+          onClick={expand}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            width: 34,
+            height: 34,
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            color: "var(--color-muted-foreground)",
+          }}
         >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+
         <input
+          ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Escape" && clear()}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              if (query) {
+                clear();
+              } else {
+                collapse();
+              }
+            }
+          }}
           placeholder="Search venues…"
           aria-label="Search venues"
           style={{
@@ -107,8 +148,12 @@ export function VenueSearch() {
             fontSize: 13,
             color: "var(--color-foreground)",
             fontFamily: "var(--font-sans)",
+            opacity: expanded ? 1 : 0,
+            pointerEvents: expanded ? "auto" : "none",
+            transition: "opacity 150ms ease",
           }}
         />
+
         {query ? (
           <button
             type="button"
@@ -119,7 +164,7 @@ export function VenueSearch() {
               alignItems: "center",
               background: "none",
               border: "none",
-              padding: 0,
+              padding: "0 8px 0 0",
               cursor: "pointer",
               color: "var(--color-muted-foreground)",
               flexShrink: 0,
@@ -139,7 +184,7 @@ export function VenueSearch() {
           style={{
             position: "absolute",
             top: "calc(100% + 6px)",
-            left: 0,
+            right: 0,
             width: 260,
             background: "var(--color-background)",
             border: "1px solid var(--color-border)",
@@ -174,7 +219,7 @@ export function VenueSearch() {
               <Link
                 key={v.id}
                 href={`/venues/${v.slug}`}
-                onClick={clear}
+                onClick={collapse}
                 style={{
                   display: "flex",
                   alignItems: "baseline",
