@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { VenueSearch } from "@/components/VenueSearch";
+
 import { AhaReveal } from "./aha";
 import type { OnboardingVenue, Prefs, Region } from "./data";
 import { Feed } from "./feed";
@@ -144,6 +146,7 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
             </Link>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <VenueSearch />
             <Link
               href="/rankings"
               aria-label="Rankings"

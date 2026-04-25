@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { VenueSearch } from "@/components/VenueSearch";
 import { createClient } from "@/utils/supabase/server";
 
 export async function SiteHeader() {
@@ -54,6 +55,7 @@ export async function SiteHeader() {
           Coffeesnob
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <VenueSearch />
           <Link
             href="/rankings"
             aria-label="Rankings"

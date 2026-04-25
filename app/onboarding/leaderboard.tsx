@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { VenueSearch } from "@/components/VenueSearch";
 import type { OnboardingVenue } from "./data";
 
 type LeaderboardProps = {
@@ -90,6 +91,7 @@ export function Leaderboard({ venues }: LeaderboardProps) {
           <div
             style={{ display: "flex", alignItems: "center", gap: 14 }}
           >
+            <VenueSearch />
             <Link
               href="/rankings"
               aria-label="Rankings"
