@@ -181,7 +181,7 @@ export function ReviewForm({
       {/* Top bar */}
       <div
         style={{
-          padding: "20px 36px",
+          padding: "14px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -222,31 +222,31 @@ export function ReviewForm({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "48px 36px",
+          padding: "28px 24px",
         }}
       >
         <div style={{ width: "100%", maxWidth: 480 }}>
           {isNotesStep ? (
             /* Notes step */
             <>
-              <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 20 }}>
+              <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
                 Notes
               </div>
               <h2
                 style={{
                   fontFamily: "var(--font-serif)",
-                  fontSize: "clamp(28px,4vw,42px)",
+                  fontSize: "clamp(24px,4vw,36px)",
                   fontWeight: 400,
                   color: "hsl(60 9.1% 97.8%)",
                   letterSpacing: "-0.02em",
                   lineHeight: 1.1,
-                  marginBottom: 32,
+                  marginBottom: 20,
                 }}
               >
                 Any notes to add?
               </h2>
 
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label
                   htmlFor="visited_on"
                   style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
@@ -285,7 +285,7 @@ export function ReviewForm({
                   id="body"
                   name="body"
                   maxLength={5000}
-                  rows={5}
+                  rows={4}
                   placeholder="How was the coffee?"
                   style={{
                     border: "1px solid rgba(255,255,255,0.12)",
@@ -307,18 +307,18 @@ export function ReviewForm({
           ) : (
             /* Rating step */
             <>
-              <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 20 }}>
+              <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
                 {currentAxis.label}
               </div>
               <h2
                 style={{
                   fontFamily: "var(--font-serif)",
-                  fontSize: "clamp(28px,4vw,42px)",
+                  fontSize: "clamp(24px,4vw,36px)",
                   fontWeight: 400,
                   color: "hsl(60 9.1% 97.8%)",
                   letterSpacing: "-0.02em",
                   lineHeight: 1.1,
-                  marginBottom: 16,
+                  marginBottom: 12,
                 }}
               >
                 How was the {currentAxis.label.toLowerCase()}?
@@ -328,7 +328,7 @@ export function ReviewForm({
                   fontSize: 14,
                   color: "hsl(24 5.4% 52%)",
                   lineHeight: 1.7,
-                  marginBottom: 52,
+                  marginBottom: 28,
                 }}
               >
                 {currentAxis.desc}
@@ -340,7 +340,7 @@ export function ReviewForm({
                   display: "flex",
                   alignItems: "baseline",
                   gap: 8,
-                  marginBottom: 24,
+                  marginBottom: 14,
                 }}
               >
                 <div
@@ -376,7 +376,7 @@ export function ReviewForm({
                   width: "100%",
                   accentColor: "oklch(0.75 0.11 44)",
                   cursor: "pointer",
-                  marginBottom: 12,
+                  marginBottom: 8,
                 }}
                 onChange={(e) =>
                   setValues((prev) => ({
@@ -392,7 +392,7 @@ export function ReviewForm({
                   ...MONO,
                   fontSize: 9,
                   color: "hsl(24 5.4% 36%)",
-                  marginBottom: 24,
+                  marginBottom: 14,
                 }}
               >
                 <span>Poor</span>
@@ -422,7 +422,7 @@ export function ReviewForm({
         style={{
           position: "sticky",
           bottom: 0,
-          padding: "20px 36px",
+          padding: "14px 24px",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           background: "hsl(20 14.3% 4%)",
           display: "flex",
