@@ -426,10 +426,7 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
           <button
             type="button"
             key={r.id}
-            onClick={() => {
-              setPrefs({ ...prefs, region: r.id });
-              onNext();
-            }}
+            onClick={() => setPrefs({ ...prefs, region: r.id })}
             style={{
               padding: "10px 12px",
               textAlign: "left",
@@ -456,6 +453,27 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={!prefs.region}
+        style={{
+          marginTop: 16,
+          height: 38,
+          padding: "0 20px",
+          border: "1px solid var(--color-primary)",
+          background: prefs.region ? "var(--color-primary)" : "var(--color-muted)",
+          color: prefs.region ? "var(--color-primary-foreground)" : "var(--color-muted-foreground)",
+          borderRadius: "var(--radius)",
+          cursor: prefs.region ? "pointer" : "default",
+          fontFamily: "var(--font-sans)",
+          fontSize: 13,
+          fontWeight: 600,
+          opacity: prefs.region ? 1 : 0.5,
+        }}
+      >
+        Next →
+      </button>
     </div>
   );
 }
@@ -520,15 +538,16 @@ function DrinkPanel({ prefs, setPrefs, onNext }: PanelProps) {
         onClick={onNext}
         style={{
           marginTop: 16,
-          height: 34,
-          padding: "0 14px",
-          border: "1px solid var(--color-border)",
-          background: "var(--color-background)",
+          height: 38,
+          padding: "0 20px",
+          border: "1px solid var(--color-primary)",
+          background: "var(--color-primary)",
+          color: "var(--color-primary-foreground)",
           borderRadius: "var(--radius)",
           cursor: "pointer",
           fontFamily: "var(--font-sans)",
-          fontSize: 12,
-          fontWeight: 500,
+          fontSize: 13,
+          fontWeight: 600,
         }}
       >
         Next →
@@ -608,7 +627,7 @@ function FlavourPanel({
       >
         {pair.prompt}
       </h3>
-      <div style={{ display: "grid", gap: 8 }}>
+      <div style={{ display: "grid", gap: 10 }}>
         {pair.options.map((o) => (
           <button
             type="button"
@@ -616,13 +635,17 @@ function FlavourPanel({
             onClick={() => onPick(pair, o)}
             style={{
               textAlign: "left",
-              padding: "14px 16px",
-              border: "1px solid var(--color-border)",
+              padding: "16px 18px",
+              border: "2px solid var(--color-border)",
               borderRadius: "var(--radius-lg)",
               background: "var(--color-background)",
               cursor: "pointer",
               fontFamily: "var(--font-sans)",
               transition: "all 160ms",
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              alignItems: "center",
+              gap: 12,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "var(--color-accent)";
@@ -633,27 +656,39 @@ function FlavourPanel({
               e.currentTarget.style.background = "var(--color-background)";
             }}
           >
-            <div style={{ fontSize: 14, fontWeight: 600 }}>{o.name}</div>
-            <div
-              style={{
-                fontSize: 12,
-                color: "var(--color-accent)",
-                fontFamily: "var(--font-mono)",
-                marginTop: 2,
-                letterSpacing: "0.02em",
-              }}
-            >
-              {o.notes}
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{o.name}</div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--color-accent)",
+                  fontFamily: "var(--font-mono)",
+                  marginTop: 2,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {o.notes}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--color-muted-foreground)",
+                  marginTop: 6,
+                  textWrap: "pretty",
+                }}
+              >
+                {o.body}
+              </div>
             </div>
             <div
               style={{
-                fontSize: 12,
-                color: "var(--color-muted-foreground)",
-                marginTop: 6,
-                textWrap: "pretty",
+                fontSize: 18,
+                color: "var(--color-border)",
+                lineHeight: 1,
+                flexShrink: 0,
               }}
             >
-              {o.body}
+              →
             </div>
           </button>
         ))}
