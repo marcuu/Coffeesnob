@@ -23,44 +23,21 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
   return (
     <div>
       <div style={{ marginBottom: 48 }}>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            fontWeight: 400,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "var(--color-muted-foreground)",
-            marginBottom: 20,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            minHeight: 20,
-          }}
-        >
-          {!hasPrefs && `Best in ${regionName ?? "the UK"}`}
-          {hasPrefs && (
-            <button
-              type="button"
-              onClick={onOpenSidebar}
-              style={{
-                fontSize: 10,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontFamily: "var(--font-mono)",
-                color: "var(--color-muted-foreground)",
-                background: "transparent",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius)",
-                padding: "2px 8px",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
-            >
-              Refine taste →
-            </button>
-          )}
-        </div>
+        {!hasPrefs && (
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              fontWeight: 400,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--color-muted-foreground)",
+              marginBottom: 20,
+            }}
+          >
+            {`Best in ${regionName ?? "the UK"}`}
+          </div>
+        )}
         <h1
           style={{
             margin: 0,
@@ -88,6 +65,28 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
             ? "Personalised to your taste."
             : "Tell us about your preferences and we'll find the best coffee for you."}
         </p>
+        {hasPrefs && (
+          <button
+            type="button"
+            onClick={onOpenSidebar}
+            style={{
+              marginTop: 16,
+              fontSize: 10,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              fontFamily: "var(--font-mono)",
+              color: "var(--color-muted-foreground)",
+              background: "transparent",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius)",
+              padding: "4px 10px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            Refine taste →
+          </button>
+        )}
       </div>
 
       <div style={{ display: "grid", gap: 8 }}>
