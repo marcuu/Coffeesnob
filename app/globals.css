@@ -42,6 +42,11 @@
   }
 }
 
+@keyframes nudgePulse {
+  0%, 100% { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.4), 0 0 0 0 var(--color-accent-ring); }
+  50%       { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.4), 0 0 0 7px transparent; }
+}
+
 @keyframes onboardingSlideInRight {
   from {
     transform: translateX(100%);

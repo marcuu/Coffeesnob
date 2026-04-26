@@ -266,7 +266,6 @@ function FloatingNudge({ onOpen }: { onOpen: () => void }) {
         color: "var(--color-primary-foreground)",
         borderRadius: 999,
         border: "none",
-        boxShadow: "0 12px 30px -12px rgba(0,0,0,0.4)",
         fontFamily: "var(--font-sans)",
         fontSize: 13,
         fontWeight: 600,
@@ -275,7 +274,7 @@ function FloatingNudge({ onOpen }: { onOpen: () => void }) {
         gap: 10,
         cursor: "pointer",
         animation:
-          "onboardingSlideIn 420ms 800ms cubic-bezier(.2,.7,.2,1) both",
+          "onboardingSlideIn 420ms 800ms cubic-bezier(.2,.7,.2,1) both, nudgePulse 2.4s 1.8s ease-in-out infinite",
       }}
     >
       <span

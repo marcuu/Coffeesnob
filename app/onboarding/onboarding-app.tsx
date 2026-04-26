@@ -75,8 +75,6 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
     setSeenAha(false);
   }
 
-  const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
-
   if (venues.length === 0) {
     return (
       <main className="mx-auto max-w-xl px-6 py-20">
@@ -181,37 +179,6 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
                 <circle cx="12" cy="7" r="4"/>
               </svg>
             </Link>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              style={{
-                height: 34,
-                padding: "0 14px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius)",
-                background: "var(--color-background)",
-                color: "var(--color-foreground)",
-                fontFamily: "var(--font-sans)",
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: hasPrefs
-                    ? "var(--color-accent)"
-                    : "var(--color-muted-foreground)",
-                }}
-              />
-              {hasPrefs ? "Edit taste" : "Tune feed"}
-            </button>
           </div>
         </div>
       </header>
