@@ -144,14 +144,11 @@ export default async function VenueDetailPage({
               {formatRating(displayScore)}
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, marginTop: 4 }}>
-              <span style={{ ...MONO_LABEL, letterSpacing: "0.18em" }}>/ 10.0 overall</span>
               {explain ? <ScoreExplain data={explain} /> : null}
             </div>
-            <div style={{ ...MONO_LABEL, letterSpacing: "0.14em", marginTop: 10 }}>
-              Coffee {formatRating(coffeeScore)} · Experience {formatRating(experienceScore)}
-            </div>
-            <div style={{ ...MONO_LABEL, letterSpacing: "0.12em", marginTop: 6 }}>
-              {count} review{count === 1 ? "" : "s"}
+            <div style={{ ...MONO_LABEL, letterSpacing: "0.14em", marginTop: 10, textAlign: "right" }}>
+              <div>Coffee {formatRating(coffeeScore)}</div>
+              <div style={{ marginTop: 4 }}>Experience {formatRating(experienceScore)}</div>
             </div>
           </div>
         </div>
