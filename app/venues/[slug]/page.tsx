@@ -223,9 +223,8 @@ export default async function VenueDetailPage({
                     {r.reviewer?.username ? (
                       <Link
                         href={`/profile/${r.reviewer.username}`}
+                        className="hover:underline"
                         style={{ fontWeight: 600, fontSize: 15, color: "var(--color-foreground)", textDecoration: "none" }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "underline"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "none"; }}
                       >
                         {r.reviewer.display_name}
                       </Link>
