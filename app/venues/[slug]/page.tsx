@@ -10,10 +10,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
+import { RankingBadge } from "@/components/ranking/RankingBadge";
+import { ScoreBandBadge } from "@/components/ranking/ScoreBandBadge";
+import { SignalBadge } from "@/components/ranking/SignalBadge";
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
 import { formatRating } from "@/lib/venues";
-import { explainVenueScore, getVenueScores } from "@/lib/aggregation";
+import {
+  explainVenueScore,
+  getVenueOverallScores,
+  getVenueScores,
+} from "@/lib/aggregation";
+import {
+  buildVenueRankingSummary,
+  computeRank,
+} from "@/lib/ranking-context";
+import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
 
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
@@ -32,33 +44,51 @@ export default async function VenueDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: venue, error: venueError } = await supabase
-    .from("venues")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  // Round 1: venue + all venue id/city rows (neither depends on the other).
+  const [
+    { data: venue, error: venueError },
+    { data: allVenueRows },
+  ] = await Promise.all([
+    supabase.from("venues").select("*").eq("slug", slug).maybeSingle(),
+    supabase.from("venues").select("id, city"),
+  ]);
 
   if (venueError) throw venueError;
   if (!venue) notFound();
 
   const venueRow = venue as Venue;
 
-  const { data: reviewsData, error: reviewsError } = await supabase
-    .from("reviews")
-    .select("*, reviewer:reviewers(display_name, review_count)")
-    .eq("venue_id", venueRow.id)
-    .order("created_at", { ascending: false });
+  // Compute region for rank scope.
+  const regionId = regionIdFromCityName(venueRow.city);
+  const scopeLabel = regionDisplayName(regionId);
+  const regionVenueIds = (allVenueRows ?? [])
+    .filter((r) => regionIdFromCityName(r.city) === regionId)
+    .map((r) => r.id);
+
+  // Round 2: reviews + per-axis scores + region overall scores + auth (parallel).
+  const [
+    { data: reviewsData, error: reviewsError },
+    weightedScores,
+    regionalScores,
+    {
+      data: { user },
+    },
+  ] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select("*, reviewer:reviewers(display_name, review_count)")
+      .eq("venue_id", venueRow.id)
+      .order("created_at", { ascending: false }),
+    getVenueScores(supabase, venueRow.id),
+    getVenueOverallScores(supabase, regionVenueIds),
+    supabase.auth.getUser(),
+  ]);
 
   if (reviewsError) throw reviewsError;
 
   const reviews = (reviewsData ?? []) as ReviewWithReviewer[];
   const count = reviews.length;
 
-  const weightedScores = await getVenueScores(supabase, venueRow.id);
   const displayScore = weightedScores?.displayable
     ? (weightedScores.axes.overall?.score ?? null)
     : null;
@@ -68,10 +98,20 @@ export default async function VenueDetailPage({
   const experienceScore = weightedScores?.displayable
     ? (weightedScores.axes.experience?.score ?? null)
     : null;
+
   const explain =
     weightedScores?.displayable
       ? await explainVenueScore(supabase, venueRow.id, "overall")
       : null;
+
+  // Build ranking context using region-scoped data.
+  const rank = computeRank(venueRow.id, regionalScores);
+  const rankingSummary = buildVenueRankingSummary(
+    venueRow.id,
+    regionalScores.get(venueRow.id),
+    rank,
+    scopeLabel,
+  );
 
   const alreadyReviewedToday = user
     ? reviews.some(
@@ -111,6 +151,61 @@ export default async function VenueDetailPage({
           <div className="mt-1 text-xs text-[var(--color-muted-foreground)]">
             Coffee {formatRating(coffeeScore)} · Experience {formatRating(experienceScore)}
           </div>
+        </div>
+      </div>
+
+      {/* Ranking context hero */}
+      <div className="mt-4 space-y-1.5">
+        {rankingSummary.isUnranked ? (
+          <>
+            <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
+              <span className="font-medium">Unranked</span>
+              <span>·</span>
+              <SignalBadge label={rankingSummary.signalLabel} />
+            </div>
+            <p className="text-sm text-[var(--color-muted-foreground)]">
+              {rankingSummary.reviewPrompt}{" "}
+              <Link
+                href={`/venues/${slug}/review`}
+                className="font-medium underline-offset-2 hover:underline"
+              >
+                Help this venue enter the rankings.
+              </Link>
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              {rankingSummary.rank !== null ? (
+                <RankingBadge
+                  rank={rankingSummary.rank}
+                  scopeLabel={rankingSummary.scopeLabel}
+                />
+              ) : null}
+              <ScoreBandBadge
+                label={rankingSummary.scoreLabel}
+                tone={rankingSummary.scoreTone}
+              />
+              <SignalBadge label={rankingSummary.signalLabel} />
+            </div>
+            <p className="text-sm text-[var(--color-muted-foreground)]">
+              {rankingSummary.reviewPrompt}{" "}
+              <Link
+                href={`/venues/${slug}/review`}
+                className="font-medium underline-offset-2 hover:underline"
+              >
+                Add your review.
+              </Link>
+            </p>
+          </>
+        )}
+        <div>
+          <Link
+            href={`/rankings/${regionId}`}
+            className="text-xs text-[var(--color-muted-foreground)] underline-offset-2 hover:underline"
+          >
+            ← {scopeLabel} Rankings
+          </Link>
         </div>
       </div>
 
