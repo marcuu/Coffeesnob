@@ -426,10 +426,7 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
           <button
             type="button"
             key={r.id}
-            onClick={() => {
-              setPrefs({ ...prefs, region: r.id });
-              onNext();
-            }}
+            onClick={() => setPrefs({ ...prefs, region: r.id })}
             style={{
               padding: "10px 12px",
               textAlign: "left",
@@ -456,6 +453,27 @@ function CityPanel({ prefs, setPrefs, regions, onNext }: CityPanelProps) {
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={!prefs.region}
+        style={{
+          marginTop: 16,
+          height: 38,
+          padding: "0 20px",
+          border: "1px solid var(--color-primary)",
+          background: prefs.region ? "var(--color-primary)" : "var(--color-muted)",
+          color: prefs.region ? "var(--color-primary-foreground)" : "var(--color-muted-foreground)",
+          borderRadius: "var(--radius)",
+          cursor: prefs.region ? "pointer" : "default",
+          fontFamily: "var(--font-sans)",
+          fontSize: 13,
+          fontWeight: 600,
+          opacity: prefs.region ? 1 : 0.5,
+        }}
+      >
+        Next →
+      </button>
     </div>
   );
 }
