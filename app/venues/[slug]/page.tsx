@@ -120,7 +120,7 @@ export default async function VenueDetailPage({
   return (
     <>
       <SiteHeader />
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: "40px 36px 120px" }}>
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
 
         {/* Back → regional rankings */}
         <Link

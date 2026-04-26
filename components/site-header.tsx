@@ -44,16 +44,13 @@ export async function SiteHeader() {
         borderBottom: "1px solid var(--color-border)",
       }}
     >
-      <div
-        style={{
-          maxWidth: 920,
-          margin: "0 auto",
-          padding: "16px 36px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+      <style>{`
+        .sh-inner { max-width: 920px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        @media (min-width: 640px) { .sh-inner { padding: 16px 36px; } }
+        .sh-nav { display: flex; align-items: center; gap: 16px; }
+        @media (min-width: 640px) { .sh-nav { gap: 28px; } }
+      `}</style>
+      <div className="sh-inner">
         <Link
           href="/"
           style={{
@@ -67,7 +64,7 @@ export async function SiteHeader() {
         >
           Coffeesnob
         </Link>
-        <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        <nav className="sh-nav">
           <VenueSearch />
           <Link href="/rankings" style={NAV_LINK}>
             Rankings
