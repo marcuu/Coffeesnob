@@ -58,7 +58,7 @@ export const reviewCreateSchema = z.object({
   rating_ambience: rating,
   rating_service: rating,
   rating_value: rating,
-  body: z.string().trim().min(10).max(5000),
+  body: z.string().trim().max(5000).optional(),
   visited_on: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),

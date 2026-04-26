@@ -73,3 +73,37 @@ body {
   color: var(--color-foreground);
   color-scheme: dark light;
 }
+
+/* Rankings hero card — stacks on mobile, grid on sm+ */
+.rankings-hero {
+  display: flex;
+  flex-direction: column;
+  border-radius: 2px;
+  background: hsl(20 14.3% 6%);
+  overflow: hidden;
+}
+.rankings-hero-img {
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+}
+.rankings-hero-content {
+  flex: 1;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+@media (min-width: 640px) {
+  .rankings-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    min-height: 280px;
+  }
+  .rankings-hero-img {
+    height: auto;
+  }
+  .rankings-hero-content {
+    padding: 40px 44px;
+  }
+}

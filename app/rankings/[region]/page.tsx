@@ -136,15 +136,8 @@ export default async function RegionRankingsPage({ params }: Props) {
                   return (
                     <li key={v.id}>
                       <Link href={`/venues/${v.slug}`} className="group block">
-                        <div style={{
-                          display: "grid",
-                          gridTemplateColumns: "2fr 3fr",
-                          borderRadius: 2,
-                          background: "hsl(20 14.3% 6%)",
-                          overflow: "hidden",
-                          minHeight: 280,
-                        }}>
-                          <div style={{ position: "relative", overflow: "hidden" }}>
+                        <div className="rankings-hero">
+                          <div className="rankings-hero-img">
                             <img
                               src={v.photo_url!}
                               alt={v.name}
@@ -159,7 +152,7 @@ export default async function RegionRankingsPage({ params }: Props) {
                             />
                             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 60%, hsl(20 14.3% 6%) 100%)" }} />
                           </div>
-                          <div style={{ padding: "40px 44px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                          <div className="rankings-hero-content">
                             <div>
                               <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "oklch(0.52 0.11 44)", marginBottom: 20 }}>
                                 No. 1 in {regionName}
