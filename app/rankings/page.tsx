@@ -100,6 +100,61 @@ export default async function RankingsPage() {
             <ul className="grid gap-4">
               {ranked.map(({ venue: v, rank, score, reviewCount }) => {
                 const display = getScoreDisplay(score, true);
+                const isPrimary = rank === 1 && !!v.photo_url;
+
+                if (isPrimary) {
+                  return (
+                    <li key={v.id}>
+                      <Link href={`/venues/${v.slug}`} className="group block">
+                        <div style={{
+                          display: "grid",
+                          gridTemplateColumns: "2fr 3fr",
+                          borderRadius: 2,
+                          background: "hsl(20 14.3% 6%)",
+                          overflow: "hidden",
+                          minHeight: 280,
+                        }}>
+                          <div style={{ position: "relative", overflow: "hidden" }}>
+                            <img
+                              src={v.photo_url!}
+                              alt={v.name}
+                              style={{
+                                width: "100%", height: "100%",
+                                objectFit: "cover", objectPosition: "center",
+                                filter: "grayscale(10%) brightness(0.78) contrast(1.1) saturate(0.85)",
+                                display: "block",
+                                transition: "transform 600ms cubic-bezier(.2,.7,.2,1)",
+                              }}
+                              className="group-hover:scale-[1.03]"
+                            />
+                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 60%, hsl(20 14.3% 6%) 100%)" }} />
+                          </div>
+                          <div style={{ padding: "40px 44px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                            <div>
+                              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "oklch(0.52 0.11 44)", marginBottom: 20 }}>
+                                No. 1 in the UK
+                              </div>
+                              <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.1, color: "hsl(60 9.1% 97.8%)" }}>
+                                {v.name}
+                              </div>
+                              <div style={{ marginTop: 8, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", color: "hsl(24 5.4% 50%)" }}>
+                                {v.city} · {v.postcode} · {reviewCount} review{reviewCount === 1 ? "" : "s"}
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 32 }}>
+                              <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "hsl(24 5.4% 38%)", marginBottom: 4 }}>Score</div>
+                              <div style={{ fontFamily: "var(--font-mono)", fontSize: 48, fontWeight: 400, color: "oklch(0.52 0.11 44)", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                                {display.formattedScore}
+                                <span style={{ fontSize: 16, color: "hsl(24 5.4% 38%)", marginLeft: 4 }}>/10</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                }
+
                 return (
                   <li key={v.id}>
                     <Link href={`/venues/${v.slug}`} className="block">

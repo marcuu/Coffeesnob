@@ -118,22 +118,48 @@ export default async function VenueDetailPage({
     color: "var(--color-muted-foreground)",
   };
 
+  const IMG_FILTER = "grayscale(10%) brightness(0.78) contrast(1.1) saturate(0.85)";
+
   return (
     <>
       <SiteHeader />
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
+
+      {/* Full-bleed hero banner — only shown when the venue has a photo */}
+      {venueRow.photo_url && (
+        <div style={{ width: "100%", height: 380, overflow: "hidden", position: "relative" }}>
+          <img
+            src={venueRow.photo_url}
+            alt={venueRow.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", filter: IMG_FILTER, display: "block" }}
+          />
+          {/* Dark gradient scrim so the venue name is always legible */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 180, background: "linear-gradient(to bottom, transparent, rgba(8,5,3,0.82))" }} />
+          {/* Page-background fade at the very bottom to blend into content */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: "linear-gradient(to bottom, transparent, var(--color-background))" }} />
+          <div style={{ position: "absolute", bottom: 32, left: "clamp(16px,4vw,36px)", fontFamily: "var(--font-serif)", fontSize: "clamp(24px,3vw,38px)", fontWeight: 400, letterSpacing: "-0.02em", color: "hsl(60 9.1% 97%)" }}>
+            {venueRow.name}
+          </div>
+        </div>
+      )}
+
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: venueRow.photo_url ? "32px clamp(16px,4vw,36px) 120px" : "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
 
         {/* Back → regional rankings */}
         <BackLink href={`/rankings/${regionId}`} label={`${scopeLabel} Rankings`} />
 
         {/* Venue name + score + ⓘ */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 24, marginTop: venueRow.photo_url ? 32 : 0 }}>
           <div>
-            <div style={{ ...MONO_LABEL, marginBottom: 14 }}>Venue</div>
-            <h1 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
-              {venueRow.name}
-            </h1>
-            <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", color: "var(--color-muted-foreground)" }}>
+            {/* Only show the title block here when there's no hero banner */}
+            {!venueRow.photo_url && (
+              <>
+                <div style={{ ...MONO_LABEL, marginBottom: 14 }}>Venue</div>
+                <h1 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
+                  {venueRow.name}
+                </h1>
+              </>
+            )}
+            <div style={{ marginTop: venueRow.photo_url ? 0 : 10, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", color: "var(--color-muted-foreground)" }}>
               {venueRow.address_line1}
               {venueRow.address_line2 ? `, ${venueRow.address_line2}` : ""} ·{" "}
               {venueRow.city} {venueRow.postcode}
