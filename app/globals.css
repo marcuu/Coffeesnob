@@ -1,78 +1,75 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(20 14.3% 4.1%);
-  --color-muted: hsl(60 4.8% 95.9%);
-  --color-muted-foreground: hsl(25 5.3% 44.7%);
-  --color-border: hsl(20 5.9% 90%);
-  --color-primary: hsl(24 9.8% 10%);
-  --color-primary-foreground: hsl(60 9.1% 97.8%);
-  --color-destructive: hsl(0 84.2% 60.2%);
+  /* ── Dark mode as the app default ── */
+  --color-background:         hsl(20 14.3% 4.1%);
+  --color-foreground:         hsl(60 9.1% 97.8%);
+  --color-muted:              hsl(12 6.5% 15.1%);
+  --color-muted-foreground:   hsl(24 5.4% 63.9%);
+  --color-border:             hsl(12 6.5% 21%);
+  --color-primary:            hsl(60 9.1% 97.8%);
+  --color-primary-foreground: hsl(24 9.8% 10%);
+  --color-destructive:        hsl(0 84.2% 60.2%);
   --color-destructive-foreground: hsl(60 9.1% 97.8%);
-  --color-accent: oklch(0.52 0.11 44);
-  --color-accent-soft: oklch(0.96 0.02 44);
-  --color-accent-ring: oklch(0.52 0.11 44 / 0.18);
-  --radius: 0.5rem;
-  --radius-lg: 0.75rem;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-accent:             oklch(0.75 0.11 44);
+  --color-accent-soft:        oklch(0.27 0.035 44);
+  --color-accent-ring:        oklch(0.75 0.11 44 / 0.32);
+
+  /* ── Radius — near-zero for premium precision ── */
+  --radius-sm:  0.125rem;
+  --radius:     0.125rem;
+  --radius-md:  0.125rem;
+  --radius-lg:  0.1875rem;
+  --radius-xl:  0.1875rem;
+  --radius-2xl: 0.25rem;
+  --radius-3xl: 0.25rem;
+  --radius-full: 9999px;
+
+  /* ── Font stacks ── */
+  --font-sans:  var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-mono:  var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Light mode: only applied when the user's system prefers light */
+@media (prefers-color-scheme: light) {
+  @theme {
+    --color-background:         hsl(0 0% 100%);
+    --color-foreground:         hsl(20 14.3% 4.1%);
+    --color-muted:              hsl(60 4.8% 95.9%);
+    --color-muted-foreground:   hsl(25 5.3% 44.7%);
+    --color-border:             hsl(20 5.9% 90%);
+    --color-primary:            hsl(24 9.8% 10%);
+    --color-primary-foreground: hsl(60 9.1% 97.8%);
+    --color-accent:             oklch(0.52 0.11 44);
+    --color-accent-soft:        oklch(0.96 0.02 44);
+    --color-accent-ring:        oklch(0.52 0.11 44 / 0.18);
+  }
 }
 
 @keyframes onboardingFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes onboardingSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes nudgePulse {
-  0%, 100% { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.4), 0 0 0 0 var(--color-accent-ring); }
-  50%       { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.4), 0 0 0 7px transparent; }
+  0%, 100% { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.5), 0 0 0 0 var(--color-accent-ring); }
+  50%       { box-shadow: 0 12px 30px -12px rgba(0,0,0,0.5), 0 0 0 7px transparent; }
 }
 
 @keyframes onboardingSlideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: hsl(20 14.3% 4.1%);
-    --color-foreground: hsl(60 9.1% 97.8%);
-    --color-muted: hsl(12 6.5% 15.1%);
-    --color-muted-foreground: hsl(24 5.4% 63.9%);
-    --color-border: hsl(12 6.5% 21%);
-    --color-primary: hsl(60 9.1% 97.8%);
-    --color-primary-foreground: hsl(24 9.8% 10%);
-    --color-accent: oklch(0.75 0.11 44);
-    --color-accent-soft: oklch(0.27 0.035 44);
-    --color-accent-ring: oklch(0.75 0.11 44 / 0.32);
-  }
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
 html,
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  color-scheme: dark light;
 }

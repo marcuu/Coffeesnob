@@ -5,40 +5,67 @@ import Link from "next/link";
 import { VenueSearch } from "@/components/VenueSearch";
 import type { OnboardingVenue } from "./data";
 
+const NAV_LINK: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 10,
+  fontWeight: 400,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "var(--color-muted-foreground)",
+  textDecoration: "none",
+  transition: "color 160ms",
+};
+
+const PAGE: React.CSSProperties = {
+  maxWidth: 920,
+  margin: "0 auto",
+  padding: "64px 36px 140px",
+};
+
+const KICKER: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 10,
+  fontWeight: 400,
+  letterSpacing: "0.22em",
+  textTransform: "uppercase",
+  color: "var(--color-muted-foreground)",
+  marginBottom: 20,
+  display: "block",
+};
+
+const HERO: React.CSSProperties = {
+  margin: 0,
+  fontFamily: "var(--font-serif)",
+  fontSize: "clamp(36px, 5vw, 56px)",
+  fontWeight: 400,
+  lineHeight: 1.02,
+  letterSpacing: "-0.025em",
+  textWrap: "balance",
+};
+
+const SUBHEAD: React.CSSProperties = {
+  margin: "14px 0 0",
+  fontSize: 15,
+  color: "var(--color-muted-foreground)",
+  maxWidth: 480,
+  lineHeight: 1.65,
+  textWrap: "pretty",
+};
+
 type LeaderboardProps = {
   venues: OnboardingVenue[];
 };
 
 export function Leaderboard({ venues }: LeaderboardProps) {
-  const top = venues[0];
-  const rest = venues.slice(1, 7);
+  const [top, ...rest] = venues;
 
   if (venues.length === 0) {
     return (
-      <main
-        style={{
-          maxWidth: 820,
-          margin: "0 auto",
-          padding: "40px 28px 120px",
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: 34,
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
-          }}
-        >
+      <main style={PAGE}>
+        <h1 style={{ ...HERO, fontSize: "clamp(28px,3vw,40px)" }}>
           No venues yet.
         </h1>
-        <p
-          style={{
-            marginTop: 12,
-            fontSize: 14,
-            color: "var(--color-muted-foreground)",
-          }}
-        >
+        <p style={SUBHEAD}>
           The leaderboard fills up once the first venue is added.{" "}
           <Link
             href="/login"
@@ -60,16 +87,16 @@ export function Leaderboard({ venues }: LeaderboardProps) {
           top: 0,
           zIndex: 10,
           background:
-            "color-mix(in oklab, var(--color-background) 92%, transparent)",
-          backdropFilter: "blur(8px)",
+            "color-mix(in oklab, var(--color-background) 90%, transparent)",
+          backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--color-border)",
         }}
       >
         <div
           style={{
-            maxWidth: 820,
+            maxWidth: 920,
             margin: "0 auto",
-            padding: "14px 28px",
+            padding: "16px 36px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -79,8 +106,8 @@ export function Leaderboard({ venues }: LeaderboardProps) {
             href="/"
             style={{
               fontFamily: "var(--font-serif)",
-              fontSize: 19,
-              fontWeight: 500,
+              fontSize: 18,
+              fontWeight: 400,
               letterSpacing: "-0.01em",
               textDecoration: "none",
               color: "var(--color-foreground)",
@@ -88,113 +115,46 @@ export function Leaderboard({ venues }: LeaderboardProps) {
           >
             Coffeesnob
           </Link>
-          <div
-            style={{ display: "flex", alignItems: "center", gap: 14 }}
-          >
+          <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <VenueSearch />
-            <Link
-              href="/rankings"
-              aria-label="Rankings"
-              style={{
-                color: "var(--color-muted-foreground)",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                <path d="M4 22h16"/>
-                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
-              </svg>
+            <Link href="/rankings" style={NAV_LINK}>
+              Rankings
             </Link>
             <Link
               href="/login"
-              style={{
-                height: 34,
-                padding: "0 14px",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius)",
-                background: "var(--color-background)",
-                color: "var(--color-foreground)",
-                fontFamily: "var(--font-sans)",
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                textDecoration: "none",
-              }}
+              style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
             >
-              Sign in to personalise
+              Sign in
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <main
-        style={{
-          maxWidth: 820,
-          margin: "0 auto",
-          padding: "40px 28px 120px",
-        }}
-      >
-        <div style={{ marginBottom: 24 }}>
-          <div
+      <main style={PAGE}>
+        <span style={KICKER}>UK Coffee Leaderboard</span>
+        <h1 style={HERO}>
+          The best coffee,
+          <br />
+          reviewed harshly.
+        </h1>
+        <p style={SUBHEAD}>
+          Venues ranked by weighted reviewer scores.{" "}
+          <Link
+            href="/login"
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--color-muted-foreground)",
-              marginBottom: 12,
+              color: "var(--color-foreground)",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
             }}
           >
-            UK Coffee Leaderboard
-          </div>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: "clamp(30px, 4vw, 44px)",
-              fontWeight: 400,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              textWrap: "balance",
-            }}
-          >
-            Third-wave coffee, reviewed honestly.
-          </h1>
-          <p
-            style={{
-              margin: "10px 0 0",
-              fontSize: 15,
-              color: "var(--color-muted-foreground)",
-              maxWidth: 520,
-              textWrap: "pretty",
-            }}
-          >
-            Venues ranked by weighted reviewer scores.{" "}
-            <Link
-              href="/login"
-              style={{
-                color: "var(--color-foreground)",
-                textDecoration: "underline",
-                textUnderlineOffset: 2,
-              }}
-            >
-              Sign in
-            </Link>{" "}
-            to personalise the feed for your taste.
-          </p>
-        </div>
+            Sign in
+          </Link>{" "}
+          to personalise the feed.
+        </p>
 
-        <div style={{ display: "grid", gap: 10 }}>
-          {top ? <LeaderboardRow v={top} rank={1} primary /> : null}
-          {rest.map((v, i) => (
+        <div style={{ display: "grid", gap: 8, marginTop: 48 }}>
+          {top && <LeaderboardRow v={top} rank={1} primary />}
+          {rest.slice(0, 5).map((v, i) => (
             <LeaderboardRow key={v.slug} v={v} rank={i + 2} />
           ))}
         </div>
@@ -210,89 +170,163 @@ type LeaderboardRowProps = {
 };
 
 function LeaderboardRow({ v, rank, primary }: LeaderboardRowProps) {
+  if (primary) {
+    return (
+      <Link
+        href={`/venues/${v.slug}`}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          borderRadius: 2,
+          background: "hsl(20 14.3% 6%)",
+          cursor: "pointer",
+          overflow: "hidden",
+          textDecoration: "none",
+          color: "inherit",
+        }}
+      >
+        <div
+          style={{
+            padding: "40px 44px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            minHeight: 240,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "oklch(0.75 0.11 44)",
+                marginBottom: 20,
+              }}
+            >
+              No. {rank} in the UK
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: 26,
+                fontWeight: 400,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+                color: "hsl(60 9.1% 97.8%)",
+              }}
+            >
+              {v.name}
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 11,
+                fontFamily: "var(--font-mono)",
+                letterSpacing: "0.08em",
+                color: "hsl(24 5.4% 50%)",
+              }}
+            >
+              {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
+            </div>
+          </div>
+        </div>
+        {/* Score panel */}
+        <div
+          style={{
+            padding: "40px 44px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+            borderLeft: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "hsl(24 5.4% 38%)",
+              marginBottom: 4,
+            }}
+          >
+            Score
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 52,
+              fontWeight: 400,
+              color: "oklch(0.75 0.11 44)",
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {v.score > 0 ? v.score.toFixed(1) : "—"}
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "hsl(24 5.4% 38%)",
+              marginTop: 4,
+            }}
+          >
+            /10
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href={`/venues/${v.slug}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr auto",
-        gap: 18,
-        width: "100%",
-        padding: primary ? "24px 26px" : "18px 22px",
-        borderRadius: "var(--radius-lg)",
-        border: primary
-          ? "1px solid var(--color-accent)"
-          : "1px solid var(--color-border)",
-        background: primary
-          ? "linear-gradient(180deg, var(--color-accent-soft), var(--color-background))"
-          : "var(--color-background)",
-        boxShadow: primary
-          ? "0 8px 30px -18px var(--color-accent-ring)"
-          : "0 1px 0 rgba(0,0,0,0.02)",
-        textAlign: "left",
-        color: "var(--color-foreground)",
+        gap: 24,
+        padding: "22px 28px",
+        borderRadius: 2,
+        border: "1px solid var(--color-border)",
+        background: "var(--color-background)",
         cursor: "pointer",
-        fontFamily: "var(--font-sans)",
-        transition: "background 160ms, border-color 160ms",
+        transition: "border-color 200ms",
         textDecoration: "none",
+        color: "inherit",
       }}
       onMouseEnter={(e) => {
-        if (!primary) e.currentTarget.style.background = "var(--color-muted)";
+        e.currentTarget.style.borderColor = "var(--color-foreground)";
       }}
       onMouseLeave={(e) => {
-        if (!primary)
-          e.currentTarget.style.background = "var(--color-background)";
+        e.currentTarget.style.borderColor = "var(--color-border)";
       }}
     >
       <div style={{ minWidth: 0 }}>
-        {primary && (
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--color-accent)",
-              marginBottom: 6,
-            }}
-          >
-            #{rank} in the UK
-          </div>
-        )}
         <div
           style={{
-            fontFamily: primary ? "var(--font-serif)" : "var(--font-sans)",
-            fontSize: primary ? 22 : 16,
-            fontWeight: primary ? 500 : 600,
+            fontSize: 15,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
-            lineHeight: 1.15,
+            color: "var(--color-foreground)",
           }}
         >
           {v.name}
         </div>
         <div
           style={{
-            marginTop: 4,
-            fontSize: 12.5,
+            marginTop: 5,
+            fontSize: 11,
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.08em",
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city} · {v.roaster} · {v.reviews} review
-          {v.reviews === 1 ? "" : "s"}
+          {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
         </div>
-        {primary && (
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 13.5,
-              color: "var(--color-foreground)",
-              fontStyle: "italic",
-              textWrap: "pretty",
-            }}
-          >
-            &ldquo;{v.pitch}&rdquo;
-          </div>
-        )}
       </div>
       <div
         style={{
@@ -300,33 +334,32 @@ function LeaderboardRow({ v, rank, primary }: LeaderboardRowProps) {
           flexDirection: "column",
           alignItems: "flex-end",
           justifyContent: "space-between",
-          minWidth: 64,
+          minWidth: 56,
+          paddingTop: 2,
         }}
       >
         <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 15,
-            color: primary
-              ? "var(--color-accent)"
-              : "var(--color-foreground)",
-            fontWeight: 600,
+            fontSize: 20,
+            fontWeight: 400,
+            color: "var(--color-foreground)",
+            letterSpacing: "-0.01em",
           }}
         >
           {v.score > 0 ? v.score.toFixed(1) : "—"}
         </div>
-        {!primary && (
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--color-muted-foreground)",
-              letterSpacing: "0.08em",
-            }}
-          >
-            #{rank}
-          </div>
-        )}
+        <div
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 9,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "var(--color-muted-foreground)",
+          }}
+        >
+          #{rank}
+        </div>
       </div>
     </Link>
   );

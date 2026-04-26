@@ -12,6 +12,17 @@ import { Sidebar } from "./sidebar";
 
 const KEY = "coffeesnob.v2.prefs";
 
+const NAV_LINK: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 10,
+  fontWeight: 400,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "var(--color-muted-foreground)",
+  textDecoration: "none",
+  transition: "color 160ms",
+};
+
 function initialPrefs(regions: Region[]): Prefs {
   void regions;
   return {
@@ -77,25 +88,31 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
 
   if (venues.length === 0) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-20">
+      <main
+        style={{ maxWidth: 920, margin: "0 auto", padding: "64px 36px 140px" }}
+      >
         <h1
           style={{
             fontFamily: "var(--font-serif)",
-            fontSize: 34,
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
+            fontSize: "clamp(28px,3vw,40px)",
+            fontWeight: 400,
+            letterSpacing: "-0.025em",
           }}
         >
           No venues yet.
         </h1>
-        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+        <p
+          style={{
+            marginTop: 14,
+            fontSize: 15,
+            color: "var(--color-muted-foreground)",
+            lineHeight: 1.65,
+          }}
+        >
           The feed lights up once the first venue is added. Head to{" "}
           <Link
             href="/venues"
-            style={{
-              color: "var(--color-accent)",
-              textDecoration: "underline",
-            }}
+            style={{ color: "var(--color-accent)", textDecoration: "underline" }}
           >
             venues
           </Link>{" "}
@@ -113,81 +130,54 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
           top: 0,
           zIndex: 10,
           background:
-            "color-mix(in oklab, var(--color-background) 92%, transparent)",
-          backdropFilter: "blur(8px)",
+            "color-mix(in oklab, var(--color-background) 90%, transparent)",
+          backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--color-border)",
         }}
       >
         <div
           style={{
-            maxWidth: 820,
+            maxWidth: 920,
             margin: "0 auto",
-            padding: "14px 28px",
+            padding: "16px 36px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Link
-              href="/"
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 19,
-                fontWeight: 500,
-                letterSpacing: "-0.01em",
-                textDecoration: "none",
-                color: "var(--color-foreground)",
-              }}
-            >
-              Coffeesnob
-            </Link>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: 18,
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              textDecoration: "none",
+              color: "var(--color-foreground)",
+            }}
+          >
+            Coffeesnob
+          </Link>
+          <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <VenueSearch />
-            <Link
-              href="/rankings"
-              aria-label="Rankings"
-              style={{
-                color: "var(--color-muted-foreground)",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                <path d="M4 22h16"/>
-                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
-              </svg>
+            <Link href="/rankings" style={NAV_LINK}>
+              Rankings
             </Link>
             <Link
               href={profileHref}
-              aria-label="My profile"
-              style={{
-                color: "var(--color-muted-foreground)",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-              }}
+              style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
+              Profile
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
       <main
         style={{
-          maxWidth: 820,
+          maxWidth: 920,
           margin: "0 auto",
-          padding: "40px 28px 120px",
+          padding: "64px 36px 140px",
         }}
       >
         <Feed

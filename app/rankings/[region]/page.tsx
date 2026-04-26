@@ -78,7 +78,7 @@ export default async function RegionRankingsPage({ params }: Props) {
       return (
         <>
           <SiteHeader />
-          <main className="mx-auto max-w-3xl px-6 py-10">
+          <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
             <BackLink />
             <h1 className="mt-4 text-2xl font-semibold">
               {regionName} Coffee Rankings
@@ -134,7 +134,7 @@ export default async function RegionRankingsPage({ params }: Props) {
                   <li key={v.id}>
                     <Link href={`/venues/${v.slug}`} className="block">
                       <Card className="transition-colors hover:bg-[var(--color-muted)]">
-                        <CardHeader>
+                        <CardHeader className="p-4 sm:p-6">
                           <div className="flex items-baseline gap-4">
                             <span
                               className="shrink-0 text-sm font-medium tabular-nums text-[var(--color-muted-foreground)]"
@@ -155,35 +155,12 @@ export default async function RegionRankingsPage({ params }: Props) {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 pl-8">
+                          <div className="pl-8">
                             <CardDescription>
                               {v.city} · {v.postcode}
                             </CardDescription>
-                            <span className="rounded-full bg-[var(--color-muted)] px-2 py-0.5 text-xs font-medium">
-                              {display.label}
-                            </span>
                           </div>
                         </CardHeader>
-                        {v.roasters.length > 0 || v.brew_methods.length > 0 ? (
-                          <CardContent className="flex flex-wrap gap-2 pl-8 text-xs text-[var(--color-muted-foreground)]">
-                            {v.roasters.map((r) => (
-                              <span
-                                key={`r-${r}`}
-                                className="rounded-full border border-[var(--color-border)] px-2 py-0.5"
-                              >
-                                {r}
-                              </span>
-                            ))}
-                            {v.brew_methods.map((b) => (
-                              <span
-                                key={`b-${b}`}
-                                className="rounded-full bg-[var(--color-muted)] px-2 py-0.5"
-                              >
-                                {b.replace("_", " ")}
-                              </span>
-                            ))}
-                          </CardContent>
-                        ) : null}
                       </Card>
                     </Link>
                   </li>
@@ -206,7 +183,7 @@ export default async function RegionRankingsPage({ params }: Props) {
                 return (
                   <li key={v.id}>
                     <Card className="opacity-70">
-                      <CardHeader>
+                      <CardHeader className="p-4 sm:p-6">
                         <div className="flex items-baseline justify-between gap-4">
                           <div>
                             <div className="mb-0.5 text-xs font-medium uppercase tracking-wider text-[var(--color-muted-foreground)]">
@@ -230,7 +207,7 @@ export default async function RegionRankingsPage({ params }: Props) {
                           {v.city} · {v.postcode}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="flex items-center justify-between gap-4 text-sm">
+                      <CardContent className="flex items-center justify-between gap-4 px-4 pb-4 text-sm sm:px-6 sm:pb-6">
                         <p className="text-[var(--color-muted-foreground)]">
                           {reviewCount === 0
                             ? "No reviews yet."
