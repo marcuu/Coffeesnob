@@ -129,17 +129,6 @@ export default async function VenuesPage({
         ) : null}
       </form>
 
-      {selectedRegion ? (
-        <div className="mb-4 flex justify-end">
-          <Link
-            href={`/rankings/${selectedRegion}`}
-            className="text-sm font-medium underline-offset-2 hover:underline"
-          >
-            {regions.find((r) => r.id === selectedRegion)?.name ?? selectedRegion} Rankings →
-          </Link>
-        </div>
-      ) : null}
-
       {sortedVenues.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
           {selectedRegion
