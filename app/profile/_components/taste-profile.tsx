@@ -46,16 +46,6 @@ export function TasteProfile({ profile }: Props) {
           </span>
         ))}
       </div>
-
-      <p
-        style={{
-          fontSize: 12,
-          color: "var(--color-muted-foreground)",
-          fontFamily: "var(--font-mono)",
-        }}
-      >
-        {profile.descriptor}
-      </p>
     </section>
   );
 }

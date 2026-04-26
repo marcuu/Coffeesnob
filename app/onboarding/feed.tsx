@@ -132,6 +132,7 @@ function VenueRow({ v, prefs, primary }: VenueRowProps) {
             flexDirection: "column",
             justifyContent: "space-between",
             minHeight: 240,
+            minWidth: 0,
           }}
         >
           <div>
