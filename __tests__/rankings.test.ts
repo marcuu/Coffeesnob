@@ -22,6 +22,7 @@ const makeVenue = (overrides: Partial<Venue>): Venue => ({
   has_decaf: null,
   has_plant_milk: null,
   notes: null,
+  photo_url: null,
   created_by: "reviewer-id",
   created_at: "2026-04-01T00:00:00.000Z",
   updated_at: "2026-04-01T00:00:00.000Z",

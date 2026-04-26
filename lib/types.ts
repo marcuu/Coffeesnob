@@ -44,6 +44,7 @@ export interface Venue {
   has_decaf: boolean | null;
   has_plant_milk: boolean | null;
   notes: string | null;
+  photo_url: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
