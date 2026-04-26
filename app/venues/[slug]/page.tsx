@@ -18,8 +18,6 @@ import {
   computeRank,
 } from "@/lib/ranking-context";
 import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
-import { BackLink } from "./BackLink";
-
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
 
@@ -144,9 +142,6 @@ export default async function VenueDetailPage({
 
       <main style={{ maxWidth: 920, margin: "0 auto", padding: venueRow.photo_url ? "32px clamp(16px,4vw,36px) 120px" : "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
 
-        {/* Back → regional rankings */}
-        <BackLink href={`/rankings/${regionId}`} label={`${scopeLabel} Rankings`} />
-
         {/* Venue name + score + ⓘ */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 24, marginTop: venueRow.photo_url ? 32 : 0 }}>
           <div>
@@ -189,7 +184,7 @@ export default async function VenueDetailPage({
           ) : (
             <>
               {rankingSummary.rank !== null ? (
-                <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} href={`/rankings/${regionId}`} />
+                <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} />
               ) : null}
               <ScoreBandBadge label={rankingSummary.scoreLabel} tone={rankingSummary.scoreTone} />
               <SignalBadge label={rankingSummary.signalLabel} />
