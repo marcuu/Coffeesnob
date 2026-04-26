@@ -133,9 +133,9 @@ export function Leaderboard({ venues }: LeaderboardProps) {
       <main style={PAGE}>
         <span style={KICKER}>UK Coffee Leaderboard</span>
         <h1 style={HERO}>
-          Third-wave coffee,
+          The best coffee,
           <br />
-          reviewed honestly.
+          reviewed harshly.
         </h1>
         <p style={SUBHEAD}>
           Venues ranked by weighted reviewer scores.{" "}
@@ -228,24 +228,8 @@ function LeaderboardRow({ v, rank, primary }: LeaderboardRowProps) {
                 color: "hsl(24 5.4% 50%)",
               }}
             >
-              {v.city}
-              {v.roaster ? ` · ${v.roaster}` : ""} ·{" "}
-              {v.reviews} review{v.reviews !== 1 ? "s" : ""}
+              {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
             </div>
-            {v.pitch && (
-              <div
-                style={{
-                  marginTop: 20,
-                  fontSize: 14,
-                  fontStyle: "italic",
-                  lineHeight: 1.7,
-                  textWrap: "pretty",
-                  color: "hsl(60 9.1% 78%)",
-                }}
-              >
-                &ldquo;{v.pitch}&rdquo;
-              </div>
-            )}
           </div>
         </div>
         {/* Score panel */}
@@ -341,9 +325,7 @@ function LeaderboardRow({ v, rank, primary }: LeaderboardRowProps) {
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city}
-          {v.roaster ? ` · ${v.roaster}` : ""} · {v.reviews} review
-          {v.reviews !== 1 ? "s" : ""}
+          {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
         </div>
       </div>
       <div

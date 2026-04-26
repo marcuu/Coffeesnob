@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { rankVenues, reasonsFor } from "./data";
+import { rankVenues } from "./data";
 import type { OnboardingVenue, Prefs, RankedVenue, Region } from "./data";
 
 type FeedProps = {
@@ -48,7 +48,7 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
             textWrap: "balance",
           }}
         >
-          {hasPrefs ? "Your shortlist." : "Third-wave coffee,\nreviewed honestly."}
+          {hasPrefs ? "Your shortlist." : "The best coffee,\nreviewed harshly."}
         </h1>
         <p
           style={{
@@ -62,14 +62,14 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
         >
           {hasPrefs
             ? "Personalised to your taste."
-            : "Tell us your preferences and we'll rank the feed to your taste."}
+            : "Tell us about your preferences and we'll find the best coffee for you."}
         </p>
       </div>
 
       <div style={{ display: "grid", gap: 8 }}>
-        {top ? <VenueRow v={top} prefs={prefs} regions={regions} primary /> : null}
+        {top ? <VenueRow v={top} prefs={prefs} primary /> : null}
         {rest.slice(0, 5).map((v) => (
-          <VenueRow key={v.slug} v={v} prefs={prefs} regions={regions} />
+          <VenueRow key={v.slug} v={v} prefs={prefs} />
         ))}
       </div>
 
@@ -81,12 +81,10 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
 type VenueRowProps = {
   v: RankedVenue;
   prefs: Prefs;
-  regions: Region[];
   primary?: boolean;
 };
 
-function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
-  const reasons = reasonsFor(v, prefs, regions);
+function VenueRow({ v, prefs, primary }: VenueRowProps) {
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
 
   if (primary) {
@@ -147,45 +145,8 @@ function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
                 color: "hsl(24 5.4% 50%)",
               }}
             >
-              {v.city}
-              {v.roaster ? ` · ${v.roaster}` : ""} ·{" "}
-              {v.reviews} review{v.reviews !== 1 ? "s" : ""}
+              {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
             </div>
-            {v.pitch && (
-              <div
-                style={{
-                  marginTop: 20,
-                  fontSize: 14,
-                  fontStyle: "italic",
-                  lineHeight: 1.7,
-                  textWrap: "pretty",
-                  color: "hsl(60 9.1% 78%)",
-                }}
-              >
-                &ldquo;{v.pitch}&rdquo;
-              </div>
-            )}
-            {reasons.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 20 }}>
-                {reasons.map((r, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      fontSize: 10,
-                      padding: "3px 10px",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: 2,
-                      color: "hsl(24 5.4% 58%)",
-                      fontFamily: "var(--font-mono)",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {r}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </div>
         {/* Score panel */}
@@ -294,31 +255,8 @@ function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city}
-          {v.roaster ? ` · ${v.roaster}` : ""} · {v.reviews} review
-          {v.reviews !== 1 ? "s" : ""}
+          {v.city} · {v.reviews} review{v.reviews !== 1 ? "s" : ""}
         </div>
-        {reasons.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 10 }}>
-            {reasons.map((r, i) => (
-              <span
-                key={i}
-                style={{
-                  fontSize: 10,
-                  padding: "2px 8px",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: 2,
-                  color: "var(--color-muted-foreground)",
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {r}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
       <div
         style={{

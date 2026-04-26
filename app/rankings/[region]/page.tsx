@@ -155,35 +155,12 @@ export default async function RegionRankingsPage({ params }: Props) {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 pl-8">
+                          <div className="pl-8">
                             <CardDescription>
                               {v.city} · {v.postcode}
                             </CardDescription>
-                            <span className="rounded-full bg-[var(--color-muted)] px-2 py-0.5 text-xs font-medium">
-                              {display.label}
-                            </span>
                           </div>
                         </CardHeader>
-                        {v.roasters.length > 0 || v.brew_methods.length > 0 ? (
-                          <CardContent className="flex flex-wrap gap-2 px-4 pb-4 pl-8 text-xs text-[var(--color-muted-foreground)] sm:px-6 sm:pb-6">
-                            {v.roasters.map((r) => (
-                              <span
-                                key={`r-${r}`}
-                                className="rounded-full border border-[var(--color-border)] px-2 py-0.5"
-                              >
-                                {r}
-                              </span>
-                            ))}
-                            {v.brew_methods.map((b) => (
-                              <span
-                                key={`b-${b}`}
-                                className="rounded-full bg-[var(--color-muted)] px-2 py-0.5"
-                              >
-                                {b.replace("_", " ")}
-                              </span>
-                            ))}
-                          </CardContent>
-                        ) : null}
                       </Card>
                     </Link>
                   </li>
