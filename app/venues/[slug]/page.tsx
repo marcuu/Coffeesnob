@@ -18,6 +18,7 @@ import {
   computeRank,
 } from "@/lib/ranking-context";
 import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
+import { BackLink } from "./BackLink";
 
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
@@ -123,24 +124,7 @@ export default async function VenueDetailPage({
       <main style={{ maxWidth: 920, margin: "0 auto", padding: "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
 
         {/* Back → regional rankings */}
-        <Link
-          href={`/rankings/${regionId}`}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--color-muted-foreground)",
-            textDecoration: "none",
-            display: "inline-block",
-            marginBottom: 48,
-            transition: "color 150ms",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-foreground)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-muted-foreground)"; }}
-        >
-          ← {scopeLabel} Rankings
-        </Link>
+        <BackLink href={`/rankings/${regionId}`} label={`${scopeLabel} Rankings`} />
 
         {/* Venue name + score + ⓘ */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 24 }}>
