@@ -32,10 +32,33 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
             textTransform: "uppercase",
             color: "var(--color-muted-foreground)",
             marginBottom: 20,
-            display: "block",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
           }}
         >
           {hasPrefs ? "Ranked for you" : `Best in ${regionName ?? "the UK"}`}
+          {hasPrefs && (
+            <button
+              type="button"
+              onClick={onOpenSidebar}
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                fontFamily: "var(--font-mono)",
+                color: "var(--color-muted-foreground)",
+                background: "transparent",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius)",
+                padding: "2px 8px",
+                cursor: "pointer",
+                fontWeight: 500,
+              }}
+            >
+              Refine taste →
+            </button>
+          )}
         </span>
         <h1
           style={{
