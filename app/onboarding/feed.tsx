@@ -61,7 +61,7 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
           }}
         >
           {hasPrefs
-            ? "Ranked by your taste, not ours. The more you tell us, the tighter this gets."
+            ? "Personalised to your taste."
             : "Tell us your preferences and we'll rank the feed to your taste."}
         </p>
       </div>
