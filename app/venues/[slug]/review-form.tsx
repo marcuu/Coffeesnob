@@ -284,8 +284,6 @@ export function ReviewForm({
                 <Textarea
                   id="body"
                   name="body"
-                  required
-                  minLength={10}
                   maxLength={5000}
                   rows={5}
                   placeholder="How was the coffee?"
@@ -422,8 +420,11 @@ export function ReviewForm({
       {/* Bottom navigation */}
       <div
         style={{
+          position: "sticky",
+          bottom: 0,
           padding: "20px 36px",
           borderTop: "1px solid rgba(255,255,255,0.06)",
+          background: "hsl(20 14.3% 4%)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
