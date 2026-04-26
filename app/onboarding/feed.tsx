@@ -14,8 +14,7 @@ type FeedProps = {
 
 export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
   const ranked = rankVenues(venues, prefs);
-  const top = ranked[0];
-  const rest = ranked.slice(1, 7);
+  const [top, ...rest] = ranked;
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
   const regionName = prefs.region
     ? regions.find((r) => r.id === prefs.region)?.name
@@ -23,59 +22,58 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <div
+      <div style={{ marginBottom: 48 }}>
+        <span
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.14em",
+            fontSize: 10,
+            fontWeight: 400,
+            letterSpacing: "0.22em",
             textTransform: "uppercase",
             color: "var(--color-muted-foreground)",
-            marginBottom: 12,
+            marginBottom: 20,
+            display: "block",
           }}
         >
           {hasPrefs ? "Ranked for you" : `Best in ${regionName ?? "the UK"}`}
-        </div>
+        </span>
         <h1
           style={{
             margin: 0,
             fontFamily: "var(--font-serif)",
-            fontSize: "clamp(30px, 4vw, 44px)",
+            fontSize: "clamp(36px, 5vw, 56px)",
             fontWeight: 400,
-            lineHeight: 1.05,
-            letterSpacing: "-0.02em",
+            lineHeight: 1.02,
+            letterSpacing: "-0.025em",
             textWrap: "balance",
           }}
         >
-          {hasPrefs
-            ? "Your shortlist."
-            : "Third-wave coffee, reviewed honestly."}
+          {hasPrefs ? "Your shortlist." : "Third-wave coffee,\nreviewed honestly."}
         </h1>
         <p
           style={{
-            margin: "10px 0 0",
+            margin: "14px 0 0",
             fontSize: 15,
             color: "var(--color-muted-foreground)",
-            maxWidth: 520,
+            maxWidth: 480,
+            lineHeight: 1.65,
             textWrap: "pretty",
           }}
         >
           {hasPrefs
-            ? "These are ranked by your taste, not ours. The more you tell us, the tighter this gets."
-            : "Start browsing below. Tap any card to see reviews, or tell us your taste for better picks →"}
+            ? "Ranked by your taste, not ours. The more you tell us, the tighter this gets."
+            : "Tell us your preferences and we'll rank the feed to your taste."}
         </p>
       </div>
 
-      <div style={{ display: "grid", gap: 10 }}>
-        {top ? (
-          <VenueRow v={top} prefs={prefs} regions={regions} primary />
-        ) : null}
-        {rest.map((v) => (
+      <div style={{ display: "grid", gap: 8 }}>
+        {top ? <VenueRow v={top} prefs={prefs} regions={regions} primary /> : null}
+        {rest.slice(0, 5).map((v) => (
           <VenueRow key={v.slug} v={v} prefs={prefs} regions={regions} />
         ))}
       </div>
 
-      {!hasPrefs && <FloatingNudge onOpen={onOpenSidebar} />}
+      {!hasPrefs && <TuneNudge onOpen={onOpenSidebar} />}
     </div>
   );
 }
@@ -90,126 +88,235 @@ type VenueRowProps = {
 function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
   const reasons = reasonsFor(v, prefs, regions);
   const hasPrefs = !!prefs.axes || (prefs.drink && prefs.drink.length > 0);
+
+  if (primary) {
+    return (
+      <Link
+        href={`/venues/${v.slug}`}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          borderRadius: 2,
+          background: "hsl(20 14.3% 6%)",
+          cursor: "pointer",
+          overflow: "hidden",
+          textDecoration: "none",
+          color: "inherit",
+        }}
+      >
+        <div
+          style={{
+            padding: "40px 44px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            minHeight: 240,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "oklch(0.75 0.11 44)",
+                marginBottom: 20,
+              }}
+            >
+              {hasPrefs ? "Top pick for you" : "No. 1 in the UK"}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: 26,
+                fontWeight: 400,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+                color: "hsl(60 9.1% 97.8%)",
+              }}
+            >
+              {v.name}
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 11,
+                fontFamily: "var(--font-mono)",
+                letterSpacing: "0.08em",
+                color: "hsl(24 5.4% 50%)",
+              }}
+            >
+              {v.city}
+              {v.roaster ? ` · ${v.roaster}` : ""} ·{" "}
+              {v.reviews} review{v.reviews !== 1 ? "s" : ""}
+            </div>
+            {v.pitch && (
+              <div
+                style={{
+                  marginTop: 20,
+                  fontSize: 14,
+                  fontStyle: "italic",
+                  lineHeight: 1.7,
+                  textWrap: "pretty",
+                  color: "hsl(60 9.1% 78%)",
+                }}
+              >
+                &ldquo;{v.pitch}&rdquo;
+              </div>
+            )}
+            {reasons.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 20 }}>
+                {reasons.map((r, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: 10,
+                      padding: "3px 10px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 2,
+                      color: "hsl(24 5.4% 58%)",
+                      fontFamily: "var(--font-mono)",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Score panel */}
+        <div
+          style={{
+            padding: "40px 44px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+            borderLeft: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "hsl(24 5.4% 38%)",
+              marginBottom: 4,
+            }}
+          >
+            Score
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 52,
+              fontWeight: 400,
+              color: "oklch(0.75 0.11 44)",
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {v.score > 0 ? v.score.toFixed(1) : "—"}
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+              color: "hsl(24 5.4% 38%)",
+              marginTop: 4,
+            }}
+          >
+            /10
+          </div>
+          {hasPrefs && (
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.1em",
+                color: "oklch(0.75 0.11 44)",
+                marginTop: 16,
+              }}
+            >
+              {v.match}% match
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href={`/venues/${v.slug}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr auto",
-        gap: 18,
-        width: "100%",
-        padding: primary ? "24px 26px" : "18px 22px",
-        borderRadius: "var(--radius-lg)",
-        border: primary
-          ? "1px solid var(--color-accent)"
-          : "1px solid var(--color-border)",
-        background: primary
-          ? "linear-gradient(180deg, var(--color-accent-soft), var(--color-background))"
-          : "var(--color-background)",
-        boxShadow: primary
-          ? "0 8px 30px -18px var(--color-accent-ring)"
-          : "0 1px 0 rgba(0,0,0,0.02)",
-        textAlign: "left",
-        color: "var(--color-foreground)",
+        gap: 24,
+        padding: "22px 28px",
+        borderRadius: 2,
+        border: "1px solid var(--color-border)",
+        background: "var(--color-background)",
         cursor: "pointer",
-        fontFamily: "var(--font-sans)",
-        transition: "background 160ms, border-color 160ms",
+        transition: "border-color 200ms",
         textDecoration: "none",
+        color: "inherit",
       }}
       onMouseEnter={(e) => {
-        if (!primary) e.currentTarget.style.background = "var(--color-muted)";
+        e.currentTarget.style.borderColor = "var(--color-foreground)";
       }}
       onMouseLeave={(e) => {
-        if (!primary)
-          e.currentTarget.style.background = "var(--color-background)";
+        e.currentTarget.style.borderColor = "var(--color-border)";
       }}
     >
       <div style={{ minWidth: 0 }}>
-        {primary && (
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--color-accent)",
-              marginBottom: 6,
-            }}
-          >
-            Top pick for you
-          </div>
-        )}
         <div
           style={{
-            fontFamily: primary ? "var(--font-serif)" : "var(--font-sans)",
-            fontSize: primary ? 22 : 16,
-            fontWeight: primary ? 500 : 600,
+            fontSize: 15,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
-            lineHeight: 1.15,
+            color: "var(--color-foreground)",
           }}
         >
           {v.name}
         </div>
         <div
           style={{
-            marginTop: 4,
-            fontSize: 12.5,
+            marginTop: 5,
+            fontSize: 11,
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.08em",
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city} · {v.roaster} · {v.reviews} review
-          {v.reviews === 1 ? "" : "s"}
+          {v.city}
+          {v.roaster ? ` · ${v.roaster}` : ""} · {v.reviews} review
+          {v.reviews !== 1 ? "s" : ""}
         </div>
-        {primary && (
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 13.5,
-              color: "var(--color-foreground)",
-              fontStyle: "italic",
-              textWrap: "pretty",
-            }}
-          >
-            &ldquo;{v.pitch}&rdquo;
-          </div>
-        )}
-        <div
-          style={{
-            marginTop: 10,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 6,
-          }}
-        >
-          {reasons.map((r, i) => (
-            <span
-              key={i}
-              style={{
-                fontSize: 11,
-                padding: "2px 9px",
-                borderRadius: 999,
-                background: primary
-                  ? "var(--color-background)"
-                  : "var(--color-muted)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-muted-foreground)",
-              }}
-            >
-              {r}
-            </span>
-          ))}
-        </div>
-        {primary && hasPrefs && (
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 12,
-              color: "var(--color-muted-foreground)",
-              fontFamily: "var(--font-mono)",
-              letterSpacing: "0.02em",
-            }}
-          >
-            Why: {v.proof}
+        {reasons.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 10 }}>
+            {reasons.map((r, i) => (
+              <span
+                key={i}
+                style={{
+                  fontSize: 10,
+                  padding: "2px 8px",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: 2,
+                  color: "var(--color-muted-foreground)",
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {r}
+              </span>
+            ))}
           </div>
         )}
       </div>
@@ -219,17 +326,17 @@ function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
           flexDirection: "column",
           alignItems: "flex-end",
           justifyContent: "space-between",
-          minWidth: 64,
+          minWidth: 56,
+          paddingTop: 2,
         }}
       >
         <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: 15,
-            color: primary
-              ? "var(--color-accent)"
-              : "var(--color-foreground)",
-            fontWeight: 600,
+            fontSize: 20,
+            fontWeight: 400,
+            color: "var(--color-foreground)",
+            letterSpacing: "-0.01em",
           }}
         >
           {v.score > 0 ? v.score.toFixed(1) : "—"}
@@ -238,12 +345,13 @@ function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
           <div
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: 10,
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
               color: "var(--color-muted-foreground)",
-              letterSpacing: "0.08em",
             }}
           >
-            {v.match}% MATCH
+            {v.match}% match
           </div>
         )}
       </div>
@@ -251,41 +359,54 @@ function VenueRow({ v, prefs, regions, primary }: VenueRowProps) {
   );
 }
 
-function FloatingNudge({ onOpen }: { onOpen: () => void }) {
+function TuneNudge({ onOpen }: { onOpen: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      style={{
-        position: "fixed",
-        right: 24,
-        bottom: 24,
-        zIndex: 20,
-        padding: "14px 18px",
-        background: "var(--color-primary)",
-        color: "var(--color-primary-foreground)",
-        borderRadius: 999,
-        border: "none",
-        fontFamily: "var(--font-sans)",
-        fontSize: 13,
-        fontWeight: 600,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 10,
-        cursor: "pointer",
-        animation:
-          "onboardingSlideIn 420ms 800ms cubic-bezier(.2,.7,.2,1) both, nudgePulse 2.4s 1.8s ease-in-out infinite",
-      }}
-    >
-      <span
+    <>
+      <style>{`@keyframes csNudge{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <button
+        type="button"
+        onClick={onOpen}
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: 999,
-          background: "var(--color-accent)",
+          position: "fixed",
+          right: 36,
+          bottom: 36,
+          zIndex: 20,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 16,
+          padding: "16px 24px",
+          background: "hsl(20 14.3% 6%)",
+          border: "none",
+          borderRadius: 2,
+          boxShadow: "0 16px 48px -12px rgba(0,0,0,0.5)",
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "hsl(60 9.1% 97.8%)",
+          cursor: "pointer",
+          transition: "background 180ms",
+          animation: "csNudge 480ms 600ms cubic-bezier(.2,.7,.2,1) both",
         }}
-      />
-      Want better matches? Take 30 seconds →
-    </button>
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "hsl(20 14.3% 10%)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "hsl(20 14.3% 6%)";
+        }}
+      >
+        <span
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: "oklch(0.75 0.11 44)",
+            flexShrink: 0,
+          }}
+        />
+        Personalise your feed
+        <span style={{ color: "oklch(0.75 0.11 44)", marginLeft: 2 }}>→</span>
+      </button>
+    </>
   );
 }

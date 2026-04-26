@@ -1,14 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
 import { RankingBadge } from "@/components/ranking/RankingBadge";
 import { ScoreBandBadge } from "@/components/ranking/ScoreBandBadge";
@@ -124,32 +116,47 @@ export default async function VenueDetailPage({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: "40px 36px 120px" }}>
       <Link
         href="/venues"
-        className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 10,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "var(--color-muted-foreground)",
+          textDecoration: "none",
+          display: "block",
+          marginBottom: 48,
+        }}
       >
         ← Back to venues
       </Link>
 
-      <div className="mt-3 flex items-baseline justify-between gap-6">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 32 }}>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 14 }}>Venue</div>
+          <h1 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
             {venueRow.name}
           </h1>
-          <p className="text-sm text-[var(--color-muted-foreground)]">
+          <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", color: "var(--color-muted-foreground)" }}>
             {venueRow.address_line1}
             {venueRow.address_line2 ? `, ${venueRow.address_line2}` : ""} ·{" "}
             {venueRow.city} {venueRow.postcode}
-          </p>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-semibold">{formatRating(displayScore)}</div>
-          <div className="text-xs text-[var(--color-muted-foreground)]">
-            {count} review{count === 1 ? "" : "s"}
           </div>
-          <div className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+        </div>
+        <div style={{ textAlign: "right", paddingTop: 24 }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 56, fontWeight: 400, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-accent)" }}>
+            {formatRating(displayScore)}
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginTop: 4 }}>
+            / 10.0 overall
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginTop: 10 }}>
             Coffee {formatRating(coffeeScore)} · Experience {formatRating(experienceScore)}
+          </div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginTop: 6 }}>
+            {count} review{count === 1 ? "" : "s"}
           </div>
         </div>
       </div>
@@ -210,11 +217,11 @@ export default async function VenueDetailPage({
       </div>
 
       {venueRow.roasters.length || venueRow.brew_methods.length ? (
-        <div className="mt-4 flex flex-wrap gap-2 text-xs text-[var(--color-muted-foreground)]">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 32 }}>
           {venueRow.roasters.map((r) => (
             <span
               key={`r-${r}`}
-              className="rounded-full border border-[var(--color-border)] px-2 py-0.5"
+              style={{ fontSize: 10, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px", border: "1px solid var(--color-border)", borderRadius: 2, color: "var(--color-muted-foreground)" }}
             >
               {r}
             </span>
@@ -222,7 +229,7 @@ export default async function VenueDetailPage({
           {venueRow.brew_methods.map((b) => (
             <span
               key={`b-${b}`}
-              className="rounded-full bg-[var(--color-muted)] px-2 py-0.5"
+              style={{ fontSize: 10, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px", background: "var(--color-muted)", borderRadius: 2, color: "var(--color-muted-foreground)" }}
             >
               {b.replace("_", " ")}
             </span>
@@ -236,78 +243,84 @@ export default async function VenueDetailPage({
         <p className="mt-6 whitespace-pre-line text-sm">{venueRow.notes}</p>
       ) : null}
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Reviews</h2>
+      <div style={{ height: 1, background: "var(--color-border)", marginBottom: 32 }} />
+
+      <section style={{ marginBottom: 56 }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 24 }}>
+          Reviews · {count}
+        </div>
         {reviews.length === 0 ? (
-          <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-            No reviews yet.
-          </p>
+          <p style={{ fontSize: 14, color: "var(--color-muted-foreground)" }}>No reviews yet.</p>
         ) : (
-          <ul className="mt-4 grid gap-4">
+          <div style={{ display: "grid", gap: 1 }}>
             {reviews.map((r) => (
-              <li key={r.id}>
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-baseline justify-between gap-4">
-                      <CardTitle className="text-base">
-                        {r.reviewer?.display_name ?? "Unknown reviewer"}
-                      </CardTitle>
-                      <div className="text-sm font-medium">
-                        {r.rating_overall}/10 overall
-                      </div>
-                    </div>
-                    <CardDescription>
-                      Visited {r.visited_on}
-                      {r.reviewer
-                        ? ` · ${r.reviewer.review_count} review${r.reviewer.review_count === 1 ? "" : "s"}`
-                        : ""}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="whitespace-pre-line text-sm">{r.body}</p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted-foreground)]">
-                      <span>Taste {r.rating_taste ?? "—"}</span>
-                      <span>Body {r.rating_body ?? "—"}</span>
-                      <span>Aroma {r.rating_aroma ?? "—"}</span>
-                      <span>Ambience {r.rating_ambience}</span>
-                      <span>Service {r.rating_service}</span>
-                      <span>Value {r.rating_value}</span>
-                    </div>
-                    {user?.id === r.reviewer_id ? (
-                      <form action={deleteReview}>
-                        <input type="hidden" name="id" value={r.id} />
-                        <input type="hidden" name="slug" value={slug} />
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="sm"
-                          className="text-[var(--color-destructive)]"
-                        >
-                          Delete
-                        </Button>
-                      </form>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              </li>
+              <div key={r.id} style={{ padding: "24px 0", borderBottom: "1px solid var(--color-border)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                  <span style={{ fontWeight: 600, fontSize: 15 }}>
+                    {r.reviewer?.display_name ?? "Unknown reviewer"}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
+                    {r.rating_overall}/10
+                  </span>
+                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 14 }}>
+                  Visited {r.visited_on}
+                  {r.reviewer ? ` · ${r.reviewer.review_count} review${r.reviewer.review_count === 1 ? "" : "s"}` : ""}
+                </div>
+                <p style={{ fontSize: 14, lineHeight: 1.75, marginBottom: 16, whiteSpace: "pre-line" }}>{r.body}</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
+                  {[
+                    ["Taste", r.rating_taste],
+                    ["Body", r.rating_body],
+                    ["Aroma", r.rating_aroma],
+                    ["Ambience", r.rating_ambience],
+                    ["Service", r.rating_service],
+                    ["Value", r.rating_value],
+                  ].map(([label, val]) => (
+                    <span key={label as string} style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-muted-foreground)" }}>
+                      {label} <strong style={{ color: "var(--color-foreground)", fontWeight: 600 }}>{val ?? "—"}</strong>
+                    </span>
+                  ))}
+                </div>
+                {user?.id === r.reviewer_id ? (
+                  <form action={deleteReview} style={{ marginTop: 12 }}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <button
+                      type="submit"
+                      style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--color-destructive)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    >
+                      Delete
+                    </button>
+                  </form>
+                ) : null}
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Add a review</h2>
+      <section>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 20 }}>
+          Add a review
+        </div>
         {alreadyReviewedToday ? (
-          <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-            You already logged a visit for today. Edit the date to record a
-            different visit.
+          <p style={{ fontSize: 13, color: "var(--color-muted-foreground)", marginBottom: 16 }}>
+            You already logged a visit for today. Edit the date to record a different visit.
           </p>
         ) : null}
-        <div className="mt-4">
-          <Button asChild>
-            <Link href={`/venues/${slug}/review`}>Start 6-step review</Link>
-          </Button>
-        </div>
+        {user ? (
+          <Link
+            href={`/venues/${slug}/review`}
+            style={{ display: "inline-flex", alignItems: "center", gap: 12, height: 42, padding: "0 24px", background: "hsl(20 14.3% 6%)", color: "hsl(60 9.1% 97.8%)", border: "none", borderRadius: 2, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}
+          >
+            Start 6-step review →
+          </Link>
+        ) : (
+          <p style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>
+            <Link href="/login" style={{ color: "var(--color-foreground)", textDecoration: "underline" }}>Sign in</Link> to leave a review.
+          </p>
+        )}
       </section>
       </main>
     </>
