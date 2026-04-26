@@ -23,7 +23,7 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
   return (
     <div>
       <div style={{ marginBottom: 48 }}>
-        <span
+        <div
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: 10,
@@ -35,9 +35,10 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
             display: "flex",
             alignItems: "center",
             gap: 10,
+            minHeight: 20,
           }}
         >
-          {hasPrefs ? "Ranked for you" : `Best in ${regionName ?? "the UK"}`}
+          {!hasPrefs && `Best in ${regionName ?? "the UK"}`}
           {hasPrefs && (
             <button
               type="button"
@@ -59,7 +60,7 @@ export function Feed({ venues, regions, prefs, onOpenSidebar }: FeedProps) {
               Refine taste →
             </button>
           )}
-        </span>
+        </div>
         <h1
           style={{
             margin: 0,

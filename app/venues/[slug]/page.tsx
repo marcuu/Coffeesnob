@@ -126,11 +126,18 @@ export default async function VenueDetailPage({
         <Link
           href={`/rankings/${regionId}`}
           style={{
-            ...MONO_LABEL,
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "var(--color-muted-foreground)",
             textDecoration: "none",
-            display: "block",
+            display: "inline-block",
             marginBottom: 48,
+            transition: "color 150ms",
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-foreground)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-muted-foreground)"; }}
         >
           ← {scopeLabel} Rankings
         </Link>
@@ -175,7 +182,7 @@ export default async function VenueDetailPage({
           ) : (
             <>
               {rankingSummary.rank !== null ? (
-                <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} />
+                <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} href={`/rankings/${regionId}`} />
               ) : null}
               <ScoreBandBadge label={rankingSummary.scoreLabel} tone={rankingSummary.scoreTone} />
               <SignalBadge label={rankingSummary.signalLabel} />
