@@ -69,9 +69,6 @@ export async function SiteHeader() {
         </Link>
         <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
           <VenueSearch />
-          <Link href="/venues" style={NAV_LINK}>
-            Venues
-          </Link>
           <Link href="/rankings" style={NAV_LINK}>
             Rankings
           </Link>
