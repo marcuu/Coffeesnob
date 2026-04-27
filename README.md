@@ -101,6 +101,16 @@ See `.env.example`:
   `--color-foreground`, `--color-accent-soft`, etc.) instead of hardcoded light
   values so onboarding and modal surfaces remain legible in both themes.
 
+## Invite scarcity MVP
+
+- Access is still enforced via `allowed_users`, but allowlisted reviewers can now
+  issue invites from `/profile`.
+- Weekly quota is **3 invites** by default and **5 invites** for high-signal
+  reviewers (`status = beaned` or `review_count >= 20`).
+- Invites are email-based and expire after 7 days. When an invited user signs in
+  with the invited email, `/auth/callback` accepts the invite, adds them to
+  `allowed_users`, and marks the invite as accepted.
+
 ## Scoring model
 
 Reviews capture six slider inputs (ambience, service, value, taste, body, aroma)

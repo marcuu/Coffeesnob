@@ -67,6 +67,19 @@ export interface Review {
   updated_at: string;
 }
 
+
+export interface Invite {
+  id: string;
+  inviter_id: string;
+  invitee_email: string;
+  invitee_user_id: string | null;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  accepted_at: string | null;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export type RatingAxis =
   | "rating_overall"
   | "rating_taste"
