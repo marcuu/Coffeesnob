@@ -30,9 +30,6 @@ export function InvitePanel({
 }: Props) {
   const [state, formAction, pending] = useActionState(createInvite, initialState);
   const now = new Date(nowIso);
-  const visibleActivity = isOwnProfile
-    ? activity
-    : activity.filter((item) => item.status === "accepted");
 
   return (
     <section
@@ -95,12 +92,12 @@ export function InvitePanel({
       ) : null}
 
       <ul style={{ display: "grid", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
-        {visibleActivity.length === 0 && (
+        {activity.length === 0 && (
           <li style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>
             No invite activity yet.
           </li>
         )}
-        {visibleActivity.map((item) => {
+        {activity.map((item) => {
           const invitee = item.inviteeUsername
             ? `@${item.inviteeUsername}`
             : item.inviteeDisplayName ?? item.inviteeMask;

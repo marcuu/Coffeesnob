@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { sanitizeNext } from "@/lib/sanitize-next";
-import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/service";
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -47,43 +47,14 @@ export async function GET(request: Request) {
   }
 
   const service = createServiceRoleClient();
+  const { data: acceptedInviteId, error: acceptError } = await service.rpc(
+    "accept_invite_for_email",
+    { p_email: email, p_user_id: user.id },
+  );
 
-  const { data: invite, error: inviteError } = await service
-    .from("invites")
-    .select("id")
-    .eq("invitee_email", email)
-    .eq("status", "pending")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (inviteError || !invite) {
+  if (acceptError || !acceptedInviteId) {
     await supabase.auth.signOut();
     return unauthorized("Your account is not on the access list.");
-  }
-
-  const { error: insertAllowError } = await service
-    .from("allowed_users")
-    .upsert({ email }, { onConflict: "email", ignoreDuplicates: true });
-
-  if (insertAllowError) {
-    await supabase.auth.signOut();
-    return unauthorized("Could not complete invite acceptance. Please retry.");
-  }
-
-  const { error: acceptError } = await service
-    .from("invites")
-    .update({
-      status: "accepted",
-      invitee_user_id: user.id,
-      accepted_at: new Date().toISOString(),
-    })
-    .eq("id", invite.id);
-
-  if (acceptError) {
-    await supabase.auth.signOut();
-    return unauthorized("Could not complete invite acceptance. Please retry.");
   }
 
   return NextResponse.redirect(`${origin}${next}`);

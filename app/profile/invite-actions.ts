@@ -16,6 +16,9 @@ export type InviteFormState = {
   message?: string;
 };
 
+const GENERIC_SUCCESS_MESSAGE =
+  "Invite recorded. If they are not already a member, they can claim access by signing in with that email.";
+
 export async function createInvite(
   _prev: InviteFormState,
   formData: FormData,
@@ -43,64 +46,38 @@ export async function createInvite(
   }
 
   const weekStart = startOfUtcWeek(new Date());
-  const weeklyLimit = getWeeklyInviteLimit(reviewer as Pick<Reviewer, "status" | "review_count">);
+  const weeklyLimit = getWeeklyInviteLimit(
+    reviewer as Pick<Reviewer, "status" | "review_count">,
+  );
 
-  const { count: usedThisWeek } = await supabase
-    .from("invites")
-    .select("id", { count: "exact", head: true })
-    .eq("inviter_id", user.id)
-    .gte("created_at", weekStart)
-    .in("status", ["pending", "accepted"]);
+  const { data: inviteResult, error: inviteError } = await supabase.rpc(
+    "issue_invite",
+    {
+      p_inviter_id: user.id,
+      p_invitee_email: parsed.data.email,
+      p_week_start: weekStart,
+      p_weekly_limit: weeklyLimit,
+    },
+  );
 
-  if ((usedThisWeek ?? 0) >= weeklyLimit) {
+  if (inviteError) {
+    return { status: "error", message: "Could not send invite. Please retry." };
+  }
+
+  if (inviteResult === "quota_exceeded") {
     return {
       status: "error",
       message: `You've used all ${weeklyLimit} invites for this week.`,
     };
   }
 
-  const email = parsed.data.email;
-
-  const { data: alreadyAllowed } = await supabase
-    .from("allowed_users")
-    .select("email")
-    .eq("email", email)
-    .maybeSingle();
-
-  if (alreadyAllowed) {
-    return {
-      status: "error",
-      message: "That email already has access.",
-    };
-  }
-
-  const { data: existingPending } = await supabase
-    .from("invites")
-    .select("id")
-    .eq("inviter_id", user.id)
-    .eq("invitee_email", email)
-    .eq("status", "pending")
-    .maybeSingle();
-
-  if (existingPending) {
-    return {
-      status: "error",
-      message: "You already have a pending invite for that email.",
-    };
-  }
-
-  const { error } = await supabase.from("invites").insert({
-    inviter_id: user.id,
-    invitee_email: email,
-  });
-
-  if (error) {
-    return { status: "error", message: error.message };
+  if (!["created", "already_member", "already_pending"].includes(inviteResult)) {
+    return { status: "error", message: "Could not send invite. Please retry." };
   }
 
   revalidatePath("/profile");
   return {
     status: "success",
-    message: `Invite sent to ${email}. They can sign in with that email to claim it.`,
+    message: GENERIC_SUCCESS_MESSAGE,
   };
 }

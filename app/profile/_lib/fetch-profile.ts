@@ -35,7 +35,7 @@ export type ReviewWithVenue = {
 export type InviteActivityItem = {
   id: string;
   status: Invite["status"];
-  inviteeEmail: string;
+  inviteeEmail: string | null;
   inviteeMask: string;
   inviteeUsername: string | null;
   inviteeDisplayName: string | null;
@@ -59,11 +59,48 @@ export type ProfileData = {
   inviteActivity: InviteActivityItem[];
 };
 
+type InviteJoin =
+  | {
+      username: string | null;
+      display_name: string;
+    }
+  | {
+      username: string | null;
+      display_name: string;
+    }[]
+  | null;
+
+type InviteQueryRow = {
+  id: string;
+  status: Invite["status"];
+  invitee_email?: string;
+  created_at: string;
+  accepted_at: string | null;
+  invitee: InviteJoin;
+};
+
 export async function fetchProfileByUserId(
   supabase: SupabaseClient,
   reviewerId: string,
+  viewerId: string,
 ): Promise<ProfileData | null> {
   const weekStart = startOfUtcWeek(new Date());
+  const isOwnProfile = viewerId === reviewerId;
+
+  const inviteFields = isOwnProfile
+    ? "id, status, invitee_email, created_at, accepted_at, invitee:reviewers!invites_invitee_user_id_fkey(username, display_name)"
+    : "id, status, created_at, accepted_at, invitee:reviewers!invites_invitee_user_id_fkey(username, display_name)";
+
+  let invitesQuery = supabase
+    .from("invites")
+    .select(inviteFields)
+    .eq("inviter_id", reviewerId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (!isOwnProfile) {
+    invitesQuery = invitesQuery.eq("status", "accepted");
+  }
 
   const [reviewerResult, reviewsResult, tenureResult, invitesResult, invitesUsedResult] =
     await Promise.all([
@@ -80,14 +117,7 @@ export async function fetchProfileByUserId(
         .select("tenure_score, consistency_score")
         .eq("reviewer_id", reviewerId)
         .maybeSingle(),
-      supabase
-        .from("invites")
-        .select(
-          "id, status, invitee_email, created_at, accepted_at, invitee:reviewers!invites_invitee_user_id_fkey(username, display_name)",
-        )
-        .eq("inviter_id", reviewerId)
-        .order("created_at", { ascending: false })
-        .limit(10),
+      invitesQuery,
       supabase
         .from("invites")
         .select("id", { count: "exact", head: true })
@@ -106,33 +136,16 @@ export async function fetchProfileByUserId(
   const weeklyLimit = getWeeklyInviteLimit(reviewer);
   const usedThisWeek = invitesUsedResult.count ?? 0;
 
-  type InviteQueryRow = {
-    id: string;
-    status: Invite["status"];
-    invitee_email: string;
-    created_at: string;
-    accepted_at: string | null;
-    invitee:
-      | {
-          username: string | null;
-          display_name: string;
-        }
-      | {
-          username: string | null;
-          display_name: string;
-        }[]
-      | null;
-  };
-
   const inviteActivity = ((invitesResult.data ?? []) as unknown as InviteQueryRow[]).map(
     (row) => {
       const invitee = Array.isArray(row.invitee) ? row.invitee[0] : row.invitee;
+      const inviteeEmail = row.invitee_email ?? null;
 
       return {
         id: row.id,
         status: row.status,
-        inviteeEmail: row.invitee_email,
-        inviteeMask: maskInviteeEmail(row.invitee_email),
+        inviteeEmail,
+        inviteeMask: inviteeEmail ? maskInviteeEmail(inviteeEmail) : "hidden",
         inviteeUsername: invitee?.username ?? null,
         inviteeDisplayName: invitee?.display_name ?? null,
         createdAt: row.created_at,

@@ -107,9 +107,14 @@ See `.env.example`:
   issue invites from `/profile`.
 - Weekly quota is **3 invites** by default and **5 invites** for high-signal
   reviewers (`status = beaned` or `review_count >= 20`).
-- Invites are email-based and expire after 7 days. When an invited user signs in
-  with the invited email, `/auth/callback` accepts the invite, adds them to
-  `allowed_users`, and marks the invite as accepted.
+- Invites are email-based, canonicalised to lowercase, and expire after 7 days.
+  Only one pending invite can exist per email at a time.
+- Invite creation and invite acceptance run through Postgres functions
+  (`issue_invite`, `accept_invite_for_email`) so quota checks and allowlist
+  admission happen atomically.
+- When an invited user signs in with the invited email, `/auth/callback` calls
+  `accept_invite_for_email`, which grants `allowed_users` access and marks the
+  invite accepted in a single transaction.
 
 ## Scoring model
 

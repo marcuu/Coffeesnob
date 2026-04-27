@@ -34,7 +34,8 @@ browser ──▶ middleware.ts ──▶ utils/supabase/middleware.ts
   trusts the local JWT — don't use it for authorization in mutations.
 - **Callback:** `/auth/callback` exchanges the OAuth code for a session and
   redirects back to the app. If the email is not yet in `allowed_users` but has
-  a pending unexpired invite, the callback accepts the invite and grants access.
+  a pending unexpired invite, the callback calls `accept_invite_for_email`, which
+  atomically grants allowlist access and marks the invite accepted.
 
 ## Data access
 
@@ -65,6 +66,7 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
 - **invites** track scarce access grants: reviewers can issue invites by email;
   accepted invites are visible as profile activity. Weekly quota is 3 by default
   and 5 for high-signal reviewers (`beaned` status or `review_count >= 20`).
+  Pending invites remain private to the inviter.
 - **landing page** (`/`) doubles as the personalised venue feed for signed-in
   users and a public leaderboard for visitors. Server component detects auth
   via `getUser()` and branches: signed-in users get `<OnboardingApp>` with
