@@ -1,5 +1,10 @@
 # Architecture
 
+> The migration files in `supabase/migrations/` are the canonical source of
+> truth for the schema. The descriptions below are best-effort documentation;
+> if anything here disagrees with a migration, the migration wins and this
+> doc should be updated.
+
 ## Request flow
 
 ```
@@ -58,9 +63,13 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
   supports an exact-match city dropdown filter populated from known venue
   cities and defaults to ranking by displayed weighted score (high to low).
   The "Add venue" CTA lives only in the `/venues` page header.
-- **reviews** use five 1-10 axes (overall, coffee, ambience, service, value).
-  Unique on `(venue_id, reviewer_id, visited_on)` — a reviewer can re-review
-  the same venue on different visits.
+- **reviews** use six user-entered 1-10 axes (`taste`, `body`, `aroma`,
+  `ambience`, `service`, `value`) plus a derived `rating_overall` and a
+  nullable legacy `rating_coffee`. Unique on `(venue_id, reviewer_id,
+  visited_on)` — a reviewer can re-review the same venue on different visits.
+  The composite axes the scoring pipeline aggregates over are `overall`,
+  `coffee` (mean of taste/body/aroma) and `experience` (mean of
+  ambience/service/value).
 - **landing page** (`/`) doubles as the personalised venue feed for signed-in
   users and a public leaderboard for visitors. Server component detects auth
   via `getUser()` and branches: signed-in users get `<OnboardingApp>` with
