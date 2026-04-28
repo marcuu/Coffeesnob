@@ -105,13 +105,20 @@ export async function reorderReview(
   let appliedRank = newRankPosition;
 
   if (updateError && isUniqueViolation(updateError)) {
-    // Compact the destination bucket excluding this review, then retry at the
-    // recomputed rank position. We approximate by compacting all rows in the
-    // bucket and inserting at end+1000 if mid-list collision.
+    // Compact the destination bucket excluding this review, then retry at
+    // the post-compaction midpoint between the same neighbours the user
+    // originally targeted. We have to figure out where in the destination
+    // ordering the moving review was meant to land *before* compacting,
+    // because compaction renumbers everything.
     const dest = await fetchBucket(supabase, user.id, newBucket);
-    const compacted = compactBucket(
-      dest.filter((r) => r.id !== reviewId),
+    const destExcl = dest.filter((r) => r.id !== reviewId);
+    // Insertion index in destExcl that newRankPosition was meant to fill.
+    const firstAfter = destExcl.findIndex(
+      (r) => r.rank_position > newRankPosition,
     );
+    const insertIdx = firstAfter === -1 ? destExcl.length : firstAfter;
+
+    const compacted = compactBucket(destExcl);
     for (const c of compacted) {
       const { error: e } = await supabase
         .from("reviews")
@@ -121,11 +128,23 @@ export async function reorderReview(
         return { status: "error", code: "compact_failed", message: e.message };
       }
     }
-    // Place at the same target slot expressed in the new spacing: scale to
-    // 1000-spaced slots by ratio of position-in-old-list.
-    const newDest = compacted.map((c) => c.new_rank);
-    const dropPosition = newDest.length === 0 ? 1000 : newDest[newDest.length - 1] + 1000;
-    appliedRank = dropPosition;
+
+    // Compute the post-compaction midpoint at insertIdx, preserving the
+    // user's original placement intent across the compact + retry.
+    let retryRank: number;
+    if (compacted.length === 0) {
+      retryRank = 1000;
+    } else if (insertIdx === 0) {
+      retryRank = Math.max(1, Math.floor(compacted[0].new_rank / 2));
+    } else if (insertIdx >= compacted.length) {
+      retryRank = compacted[compacted.length - 1].new_rank + 1000;
+    } else {
+      retryRank = Math.floor(
+        (compacted[insertIdx - 1].new_rank + compacted[insertIdx].new_rank) / 2,
+      );
+    }
+    appliedRank = retryRank;
+
     const retry = await tryUpdate(appliedRank);
     if (retry.error) {
       if (isUniqueViolation(retry.error)) {
@@ -151,14 +170,23 @@ export async function reorderReview(
     };
   }
 
-  // For an optimistic-merge-friendly response, derive the new rating_overall
-  // from the post-update bucket size if the trigger hasn't already populated
-  // updated.rating_overall on the returned row (some Supabase mock drivers
-  // don't refresh the returning row after the trigger runs).
-  let newRatingOverall = (updated as { rating_overall?: number } | null)?.rating_overall ?? 0;
+  // Derive the moved review's rating_overall. The trigger should have
+  // populated updated.rating_overall on the returned row, but if the driver
+  // doesn't refresh the returning row after the trigger fires we recompute
+  // it from the post-update bucket ordering. Critically: rank is derived
+  // from the row's actual position, NOT a hardcoded 1 — otherwise every
+  // reorder would optimistically display the top-of-band score.
+  let newRatingOverall =
+    (updated as { rating_overall?: number } | null)?.rating_overall ?? 0;
   if (!newRatingOverall) {
-    const sizeAfter = (await fetchBucket(supabase, user.id, newBucket)).length;
-    newRatingOverall = sizeAfter > 0 ? computeRatingOverall(newBucket, 1, sizeAfter) : 0;
+    const finalBucket = await fetchBucket(supabase, user.id, newBucket);
+    const sizeAfter = finalBucket.length;
+    const idx = finalBucket.findIndex((r) => r.id === reviewId);
+    const derivedRank = idx >= 0 ? idx + 1 : 1;
+    newRatingOverall =
+      sizeAfter > 0
+        ? computeRatingOverall(newBucket, derivedRank, sizeAfter)
+        : 0;
   }
 
   revalidatePath("/list");

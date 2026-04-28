@@ -16,6 +16,10 @@ type State = {
   forceCollisionAttempts: number;
   comparisonsTouched: number;
   updateCount: number;
+  // Simulates a driver that returns a row without rating_overall after an
+  // UPDATE — exercises the action's fallback path that recomputes the
+  // value from the post-update bucket ordering.
+  stripRatingOverallOnReturn: boolean;
 };
 
 const state: State = {
@@ -24,6 +28,7 @@ const state: State = {
   forceCollisionAttempts: 0,
   comparisonsTouched: 0,
   updateCount: 0,
+  stripRatingOverallOnReturn: false,
 };
 
 function resetState() {
@@ -32,6 +37,7 @@ function resetState() {
   state.forceCollisionAttempts = 0;
   state.comparisonsTouched = 0;
   state.updateCount = 0;
+  state.stripRatingOverallOnReturn = false;
 }
 
 const ID_A = "00000000-0000-4000-8000-000000000001";
@@ -74,6 +80,7 @@ function makeBuilder(table: string): any {
   const filters: { col: string; val: unknown }[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let pendingUpdate: Record<string, unknown> | null = null;
+  let orderBy: { col: string; ascending: boolean } | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {
     select(_cols?: string) {
@@ -87,7 +94,8 @@ function makeBuilder(table: string): any {
       filters.push({ col, val: vals });
       return builder;
     },
-    order(_col: string, _opts: { ascending: boolean }) {
+    order(col: string, opts: { ascending: boolean }) {
+      orderBy = { col, ascending: opts.ascending };
       return builder;
     },
     update(values: Record<string, unknown>) {
@@ -158,8 +166,16 @@ function makeBuilder(table: string): any {
           recomputeBucket(state.user?.id ?? "", b);
         }
         pendingUpdate = null;
-        // Return the updated row(s).
-        const data = matches.length === 1 ? matches[0] : matches;
+        // Return the updated row(s). Optionally strip rating_overall to
+        // exercise the action's fallback recompute path.
+        const sanitized = state.stripRatingOverallOnReturn
+          ? matches.map((m) => {
+              const { rating_overall: _ignore, ...rest } = m;
+              void _ignore;
+              return rest as Review;
+            })
+          : matches;
+        const data = sanitized.length === 1 ? sanitized[0] : sanitized;
         return { data, error: null };
       }
 
@@ -168,6 +184,15 @@ function makeBuilder(table: string): any {
       if (reviewerFilter) rows = rows.filter((r) => r.reviewer_id === reviewerFilter.val);
       if (bucketFilter) rows = rows.filter((r) => r.bucket === bucketFilter.val);
       if (idFilter) rows = rows.filter((r) => r.id === idFilter.val);
+      if (orderBy) {
+        const col = orderBy.col as keyof Review;
+        const dir = orderBy.ascending ? 1 : -1;
+        rows = [...rows].sort((a, b) => {
+          const av = a[col] as number;
+          const bv = b[col] as number;
+          return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+        });
+      }
       return { data: rows, error: null };
     }
     return { data: null, error: null };
@@ -301,6 +326,55 @@ describe("reorderReview", () => {
     const result = await reorderReview(ID_A, "pilgrimage", 1001);
     expect(result.status).toBe("ok");
     expect(state.updateCount).toBeGreaterThanOrEqual(2); // compaction + retry
+  });
+
+  it("collision retry preserves placement intent across compactBucket", async () => {
+    // The user is moving A into the slot currently held by B. This
+    // collides; after compacting we should still place A between B and C
+    // (their post-compaction ranks), not append it to the end of the
+    // bucket. Regression for the non-blocking observation in the peer
+    // review.
+    state.reviews = [
+      makeReview(ID_A, "user-1", "pilgrimage", 1000),
+      makeReview(ID_B, "user-1", "pilgrimage", 1001),
+      makeReview(ID_C, "user-1", "pilgrimage", 1002),
+    ];
+    state.forceCollisionAttempts = 1;
+
+    const result = await reorderReview(ID_A, "pilgrimage", 1001);
+    expect(result.status).toBe("ok");
+
+    // After compaction destExcl = [B@1000, C@2000]; A inserted between
+    // them at 1500. Final order: B, A, C — A is rank 2 of 3.
+    const ordered = state.reviews
+      .filter((r) => r.bucket === "pilgrimage")
+      .sort((a, b) => a.rank_position - b.rank_position);
+    expect(ordered.map((r) => r.id)).toEqual([ID_B, ID_A, ID_C]);
+  });
+
+  it("rating_overall fallback uses derived rank, not top-of-bucket", async () => {
+    // Regression for the peer-review issue: the fallback path used
+    // `computeRatingOverall(bucket, 1, size)` which assigned the top-of-band
+    // score regardless of where the review actually landed. Move A from the
+    // top of pilgrimage to the bottom and force the fallback path; the
+    // resulting rating should reflect the new bottom-of-bucket position,
+    // not 10.
+    state.reviews = [
+      makeReview(ID_A, "user-1", "pilgrimage", 1000, 9),
+      makeReview(ID_B, "user-1", "pilgrimage", 2000, 8),
+      makeReview(ID_C, "user-1", "pilgrimage", 3000, 7),
+    ];
+    state.stripRatingOverallOnReturn = true;
+
+    const result = await reorderReview(ID_A, "pilgrimage", 4000);
+    expect(result.status).toBe("ok");
+    if (result.status === "ok") {
+      // After move, the bucket order is B, C, A. With the bug, A would
+      // come back at 10 (rank=1 always). Correct answer: bottom-of-band.
+      // pilgrimage band 7..10 with size=3 rank=3:
+      //   round(7 + 3 * (3 - 3 + 1) / 3) = round(8) = 8.
+      expect(result.newRatingOverall).toBe(8);
+    }
   });
 
   it("returns rank_collision_after_compact when retry also collides", async () => {

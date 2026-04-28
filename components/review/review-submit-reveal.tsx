@@ -124,9 +124,11 @@ export function ReviewSubmitReveal({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 12,
             marginTop: 8,
             paddingTop: 18,
             borderTop: "1px solid rgba(255,255,255,0.06)",
+            flexWrap: "wrap",
           }}
         >
           <span
@@ -138,21 +140,38 @@ export function ReviewSubmitReveal({
           >
             COFFEESNOB
           </span>
-          <Link
-            href={backHref}
-            style={{
-              ...MONO,
-              display: "inline-block",
-              padding: "10px 22px",
-              background: "transparent",
-              color: "hsl(60 9.1% 97.8%)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 2,
-              textDecoration: "none",
-            }}
-          >
-            Done
-          </Link>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Link
+              href={backHref}
+              style={{
+                ...MONO,
+                display: "inline-block",
+                padding: "10px 22px",
+                background: "transparent",
+                color: "hsl(60 9.1% 97.8%)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 2,
+                textDecoration: "none",
+              }}
+            >
+              Back to venue
+            </Link>
+            <Link
+              href="/list"
+              style={{
+                ...MONO,
+                display: "inline-block",
+                padding: "10px 22px",
+                background: "oklch(0.75 0.11 44)",
+                color: "hsl(20 14.3% 4%)",
+                border: "none",
+                borderRadius: 2,
+                textDecoration: "none",
+              }}
+            >
+              View your list
+            </Link>
+          </div>
         </div>
       </motion.div>
     </div>
