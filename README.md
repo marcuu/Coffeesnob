@@ -104,10 +104,21 @@ See `.env.example`:
 ## Scoring model
 
 Reviews capture six slider inputs (ambience, service, value, taste, body, aroma)
-in a dedicated **6-step review flow** (`/venues/[slug]/review`). Each slider
-defaults to **5/10** until the reviewer changes it, and includes third-wave
-travel guidance (5/10 good, 7/10 worth 30 minutes, 8/10 worth 60 minutes,
-9/10 worth 3 hours).
-`rating_overall` is derived from weighted inputs (10/10/10/25/20/25), and the
-scoring pipeline computes weighted venue composites for `overall`, `coffee`, and
-`experience`.
+plus a Michelin-style **bucket** (Pilgrimage / Detour / Convenience). The
+review flow at `/venues/[slug]/review` walks through:
+
+1. **Bucket** — pick where this venue lands in your list.
+2. **Tournament** — binary-search the new venue's rank within that bucket
+   via head-to-head comparisons (skipped if the bucket is empty).
+3. **Six axes** — slider per axis, defaults to 5/10.
+4. **Notes** — visit date and free-text review.
+5. **Reveal** — animated "lands at #N of M pilgrimages" card.
+
+`rating_overall` is now derived smallint storage from
+`(bucket, rank_position, bucket_size)` rather than a free-form 1–10 slider.
+The scoring pipeline computes weighted venue composites for `overall`,
+`coffee`, and `experience`. See `docs/ranking.md` for the bucketed
+ranking design and `docs/scoring.md` for the weighted-scoring model.
+
+Your personal ranked list lives at `/list` — drag to reorder within or
+across buckets.

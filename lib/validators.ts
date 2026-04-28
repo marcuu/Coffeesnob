@@ -2,6 +2,12 @@ import { z } from "zod";
 
 import { type BrewMethod, RATING_AXES } from "@/lib/types";
 
+export const REVIEW_BUCKETS = [
+  "pilgrimage",
+  "detour",
+  "convenience",
+] as const;
+
 export const BREW_METHODS = [
   "espresso",
   "filter",
@@ -65,6 +71,35 @@ export const reviewCreateSchema = z.object({
 });
 
 export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;
+
+// Ranked-review submission. Replaces the old rating_overall slider with a
+// bucket choice + a client-side binary tournament. The six axis sliders
+// remain required and unchanged. The history is replayed server-side to
+// validate the claimed rankPosition.
+export const comparisonHistoryEntrySchema = z.object({
+  against_review_id: z.string().uuid(),
+  result: z.enum(["better", "worse", "same"]),
+  step_index: z.number().int().min(0),
+});
+
+export const rankedReviewCreateSchema = z.object({
+  venue_id: z.string().uuid(),
+  visited_on: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  bucket: z.enum(REVIEW_BUCKETS),
+  rank_position: z.number().int(),
+  history: z.array(comparisonHistoryEntrySchema).max(64),
+  rating_taste: rating,
+  rating_body: rating,
+  rating_aroma: rating,
+  rating_ambience: rating,
+  rating_service: rating,
+  rating_value: rating,
+  body: z.string().trim().min(10).max(5000),
+});
+
+export type RankedReviewCreateInput = z.infer<typeof rankedReviewCreateSchema>;
 
 export const profileUpdateSchema = z.object({
   display_name: z.string().trim().min(1, "Display name is required").max(60),

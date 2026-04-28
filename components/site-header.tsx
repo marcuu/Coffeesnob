@@ -69,6 +69,11 @@ export async function SiteHeader() {
           <Link href="/rankings" style={NAV_LINK}>
             Rankings
           </Link>
+          {user ? (
+            <Link href="/list" style={NAV_LINK}>
+              Your list
+            </Link>
+          ) : null}
           <Link
             href={user ? profileHref : "/login"}
             style={{ ...NAV_LINK, color: "var(--color-foreground)" }}

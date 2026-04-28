@@ -5,7 +5,7 @@ import {
   computeStreak,
   deriveTasteProfile,
 } from "@/lib/profile";
-import type { Reviewer } from "@/lib/types";
+import type { Reviewer, ReviewBucket } from "@/lib/types";
 
 export type ReviewWithVenue = {
   id: string;
@@ -16,6 +16,7 @@ export type ReviewWithVenue = {
   rating_ambience: number;
   rating_service: number;
   rating_value: number;
+  bucket: ReviewBucket;
   body: string;
   visited_on: string;
   created_at: string;
@@ -27,6 +28,8 @@ export type ReviewWithVenue = {
   };
 };
 
+export type BucketCounts = Record<ReviewBucket, number>;
+
 export type ProfileData = {
   reviewer: Reviewer;
   reviews: ReviewWithVenue[];
@@ -34,6 +37,7 @@ export type ProfileData = {
   streak: number;
   tasteProfile: ReturnType<typeof deriveTasteProfile>;
   reputation: ReturnType<typeof computeReputationTier>;
+  bucketCounts: BucketCounts;
 };
 
 export async function fetchProfileByUserId(
@@ -45,7 +49,7 @@ export async function fetchProfileByUserId(
     supabase
       .from("reviews")
       .select(
-        "id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, body, visited_on, created_at, venue:venues(name, slug, city, brew_methods)",
+        "id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, bucket, body, visited_on, created_at, venue:venues(name, slug, city, brew_methods)",
       )
       .eq("reviewer_id", reviewerId)
       .order("created_at", { ascending: false }),
@@ -67,6 +71,13 @@ export async function fetchProfileByUserId(
 
   const cities = new Set(reviews.map((r) => r.venue?.city).filter(Boolean));
 
+  const bucketCounts: BucketCounts = { pilgrimage: 0, detour: 0, convenience: 0 };
+  for (const r of reviews) {
+    if (r.bucket && r.bucket in bucketCounts) {
+      bucketCounts[r.bucket]++;
+    }
+  }
+
   return {
     reviewer,
     reviews,
@@ -74,5 +85,6 @@ export async function fetchProfileByUserId(
     streak: computeStreak(reviews.map((r) => r.visited_on)),
     tasteProfile: deriveTasteProfile(reviews),
     reputation: computeReputationTier(reviewer, tenure),
+    bucketCounts,
   };
 }

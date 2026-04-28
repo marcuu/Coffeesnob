@@ -91,7 +91,12 @@ __tests__/              # Vitest tests
 
 ## Database Schema
 
-See `supabase/migrations/` for full DDL. Core tables:
+`supabase/migrations/` is the canonical source of truth for the schema. The
+notes below are best-effort documentation — if anything in this file or in
+`docs/` disagrees with a migration, the migration wins and the doc should be
+fixed.
+
+Core tables:
 
 - `allowed_users` — email allowlist (`email` primary key). Gates access via `is_allowed_email()`.
 - `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`. Also has `status text` (`'beaned' | 'invited' | 'active'`, default `'active'`) — SQL-managed tier consumed by the scoring pipeline (see `docs/scoring.md`).
