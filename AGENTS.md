@@ -102,6 +102,7 @@ See `supabase/migrations/` for full DDL. Core tables:
 - `review_weights` — cached per-review, per-axis weight used to aggregate venue scores. Populated by the scoring pipeline.
 - `venue_axis_scores` — weighted per-axis score, confidence, and review counts read by the UI. Populated by the scoring pipeline; read-only to authenticated clients via RLS.
 - `scoring_dirty_queue` — append-only work queue for the nightly scoring pipeline. A trigger on `public.reviews` (`reviews_enqueue_scoring_trigger`) enqueues on insert/update/delete so review writes never block on recomputation. Drained by `runFullPipeline`.
+- `invites` — invite scarcity ledger. Reviewers can issue weekly email invites (`3/week` base, `5/week` for high-signal reviewers). Emails are canonical lowercase and only one pending invite is allowed per email. Pending invite rows are only visible to the inviter; shared profiles show accepted invite activity only.
 
 A trigger on `auth.users` insert auto-creates a `reviewers` row with
 `display_name` defaulted from the email local-part, so review FKs are always
@@ -133,7 +134,11 @@ Two sign-in paths on `/login`:
   is the primary path for local dev — the link lands in Inbucket at
   http://localhost:54324. Works in production too as a fallback.
 
-Both flows share `/auth/callback` for session exchange.
+Both flows share `/auth/callback` for session exchange. `/auth/callback` also
+accepts pending invites by calling `accept_invite_for_email` (security-definer
+Postgres function), which atomically writes to `allowed_users` and marks the
+invite accepted. Ensure invite RPC execute grants are applied for
+`authenticated`/`service_role` when running migrations.
 
 ## Testing
 

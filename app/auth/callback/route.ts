@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { createClient } from "@/utils/supabase/server";
 import { sanitizeNext } from "@/lib/sanitize-next";
+import { createServiceRoleClient } from "@/utils/supabase/service";
+import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -33,13 +34,25 @@ export async function GET(request: Request) {
     return unauthorized("Could not verify your account. Please try again.");
   }
 
+  const email = user.email.toLowerCase();
+
   const { data: allowed, error: allowlistError } = await supabase
     .from("allowed_users")
     .select("email")
-    .eq("email", user.email)
+    .eq("email", email)
     .maybeSingle();
 
-  if (allowlistError || !allowed) {
+  if (!allowlistError && allowed) {
+    return NextResponse.redirect(`${origin}${next}`);
+  }
+
+  const service = createServiceRoleClient();
+  const { data: acceptedInviteId, error: acceptError } = await service.rpc(
+    "accept_invite_for_email",
+    { p_email: email, p_user_id: user.id },
+  );
+
+  if (acceptError || !acceptedInviteId) {
     await supabase.auth.signOut();
     return unauthorized("Your account is not on the access list.");
   }

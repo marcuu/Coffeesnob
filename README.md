@@ -101,6 +101,24 @@ See `.env.example`:
   `--color-foreground`, `--color-accent-soft`, etc.) instead of hardcoded light
   values so onboarding and modal surfaces remain legible in both themes.
 
+## Invite scarcity MVP
+
+- Access is still enforced via `allowed_users`, but allowlisted reviewers can now
+  issue invites from `/profile`.
+- Weekly quota is **3 invites** by default and **5 invites** for high-signal
+  reviewers (`status = beaned` or `review_count >= 20`).
+- Invites are email-based, canonicalised to lowercase, and expire after 7 days.
+  Only one pending invite can exist per email at a time.
+- Invite creation and invite acceptance run through Postgres functions
+  (`issue_invite`, `accept_invite_for_email`) so quota checks and allowlist
+  admission happen atomically.
+- When an invited user signs in with the invited email, `/auth/callback` calls
+  `accept_invite_for_email`, which grants `allowed_users` access and marks the
+  invite accepted in a single transaction.
+- If invite creation returns an immediate error in local/dev, make sure the
+  latest migrations are applied so `authenticated` can execute invite RPCs
+  (`issue_invite`, `accept_invite_for_email`).
+
 ## Scoring model
 
 Reviews capture six slider inputs (ambience, service, value, taste, body, aroma)

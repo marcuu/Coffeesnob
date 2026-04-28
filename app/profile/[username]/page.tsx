@@ -30,7 +30,7 @@ export default async function SharedProfilePage({
 
   if (!reviewerRow) notFound();
 
-  const profileData = await fetchProfileByUserId(supabase, reviewerRow.id);
+  const profileData = await fetchProfileByUserId(supabase, reviewerRow.id, user.id);
   if (!profileData) notFound();
   // notFound() throws — assertion tells TS the value is defined below.
   const data = profileData!;

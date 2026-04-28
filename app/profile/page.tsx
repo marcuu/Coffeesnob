@@ -14,7 +14,7 @@ export default async function OwnProfilePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const profileData = await fetchProfileByUserId(supabase, user.id);
+  const profileData = await fetchProfileByUserId(supabase, user.id, user.id);
   if (!profileData) redirect("/login");
   // redirect() throws — assertion tells TS the value is defined below.
   const data = profileData!;
