@@ -100,6 +100,29 @@ export function finalRankPosition(state: TournamentState): number {
   );
 }
 
+// TypeScript mirror of the SQL function compute_rating_overall(bucket, rank,
+// size) defined in supabase/migrations/20260427000000_pairwise_ranking.sql.
+// Kept here so server actions can pre-compute the value to insert and the
+// recompute trigger no-ops on unchanged rows. The SQL definition is the
+// source of truth; __tests__/compute-rating-overall.test.ts asserts both
+// match.
+const BAND_FLOOR: Record<ReviewBucket, number> = {
+  pilgrimage: 7,
+  detour: 4,
+  convenience: 1,
+};
+
+export function computeRatingOverall(
+  bucket: ReviewBucket,
+  rank: number,
+  bucketSize: number,
+): number {
+  if (bucketSize <= 0) {
+    throw new Error("bucketSize must be ≥ 1");
+  }
+  return Math.round(BAND_FLOOR[bucket] + (3 * (bucketSize - rank + 1)) / bucketSize);
+}
+
 // Renumber a bucket's reviews to clean 1000-spaced positions, preserving
 // the existing order. Used when an insertion collides on the unique
 // (reviewer_id, bucket, rank_position) constraint.
