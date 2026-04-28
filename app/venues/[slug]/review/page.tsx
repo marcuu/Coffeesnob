@@ -20,6 +20,13 @@ export default async function AddVenueReviewPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: reviewer } = await supabase
+    .from("reviewers")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
+  const handle = (reviewer as { username: string | null } | null)?.username ?? undefined;
+
   const { data: venue, error } = await supabase
     .from("venues")
     .select("id, name")
@@ -87,6 +94,7 @@ export default async function AddVenueReviewPage({
         venueName={venue.name}
         reviewsByBucket={reviewsByBucket}
         candidateNamesByReviewId={candidateNamesByReviewId}
+        handle={handle}
       />
     </div>
   );

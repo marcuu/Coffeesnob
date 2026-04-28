@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { track } from "@/lib/analytics";
 import {
   finalRankPosition,
   nextComparison,
@@ -47,28 +48,51 @@ export function PairwiseTournament({
     startTournament(candidates),
   );
   const [step, setStep] = useState(0);
+  const startedAtRef = useRef<number>(Date.now());
+  const trackedStartRef = useRef(false);
   const next = useMemo(() => nextComparison(state), [state]);
   const totalEstimate = useMemo(
     () => Math.max(1, Math.ceil(Math.log2(candidates.length + 1))),
     [candidates.length],
   );
 
+  // Fire tournament_started exactly once, on mount.
+  useEffect(() => {
+    if (!trackedStartRef.current) {
+      trackedStartRef.current = true;
+      track({ name: "tournament_started", bucket_size: candidates.length });
+    }
+  }, [candidates.length]);
+
   // Empty bucket: converge immediately. Run as an effect so the parent
   // doesn't see the component flash a head-to-head it can't render.
   useEffect(() => {
     if (!next) {
+      const final = finalRankPosition(state);
+      track({
+        name: "tournament_completed",
+        bucket,
+        comparisons_count: state.history.length,
+        duration_ms: Date.now() - startedAtRef.current,
+        final_rank: final,
+      });
       onComplete({
-        rankPosition: finalRankPosition(state),
+        rankPosition: final,
         history: state.history,
       });
     }
     // We only ever fire once per state change; onComplete is stable enough
     // for our usage but listed to keep eslint quiet in strict mode.
-  }, [next, state, onComplete]);
+  }, [next, state, onComplete, bucket]);
 
   if (!next) return null;
 
   const handle = (result: Comparison) => {
+    track({
+      name: "tournament_comparison_made",
+      step_index: step,
+      result,
+    });
     setState((s) => recordComparison(s, result));
     setStep((s) => s + 1);
   };

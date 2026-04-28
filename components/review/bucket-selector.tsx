@@ -2,6 +2,7 @@
 
 import { Coffee, MapPin, MapPinned } from "lucide-react";
 
+import { track } from "@/lib/analytics";
 import type { ReviewBucket } from "@/lib/types";
 
 const MONO: React.CSSProperties = {
@@ -66,7 +67,10 @@ export function BucketSelector({
             type="button"
             role="radio"
             aria-checked={isSelected}
-            onClick={() => onSelect(bucket)}
+            onClick={() => {
+              track({ name: "bucket_selected", bucket });
+              onSelect(bucket);
+            }}
             style={{
               display: "flex",
               alignItems: "center",

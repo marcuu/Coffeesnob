@@ -21,6 +21,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import { reorderReview } from "@/app/list/actions";
+import { track } from "@/lib/analytics";
 import type { ReviewBucket } from "@/lib/types";
 
 const BUCKETS: ReviewBucket[] = ["pilgrimage", "detour", "convenience"];
@@ -115,6 +116,10 @@ export function RankedList({
       newRank = Math.max(1, Math.floor(rankFor(below, newIndex + 1) / 2));
     }
 
+    track({
+      name: "list_reordered",
+      mode: fromBucket === toBucket ? "within_bucket" : "cross_bucket",
+    });
     void startTransition(async () => {
       const id = String(active.id);
       const result = await reorderReview(id, toBucket, newRank);

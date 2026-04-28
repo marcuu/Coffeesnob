@@ -55,12 +55,14 @@ export function ReviewForm({
   venueName,
   reviewsByBucket,
   candidateNamesByReviewId,
+  handle,
 }: {
   venueId: string;
   slug: string;
   venueName: string;
   reviewsByBucket: Record<ReviewBucket, Review[]>;
   candidateNamesByReviewId: Record<string, string>;
+  handle?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: "bucket" });
   const [values, setValues] = useState<Record<AxisName, number>>({
@@ -147,6 +149,7 @@ export function ReviewForm({
         bucketSize={stage.bucketSize}
         listChanged={stage.list_changed}
         backHref={`/venues/${slug}`}
+        handle={handle}
       />
     );
   }

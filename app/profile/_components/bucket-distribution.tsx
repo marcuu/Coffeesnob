@@ -24,12 +24,14 @@ export function BucketDistribution({ counts }: { counts: BucketCounts }) {
       ? [ORDER[1], ORDER[0], ORDER[2]]
       : ORDER;
 
+  const pilgrimagePercent = Math.round((counts.pilgrimage / total) * 100);
+
   return (
     <section style={{ marginBottom: 32 }}>
       <div style={{ ...MONO, color: "var(--color-muted-foreground)", marginBottom: 10 }}>
         Bucket distribution
       </div>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
         {sequence.map(({ key, label }) => (
           <div
             key={key}
@@ -58,6 +60,18 @@ export function BucketDistribution({ counts }: { counts: BucketCounts }) {
           </div>
         ))}
       </div>
+      <p
+        style={{
+          fontSize: 12,
+          fontStyle: "italic",
+          color: "var(--color-muted-foreground)",
+          lineHeight: 1.6,
+          maxWidth: 420,
+        }}
+      >
+        Most snobs only mark 8% of venues as pilgrimages. You&apos;re at{" "}
+        {pilgrimagePercent}%.
+      </p>
     </section>
   );
 }

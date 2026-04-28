@@ -392,3 +392,32 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
   Japanese restaurant platforms — revisit with real data.
 - No recency-bucketed separate analytics. The explain endpoint surfaces
   bucket percentages for transparency only.
+
+## Section 11: Interaction with the bucketed ranking system
+
+The Phase 1 ranking migration (`docs/ranking.md`) makes `rating_overall` a
+derived smallint computed from `(bucket, rank_position, bucket_size)` rather
+than a slider value. Three notes for this pipeline:
+
+1. **`rating_overall` is no longer a free-form 1-10 input.** For a given
+   reviewer the value within a bucket is constrained to a 4-wide band
+   (pilgrimage 7–10, detour 4–7, convenience 1–4). The pipeline's `overall`
+   axis input therefore loses some resolution at single-bucket granularity.
+2. **Six-axis path is unchanged.** When `rating_taste`, `rating_body` and
+   `rating_aroma` are all present, the pipeline computes the `overall` axis
+   from those six axes via `deriveOverallScore` and ignores
+   `reviews.rating_overall`. The bucket-derived `rating_overall` only feeds
+   the pipeline for legacy reviews missing one of the coffee axes.
+3. **Low-N confidence at the venue level.** If a venue has only 1–2 reviews
+   in a single user's pilgrimage bucket, the per-bucket band-mapping
+   forces `rating_overall` to the top of the band (10 for `bucket_size = 1`,
+   9 or 10 for `bucket_size = 2`), which combined with a high beaned-reviewer
+   weight may inflate the venue's posterior score relative to the prior.
+   The Bayesian prior at 6.0 with `PRIOR_STRENGTH = 3.0` pulls a single
+   weight-1 review at score 10 to a posterior of `(10 + 6×3) / (1 + 3) = 7.0`,
+   so the displayed score remains conservative; but the loss of slider
+   resolution does mean the top of the band gets used more often than the
+   slider previously allowed. **This is documented rather than fixed**:
+   addressing it would likely involve interpolating within the band based
+   on `rank_position` rather than `round()`-ing the linear formula, and is
+   out of scope for the bucketed-ranking PR.

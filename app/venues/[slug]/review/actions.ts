@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { track } from "@/lib/analytics";
 import {
   computeRatingOverall,
   compactBucket,
@@ -205,8 +206,8 @@ export async function submitRankedReview(
     attempt = await attemptInsert(supabase, user.id, parsed, finalRank, bucketSizeAfter);
 
     if (!attempt.ok && attempt.isCollision) {
-      // Telemetry hook lands in Phase 4; for now log to stderr.
-      console.error("rank_collision_after_compact", {
+      track({
+        name: "rank_collision_after_compact",
         bucket: parsed.bucket,
         reviewer_id: user.id,
       });
@@ -251,6 +252,12 @@ export async function submitRankedReview(
   }
   revalidatePath("/venues");
   revalidatePath("/list");
+
+  track({
+    name: "review_submitted",
+    bucket: parsed.bucket,
+    list_changed: listChanged || undefined,
+  });
 
   return {
     status: "ok",

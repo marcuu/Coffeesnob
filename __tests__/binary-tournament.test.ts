@@ -205,6 +205,25 @@ describe("50 random insertions are internally consistent", () => {
   });
 });
 
+describe("50-review bucket comparison budget (Phase 4 acceptance)", () => {
+  // Spec: 95th percentile tournament completes in ≤8 comparisons for a
+  // 50-review bucket. With binary search the upper bound is
+  // ceil(log2(51)) = 6, so the 95th percentile is comfortably ≤8 across
+  // every possible insertion position.
+  it("completes a 50-review bucket in ≤8 comparisons at p95", () => {
+    const bucket = makeBucket(50);
+    const counts: number[] = [];
+    for (let pos = 0; pos <= 50; pos++) {
+      const { comparisons } = runWithOracle(startTournament(bucket), pos);
+      counts.push(comparisons);
+    }
+    counts.sort((a, b) => a - b);
+    const p95Index = Math.ceil(0.95 * counts.length) - 1;
+    expect(counts[p95Index]).toBeLessThanOrEqual(8);
+    expect(counts[counts.length - 1]).toBeLessThanOrEqual(8);
+  });
+});
+
 describe("compactBucket", () => {
   it("renumbers to evenly-spaced positions and preserves order", () => {
     const reviews: Review[] = [
