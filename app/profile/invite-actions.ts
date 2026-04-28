@@ -61,6 +61,26 @@ export async function createInvite(
   );
 
   if (inviteError) {
+    console.error("issue_invite rpc failed", {
+      code: inviteError.code,
+      message: inviteError.message,
+      details: inviteError.details,
+    });
+
+    if (inviteError.code === "42501") {
+      return {
+        status: "error",
+        message: "Your account is not allowed to send invites.",
+      };
+    }
+
+    if (inviteError.code === "42883") {
+      return {
+        status: "error",
+        message: "Invite system is out of date. Apply the latest DB migrations.",
+      };
+    }
+
     return { status: "error", message: "Could not send invite. Please retry." };
   }
 

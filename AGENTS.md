@@ -137,7 +137,8 @@ Two sign-in paths on `/login`:
 Both flows share `/auth/callback` for session exchange. `/auth/callback` also
 accepts pending invites by calling `accept_invite_for_email` (security-definer
 Postgres function), which atomically writes to `allowed_users` and marks the
-invite accepted.
+invite accepted. Ensure invite RPC execute grants are applied for
+`authenticated`/`service_role` when running migrations.
 
 ## Testing
 

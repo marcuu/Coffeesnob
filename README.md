@@ -115,6 +115,9 @@ See `.env.example`:
 - When an invited user signs in with the invited email, `/auth/callback` calls
   `accept_invite_for_email`, which grants `allowed_users` access and marks the
   invite accepted in a single transaction.
+- If invite creation returns an immediate error in local/dev, make sure the
+  latest migrations are applied so `authenticated` can execute invite RPCs
+  (`issue_invite`, `accept_invite_for_email`).
 
 ## Scoring model
 

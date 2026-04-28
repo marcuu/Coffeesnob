@@ -35,7 +35,8 @@ browser ──▶ middleware.ts ──▶ utils/supabase/middleware.ts
 - **Callback:** `/auth/callback` exchanges the OAuth code for a session and
   redirects back to the app. If the email is not yet in `allowed_users` but has
   a pending unexpired invite, the callback calls `accept_invite_for_email`, which
-  atomically grants allowlist access and marks the invite accepted.
+  atomically grants allowlist access and marks the invite accepted. The app
+  role needs EXECUTE on invite RPCs (`issue_invite`, `accept_invite_for_email`).
 
 ## Data access
 
