@@ -22,6 +22,7 @@ export interface Reviewer {
   venues_reviewed_count: number;
   first_review_at: string | null;
   last_review_at: string | null;
+  seen_ranking_onboarding_at: string | null;
   created_at: string;
   updated_at: string;
 }
