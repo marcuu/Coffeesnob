@@ -22,6 +22,7 @@ export interface Reviewer {
   venues_reviewed_count: number;
   first_review_at: string | null;
   last_review_at: string | null;
+  seen_ranking_onboarding_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +51,8 @@ export interface Venue {
   updated_at: string;
 }
 
+export type ReviewBucket = "pilgrimage" | "detour" | "convenience";
+
 export interface Review {
   id: string;
   venue_id: string;
@@ -61,11 +64,33 @@ export interface Review {
   rating_ambience: number;
   rating_service: number;
   rating_value: number;
+  bucket: ReviewBucket;
+  rank_position: number;
   body: string;
   visited_on: string;
   created_at: string;
   updated_at: string;
 }
+
+export interface ReviewComparison {
+  id: string;
+  reviewer_id: string;
+  winning_review_id: string | null;
+  losing_review_id: string | null;
+  result: "better" | "worse" | "same";
+  created_at: string;
+}
+
+// One entry per comparison made during a tournament. Captured client-side and
+// replayed server-side on submit so the persistence layer can validate the
+// claimed rank position. step_index is 0-based and monotonic within a
+// tournament; against_review_id is the existing review the new venue was
+// compared against at that step.
+export type ComparisonHistory = Array<{
+  against_review_id: string;
+  result: "better" | "worse" | "same";
+  step_index: number;
+}>;
 
 export type RatingAxis =
   | "rating_overall"

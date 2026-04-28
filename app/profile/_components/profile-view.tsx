@@ -1,5 +1,6 @@
 import type { ProfileData } from "@/app/profile/_lib/fetch-profile";
 import { ActivityFeed } from "./activity-feed";
+import { BucketDistribution } from "./bucket-distribution";
 import { ProfileHeader } from "./profile-header";
 import { ReputationModule } from "./reputation-module";
 import { StatsSummary } from "./stats-summary";
@@ -11,8 +12,15 @@ type Props = {
 };
 
 export function ProfileView({ data, isOwnProfile }: Props) {
-  const { reviewer, reviews, citiesCount, streak, tasteProfile, reputation } =
-    data;
+  const {
+    reviewer,
+    reviews,
+    citiesCount,
+    streak,
+    tasteProfile,
+    reputation,
+    bucketCounts,
+  } = data;
 
   return (
     <>
@@ -22,6 +30,7 @@ export function ProfileView({ data, isOwnProfile }: Props) {
         citiesCount={citiesCount}
         streak={streak}
       />
+      <BucketDistribution counts={bucketCounts} />
       {tasteProfile && <TasteProfile profile={tasteProfile} />}
       <ReputationModule reputation={reputation} />
       <ActivityFeed reviews={reviews.slice(0, 10)} />
