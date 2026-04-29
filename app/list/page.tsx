@@ -48,8 +48,28 @@ export default async function MyListPage() {
     .eq("reviewer_id", user.id)
     .order("rank_position", { ascending: true });
 
-  const reviews = (reviewsRaw ?? []) as Review[];
-  const venueIds = Array.from(new Set(reviews.map((r) => r.venue_id)));
+  const allReviews = (reviewsRaw ?? []) as Review[];
+  // A reviewer can have multiple reviews of the same venue (different
+  // visited_on dates). The list represents "where every venue stands", so
+  // collapse to one entry per venue: prefer the most recent visit, then
+  // most recently created. The chosen review carries the venue's bucket
+  // and rank on this page; other reviews of the same venue are hidden
+  // here but still exist in the database.
+  const reviewByVenue = new Map<string, Review>();
+  for (const r of allReviews) {
+    const existing = reviewByVenue.get(r.venue_id);
+    if (!existing) {
+      reviewByVenue.set(r.venue_id, r);
+      continue;
+    }
+    const aKey = `${r.visited_on}\t${r.created_at}`;
+    const bKey = `${existing.visited_on}\t${existing.created_at}`;
+    if (aKey > bKey) reviewByVenue.set(r.venue_id, r);
+  }
+  const reviews = Array.from(reviewByVenue.values()).sort(
+    (a, b) => a.rank_position - b.rank_position,
+  );
+  const venueIds = Array.from(reviewByVenue.keys());
   const venuesById = new Map<string, { name: string; slug: string }>();
   if (venueIds.length > 0) {
     const { data: venueRows } = await supabase

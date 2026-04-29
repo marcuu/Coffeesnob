@@ -118,7 +118,43 @@ export async function reorderReview(
     );
     const insertIdx = firstAfter === -1 ? destExcl.length : firstAfter;
 
+    // Compute the post-compaction targets BEFORE parking — the parking
+    // step mutates rank_position on the same Review objects we're about
+    // to compact, and compactBucket sorts by rank_position. Snapshot
+    // first to capture the user-intended ordering.
     const compacted = compactBucket(destExcl);
+
+    // Park the moving review and every destExcl row at unique negative
+    // rank_positions. The unique constraint is checked per statement
+    // (deferrable initially immediate), so renumbering rows one-by-one
+    // into colliding positive ranks would bounce off the constraint —
+    // either against the moving review's existing rank (within-bucket
+    // case) or against a sibling that hasn't been renumbered yet.
+    // Negative ranks are guaranteed not to be in use. The moving review
+    // stays in its old bucket while parked; the final retry below
+    // applies the new bucket and rank in one statement.
+    const { error: parkMoveErr } = await supabase
+      .from("reviews")
+      .update({ rank_position: -1 })
+      .eq("id", reviewId)
+      .eq("reviewer_id", user.id);
+    if (parkMoveErr) {
+      return {
+        status: "error",
+        code: "park_failed",
+        message: parkMoveErr.message,
+      };
+    }
+    for (let i = 0; i < destExcl.length; i++) {
+      const { error: e } = await supabase
+        .from("reviews")
+        .update({ rank_position: -(i + 2) })
+        .eq("id", destExcl[i].id);
+      if (e) {
+        return { status: "error", code: "park_failed", message: e.message };
+      }
+    }
+
     for (const c of compacted) {
       const { error: e } = await supabase
         .from("reviews")

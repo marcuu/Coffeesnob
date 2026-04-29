@@ -163,6 +163,9 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
             <Link href="/rankings" style={NAV_LINK}>
               Rankings
             </Link>
+            <Link href="/list" style={NAV_LINK}>
+              Your list
+            </Link>
             <Link
               href={profileHref}
               style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
