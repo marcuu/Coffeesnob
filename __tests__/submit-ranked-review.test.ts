@@ -48,12 +48,8 @@ function makeReview(
     venue_id: `venue-${id}`,
     reviewer_id: "user-1",
     rating_overall: ratingOverall,
-    rating_taste: 7,
-    rating_body: 7,
-    rating_aroma: 7,
-    rating_ambience: 7,
-    rating_service: 7,
-    rating_value: 7,
+    rating_coffee_5: 4,
+    rating_vibe_5: 4,
     bucket,
     rank_position: rank,
     body: "ok",
@@ -228,12 +224,8 @@ describe("submitRankedReview", () => {
       result: "better" | "worse" | "same";
       step_index: number;
     }>,
-    rating_taste: 8,
-    rating_body: 7,
-    rating_aroma: 9,
-    rating_ambience: 7,
-    rating_service: 8,
-    rating_value: 7,
+    rating_coffee_5: 4,
+    rating_vibe_5: 3,
     body: "Solid filter, clean cup, good service.",
   };
 
@@ -246,16 +238,33 @@ describe("submitRankedReview", () => {
     }
   });
 
-  it("rejects input missing one of the six axes", async () => {
-    const { rating_body: _omit, ...partial } = baseInput;
+  it("rejects input missing rating_coffee_5", async () => {
+    const { rating_coffee_5: _omit, ...partial } = baseInput;
     void _omit;
     const result = await submitRankedReview(partial);
     expect(result.status).toBe("error");
     if (result.status === "error") {
       expect(result.code).toBe("invalid_input");
       expect(result.fieldErrors).toBeDefined();
-      expect(Object.keys(result.fieldErrors!)).toContain("rating_body");
+      expect(Object.keys(result.fieldErrors!)).toContain("rating_coffee_5");
     }
+  });
+
+  it("rejects input missing rating_vibe_5", async () => {
+    const { rating_vibe_5: _omit, ...partial } = baseInput;
+    void _omit;
+    const result = await submitRankedReview(partial);
+    expect(result.status).toBe("error");
+    if (result.status === "error") {
+      expect(result.code).toBe("invalid_input");
+      expect(result.fieldErrors).toBeDefined();
+      expect(Object.keys(result.fieldErrors!)).toContain("rating_vibe_5");
+    }
+  });
+
+  it("rejects rating_coffee_5 outside 1-5", async () => {
+    const result = await submitRankedReview({ ...baseInput, rating_coffee_5: 6 });
+    expect(result.status).toBe("error");
   });
 
   it("inserts an empty-bucket review at rank 1000 ignoring client claim", async () => {

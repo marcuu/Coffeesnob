@@ -30,7 +30,7 @@ export function ProfileView({ data, isOwnProfile }: Props) {
         citiesCount={citiesCount}
         streak={streak}
       />
-      <BucketDistribution counts={bucketCounts} />
+      <BucketDistribution counts={bucketCounts} reviews={reviews} />
       {tasteProfile && <TasteProfile profile={tasteProfile} />}
       <ReputationModule reputation={reputation} />
       <ActivityFeed reviews={reviews.slice(0, 10)} />

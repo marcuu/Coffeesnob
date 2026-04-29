@@ -8,12 +8,8 @@ import type { Reviewer } from "@/lib/types";
 
 export type ReviewForProfile = {
   rating_overall: number;
-  rating_taste: number | null;
-  rating_body: number | null;
-  rating_aroma: number | null;
-  rating_ambience: number;
-  rating_service: number;
-  rating_value: number;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
   body: string;
   visited_on: string;
   venue: {
@@ -83,36 +79,30 @@ export function deriveTasteProfile(
 ): TasteProfile | null {
   if (reviews.length < 3) return null;
 
+  // rating_coffee_5 / rating_vibe_5 are 1-5 scale; rating_overall is 1-10.
+  // Compare coffee vs vibe directly on the 1-5 scale (delta of 0.5 ~ a
+  // half-step difference, equivalent to the old delta of 1 on the averaged
+  // 1-10 scale halved). Comparing avgs in 1-5 land also avoids leaking the
+  // bucket-derived rating_overall into the per-axis chip logic.
   let totalCoffee = 0;
-  let countCoffee = 0;
-  let totalExp = 0;
+  let totalVibe = 0;
   let totalOverall = 0;
 
   for (const r of reviews) {
-    const coffeeScores = [r.rating_taste, r.rating_body, r.rating_aroma].filter(
-      (v): v is number => v !== null && v !== undefined,
-    );
-    if (coffeeScores.length > 0) {
-      totalCoffee += coffeeScores.reduce((a, b) => a + b, 0) / coffeeScores.length;
-      countCoffee++;
-    }
-    totalExp +=
-      (r.rating_ambience + r.rating_service + r.rating_value) / 3;
+    totalCoffee += r.rating_coffee_5;
+    totalVibe += r.rating_vibe_5;
     totalOverall += r.rating_overall;
   }
 
-  const avgCoffee = countCoffee > 0 ? totalCoffee / countCoffee : null;
-  const avgExp = totalExp / reviews.length;
+  const avgCoffee = totalCoffee / reviews.length;
+  const avgVibe = totalVibe / reviews.length;
   const avgOverall = totalOverall / reviews.length;
 
   const chips: string[] = [];
 
-  // Coffee vs experience priority
-  if (avgCoffee !== null) {
-    if (avgCoffee > avgExp + 0.5) chips.push("Coffee-first");
-    else if (avgExp > avgCoffee + 0.5) chips.push("Experience-focused");
-    else chips.push("Balanced");
-  }
+  if (avgCoffee > avgVibe + 0.5) chips.push("Coffee-first");
+  else if (avgVibe > avgCoffee + 0.5) chips.push("Experience-focused");
+  else chips.push("Balanced");
 
   // Rating strictness
   if (avgOverall < 6.0) chips.push("Strict");

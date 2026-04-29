@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { deriveCoffeeScore, deriveExperienceScore } from "@/lib/review-scoring";
+import { deriveCoffeeScore, deriveVibeScore } from "@/lib/review-scoring";
 import { AXES, SCORING_CONSTANTS, type Axis } from "@/lib/scoring/weights";
 
 export type AxisScore = {
@@ -108,25 +108,16 @@ function resolveAxisScore(
   if (axis === "overall") return Number(row.rating_overall ?? null);
 
   if (axis === "coffee") {
-    if (
-      typeof row.rating_taste === "number" &&
-      typeof row.rating_body === "number" &&
-      typeof row.rating_aroma === "number"
-    ) {
-      return deriveCoffeeScore({
-        rating_taste: row.rating_taste,
-        rating_body: row.rating_body,
-        rating_aroma: row.rating_aroma,
-      });
+    if (typeof row.rating_coffee_5 === "number") {
+      return deriveCoffeeScore({ rating_coffee_5: row.rating_coffee_5 });
     }
     return null;
   }
 
-  return deriveExperienceScore({
-    rating_ambience: Number(row.rating_ambience ?? 0),
-    rating_service: Number(row.rating_service ?? 0),
-    rating_value: Number(row.rating_value ?? 0),
-  });
+  if (typeof row.rating_vibe_5 === "number") {
+    return deriveVibeScore({ rating_vibe_5: row.rating_vibe_5 });
+  }
+  return null;
 }
 
 export async function explainVenueScore(
@@ -149,7 +140,7 @@ export async function explainVenueScore(
   const { data: reviewRows, error: reviewsErr } = await supabase
     .from("reviews")
     .select(
-      "id, visited_on, reviewer_id, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma, reviewer:reviewers(display_name)",
+      "id, visited_on, reviewer_id, rating_overall, rating_coffee_5, rating_vibe_5, reviewer:reviewers(display_name)",
     )
     .eq("venue_id", venueId);
   if (reviewsErr) throw reviewsErr;

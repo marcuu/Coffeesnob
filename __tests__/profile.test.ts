@@ -30,12 +30,8 @@ function weeksAgo(n: number): string {
 function baseReview(overrides: Partial<ReviewForProfile> = {}): ReviewForProfile {
   return {
     rating_overall: 7,
-    rating_taste: 7,
-    rating_body: 7,
-    rating_aroma: 7,
-    rating_ambience: 7,
-    rating_service: 7,
-    rating_value: 7,
+    rating_coffee_5: 4,
+    rating_vibe_5: 4,
     body: "Solid.",
     visited_on: daysAgo(1),
     venue: { city: "London", brew_methods: ["espresso"] },
@@ -101,15 +97,11 @@ describe("deriveTasteProfile", () => {
     expect(result!.chips.length).toBeGreaterThan(0);
   });
 
-  it("labels a reviewer as Coffee-first when coffee axes score significantly higher", () => {
+  it("labels a reviewer as Coffee-first when coffee axis scores significantly higher", () => {
     const reviews = Array.from({ length: 4 }, () =>
       baseReview({
-        rating_taste: 9,
-        rating_body: 9,
-        rating_aroma: 9,
-        rating_ambience: 5,
-        rating_service: 5,
-        rating_value: 5,
+        rating_coffee_5: 5,
+        rating_vibe_5: 3,
         rating_overall: 7,
       }),
     );
@@ -118,15 +110,11 @@ describe("deriveTasteProfile", () => {
     expect(result.chips).not.toContain("Experience-focused");
   });
 
-  it("labels a reviewer as Experience-focused when experience axes score significantly higher", () => {
+  it("labels a reviewer as Experience-focused when vibe axis scores significantly higher", () => {
     const reviews = Array.from({ length: 4 }, () =>
       baseReview({
-        rating_taste: 5,
-        rating_body: 5,
-        rating_aroma: 5,
-        rating_ambience: 9,
-        rating_service: 9,
-        rating_value: 9,
+        rating_coffee_5: 3,
+        rating_vibe_5: 5,
         rating_overall: 7,
       }),
     );
@@ -135,15 +123,11 @@ describe("deriveTasteProfile", () => {
     expect(result.chips).not.toContain("Coffee-first");
   });
 
-  it("labels Balanced when coffee and experience scores are within 0.5", () => {
+  it("labels Balanced when coffee and vibe scores are within 0.5", () => {
     const reviews = Array.from({ length: 4 }, () =>
       baseReview({
-        rating_taste: 7,
-        rating_body: 7,
-        rating_aroma: 7,
-        rating_ambience: 7,
-        rating_service: 7,
-        rating_value: 7,
+        rating_coffee_5: 4,
+        rating_vibe_5: 4,
         rating_overall: 7,
       }),
     );

@@ -68,15 +68,14 @@ begin
   -- Insert 5 reviews with rating_overall = null and explicit bucket/rank.
   -- The trigger should populate rating_overall via refresh_overall_for_bucket.
   insert into public.reviews(
-    venue_id, reviewer_id, rating_overall, rating_taste, rating_body,
-    rating_aroma, rating_ambience, rating_service, rating_value,
+    venue_id, reviewer_id, rating_overall, rating_coffee_5, rating_vibe_5,
     body, visited_on, bucket, rank_position
   )
   select
     v_venue_ids[gs],
     v_reviewer,
     1, -- placeholder; trigger overwrites
-    8, 8, 8, 7, 7, 7,
+    4, 4,
     'fixture body for trigger test',
     current_date,
     'pilgrimage'::review_bucket,

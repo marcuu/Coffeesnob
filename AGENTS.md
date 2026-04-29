@@ -101,7 +101,7 @@ Core tables:
 - `allowed_users` — email allowlist (`email` primary key). Gates access via `is_allowed_email()`.
 - `reviewers` — profile extension of `auth.users` (1:1 by id). Holds `display_name`, `bio`, `home_city`, and denormalised stats: `review_count`, `venues_reviewed_count`, `first_review_at`, `last_review_at`. Stats are maintained by the `reviews_stats_trigger` on `public.reviews`. Also has `status text` (`'beaned' | 'invited' | 'active'`, default `'active'`) — SQL-managed tier consumed by the scoring pipeline (see `docs/scoring.md`).
 - `venues` — coffee venues. Any allowlisted user can insert; only the creator can edit or delete. Third-wave-specific fields: `roasters text[]`, `brew_methods text[]`, `has_decaf`, `has_plant_milk`.
-- `reviews` — six user-entered rating axes (`rating_ambience`, `rating_service`, `rating_value`, `rating_taste`, `rating_body`, `rating_aroma`, each 1-10) plus derived `rating_overall` and legacy nullable `rating_coffee`. Composite weighted scores in the pipeline are `overall`, `coffee`, and `experience`. Unique on `(venue_id, reviewer_id, visited_on)` so a reviewer can review a venue multiple times across visits.
+- `reviews` — two user-entered rating axes (`rating_coffee_5`, `rating_vibe_5`, both 1-5 and required), the bucket-derived `rating_overall` (1-10 smallint, computed from `(bucket, rank_position, bucket_size)` via `compute_rating_overall`; see `docs/ranking.md`), `bucket` (`pilgrimage` / `detour` / `convenience`), `rank_position` (sparse-integer in-bucket order), and the legacy nullable `rating_coffee`. Composite weighted scores in the pipeline are `overall`, `coffee`, and `vibe`. Unique on `(venue_id, reviewer_id, visited_on)` so a reviewer can review a venue multiple times across visits.
 - `reviewer_axis_weights` — per-reviewer, per-axis credibility weight. Populated by the scoring pipeline, never by user writes.
 - `reviewer_tenure` — per-reviewer tenure and consistency scalars. Populated by the scoring pipeline.
 - `review_weights` — cached per-review, per-axis weight used to aggregate venue scores. Populated by the scoring pipeline.
@@ -120,8 +120,8 @@ Zod schemas in `lib/validators.ts` back both create/update paths:
 
 - `venueCreateSchema` / `venueUpdateSchema` — venue fields plus allowlists
   for `brew_methods` (enum of `BREW_METHODS`) and a slug regex.
-- `reviewCreateSchema` — six 1-10 axes (`ambience`, `service`, `value`, `taste`, `body`, `aroma`), 10-5000 char body, `YYYY-MM-DD` visit date, UUID venue_id. `rating_overall` is derived server-side from weighted inputs.
-- Review scoring runs in a dedicated six-step flow at `app/venues/[slug]/review/page.tsx` (rendering `review-form.tsx`), and each slider starts at `5/10` before user interaction.
+- `rankedReviewCreateSchema` — bucket choice (`pilgrimage` / `detour` / `convenience`), client-computed `rank_position`, replayable comparison `history`, two required 1-5 axes (`rating_coffee_5`, `rating_vibe_5`), optional ≤5000 char body, `YYYY-MM-DD` visit date, UUID `venue_id`. `rating_overall` is derived server-side via the `compute_rating_overall` SQL function and the post-write trigger.
+- Review scoring runs in a four-stage flow at `app/venues/[slug]/review/page.tsx` (rendering `review-form.tsx`): bucket → tournament → two-axis sliders (no defaults; both must be touched before submit) → notes → reveal.
 
 Server actions parse `FormData` with the `formString` / `formNumber` /
 `parseCsv` helpers in the same file, then call `schema.safeParse`. On

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  reviewCreateSchema,
+  rankedReviewCreateSchema,
   venueCreateSchema,
   parseCsv,
 } from "@/lib/validators";
@@ -44,49 +44,56 @@ describe("venueCreateSchema", () => {
   });
 });
 
-describe("reviewCreateSchema", () => {
+describe("rankedReviewCreateSchema", () => {
   const base = {
     venue_id: "123e4567-e89b-42d3-a456-426614174000",
-    rating_ambience: 7,
-    rating_service: 8,
-    rating_value: 7,
-    rating_taste: 9,
-    rating_body: 8,
-    rating_aroma: 9,
-    body: "Solid filter, friendly bar staff.",
     visited_on: "2026-04-17",
+    bucket: "pilgrimage" as const,
+    rank_position: 1500,
+    history: [],
+    rating_coffee_5: 4,
+    rating_vibe_5: 3,
+    body: "Solid filter, friendly bar staff.",
   };
 
-  it("accepts a valid review", () => {
-    expect(reviewCreateSchema.safeParse(base).success).toBe(true);
+  it("accepts a valid ranked review", () => {
+    expect(rankedReviewCreateSchema.safeParse(base).success).toBe(true);
   });
 
-  it("rejects ratings outside 1-10", () => {
+  it("rejects rating_coffee_5 / rating_vibe_5 outside 1-5", () => {
     expect(
-      reviewCreateSchema.safeParse({ ...base, rating_taste: 11 }).success,
+      rankedReviewCreateSchema.safeParse({ ...base, rating_coffee_5: 6 })
+        .success,
     ).toBe(false);
     expect(
-      reviewCreateSchema.safeParse({ ...base, rating_body: 0 }).success,
-    ).toBe(false);
-  });
-
-  it("rejects bodies shorter than 10 characters", () => {
-    expect(
-      reviewCreateSchema.safeParse({ ...base, body: "too short" }).success,
+      rankedReviewCreateSchema.safeParse({ ...base, rating_vibe_5: 0 }).success,
     ).toBe(false);
   });
 
   it("rejects malformed dates", () => {
     expect(
-      reviewCreateSchema.safeParse({ ...base, visited_on: "17/04/2026" })
+      rankedReviewCreateSchema.safeParse({ ...base, visited_on: "17/04/2026" })
         .success,
     ).toBe(false);
   });
 
   it("requires a uuid for venue_id", () => {
     expect(
-      reviewCreateSchema.safeParse({ ...base, venue_id: "not-a-uuid" }).success,
+      rankedReviewCreateSchema.safeParse({ ...base, venue_id: "not-a-uuid" })
+        .success,
     ).toBe(false);
+  });
+
+  it("requires both axes — missing rating_coffee_5 fails", () => {
+    const { rating_coffee_5: _omit, ...rest } = base;
+    void _omit;
+    expect(rankedReviewCreateSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it("requires both axes — missing rating_vibe_5 fails", () => {
+    const { rating_vibe_5: _omit, ...rest } = base;
+    void _omit;
+    expect(rankedReviewCreateSchema.safeParse(rest).success).toBe(false);
   });
 });
 

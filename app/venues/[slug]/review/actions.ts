@@ -82,13 +82,9 @@ async function attemptInsert(
     .insert({
       venue_id: parsed.venue_id,
       reviewer_id: userId,
-      rating_taste: parsed.rating_taste,
-      rating_body: parsed.rating_body,
-      rating_aroma: parsed.rating_aroma,
-      rating_ambience: parsed.rating_ambience,
-      rating_service: parsed.rating_service,
-      rating_value: parsed.rating_value,
-      body: parsed.body,
+      rating_coffee_5: parsed.rating_coffee_5,
+      rating_vibe_5: parsed.rating_vibe_5,
+      body: parsed.body ?? "",
       visited_on: parsed.visited_on,
       bucket: parsed.bucket,
       rank_position: rankPosition,
@@ -143,7 +139,7 @@ export async function submitRankedReview(
   const { data: bucketReviews, error: fetchError } = await supabase
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, bucket, rank_position, body, visited_on, created_at, updated_at",
+      "id, venue_id, reviewer_id, rating_overall, rating_coffee_5, rating_vibe_5, bucket, rank_position, body, visited_on, created_at, updated_at",
     )
     .eq("reviewer_id", user.id)
     .eq("bucket", parsed.bucket)
@@ -192,7 +188,7 @@ export async function submitRankedReview(
     const { data: refreshed } = await supabase
       .from("reviews")
       .select(
-        "id, venue_id, reviewer_id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, bucket, rank_position, body, visited_on, created_at, updated_at",
+        "id, venue_id, reviewer_id, rating_overall, rating_coffee_5, rating_vibe_5, bucket, rank_position, body, visited_on, created_at, updated_at",
       )
       .eq("reviewer_id", user.id)
       .eq("bucket", parsed.bucket)

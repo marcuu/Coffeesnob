@@ -3,9 +3,9 @@
 //
 // See docs/scoring.md Section 2 for the specification and rationale.
 
-export type Axis = "overall" | "coffee" | "experience";
+export type Axis = "overall" | "coffee" | "vibe";
 
-export const AXES: readonly Axis[] = ["overall", "coffee", "experience"];
+export const AXES: readonly Axis[] = ["overall", "coffee", "vibe"];
 
 export type ReviewerStatus = "beaned" | "invited" | "active";
 
@@ -44,7 +44,7 @@ export const SCORING_CONSTANTS = {
   PRIOR_SCORE_BY_AXIS: {
     overall: 6.0,
     coffee: 6.0,
-    experience: 6.0,
+    vibe: 6.0,
   } as Record<Axis, number>,
   PRIOR_STRENGTH: 3.0,
 };

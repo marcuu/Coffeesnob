@@ -26,6 +26,8 @@ export function ReviewSubmitReveal({
   listChanged,
   backHref,
   handle,
+  coffee,
+  vibe,
 }: {
   venueName: string;
   bucket: ReviewBucket;
@@ -34,6 +36,8 @@ export function ReviewSubmitReveal({
   listChanged?: boolean;
   backHref: string;
   handle?: string;
+  coffee?: number;
+  vibe?: number;
 }) {
   return (
     <div
@@ -106,6 +110,31 @@ export function ReviewSubmitReveal({
           </motion.span>{" "}
           of {bucketSize} {BUCKET_LABEL[bucket].toLowerCase()}
         </h2>
+
+        {coffee !== undefined && vibe !== undefined ? (
+          <div
+            style={{
+              display: "flex",
+              gap: 22,
+              ...MONO,
+              fontSize: 11,
+              color: "hsl(24 5.4% 60%)",
+            }}
+          >
+            <span>
+              Coffee{" "}
+              <strong style={{ color: "hsl(60 9.1% 97.8%)", fontWeight: 600 }}>
+                {coffee}/5
+              </strong>
+            </span>
+            <span>
+              Vibe{" "}
+              <strong style={{ color: "hsl(60 9.1% 97.8%)", fontWeight: 600 }}>
+                {vibe}/5
+              </strong>
+            </span>
+          </div>
+        ) : null}
 
         {listChanged ? (
           <p

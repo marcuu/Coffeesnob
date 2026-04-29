@@ -132,30 +132,39 @@ begin
      carol)
   returning id into northstar;
 
+  -- The bucket and rank_position columns are populated by the trigger and
+  -- the pairwise-ranking backfill in migration 20260427000000. They get
+  -- backfilled from the seeded rating_overall values below.
+  --
+  -- The two-axis collapse (migration 20260428000000) drops the six axis
+  -- columns (taste/body/aroma/ambience/service/value) and replaces them
+  -- with rating_coffee_5 / rating_vibe_5. We seed those directly, picking
+  -- 1-5 values that correspond loosely to the bucket each review will land
+  -- in once auto-bucketed by rating_overall.
   insert into public.reviews
     (venue_id, reviewer_id,
-     rating_overall, rating_coffee, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma,
+     rating_overall, rating_coffee, rating_coffee_5, rating_vibe_5,
      body, visited_on)
   values
-    (prufrock, alice, 9, null, 8, 9, 7, 10, 9, 10,
+    (prufrock, alice, 9, null, 5, 4,
      'Square Mile filter was spot on. Loud at lunchtime but the bar staff keep it moving.',
      current_date - 7),
-    (prufrock, bob, 8, null, 7, 8, 7, 9, 8, 9,
+    (prufrock, bob, 8, null, 4, 4,
      'Espresso is consistently good. Seats fill up fast past 9am.',
      current_date - 3),
-    (kaffeine, alice, 7, null, 6, 8, 7, 8, 7, 8,
+    (kaffeine, alice, 7, null, 4, 3,
      'Reliable Fitzrovia stop. Tight room, quick turnover, no surprises either way.',
      current_date - 14),
-    (ozone, alice, 8, null, 9, 8, 6, 8, 8, 8,
+    (ozone, alice, 8, null, 4, 4,
      'Room is the selling point. Beans are solid, food raised the bill.',
      current_date - 21),
-    (ozone, carol, 9, null, 9, 8, 7, 9, 9, 9,
+    (ozone, carol, 9, null, 5, 4,
      'Own roast shines on filter. Busy at weekends, worth the wait.',
      current_date - 2),
-    (northstar, bob, 9, null, 9, 9, 8, 9, 9, 9,
+    (northstar, bob, 9, null, 5, 4,
      'Best pour-over experience I''ve had outside Melbourne. Staff knew every lot.',
      current_date - 30),
-    (northstar, carol, 10, null, 9, 10, 9, 10, 10, 10,
+    (northstar, carol, 10, null, 5, 5,
      'Local bias noted, but it''s the real deal. Try the single-origin flight.',
      current_date - 5);
 end $$;

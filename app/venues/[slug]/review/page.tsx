@@ -41,7 +41,7 @@ export default async function AddVenueReviewPage({
   const { data: ownReviews } = await supabase
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, bucket, rank_position, body, visited_on, created_at, updated_at",
+      "id, venue_id, reviewer_id, rating_overall, rating_coffee_5, rating_vibe_5, bucket, rank_position, body, visited_on, created_at, updated_at",
     )
     .eq("reviewer_id", user.id);
 

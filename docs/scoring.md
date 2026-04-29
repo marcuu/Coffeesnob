@@ -2,17 +2,28 @@
 
 ## Context
 
-Coffeesnob currently computes venue scores from six review inputs: ambience, service, value, taste, body, and aroma. This doc specifies the weighted-scoring system that replaces
-simple averaging. The goal is the moat mechanism described in `AGENTS.md`:
-reviews from experienced and critical reviewers count more than reviews from
-casual contributors, applied per-axis so expertise in one domain doesn't leak
-into others.
+Coffeesnob computes venue scores from two review inputs on a 1-5 scale:
+**`rating_coffee_5`** (the cup itself) and **`rating_vibe_5`** (everything
+around it). The pipeline scales these to a 1-10 internal representation
+(multiply by 2) so existing aggregation, prior, and confidence machinery
+keeps operating on a single scale. The goal is the moat mechanism described
+in `AGENTS.md`: reviews from experienced and critical reviewers count more
+than reviews from casual contributors, applied per-axis so expertise in one
+domain doesn't leak into others.
+
+The previous six-axis schema (taste / body / aroma / ambience / service /
+value) was collapsed into the two axes above by migration
+`20260428000000_two_axis_collapse.sql`. See `docs/ranking.md` for the
+backfill mapping and rationale.
 
 ## Non-goals
 
-- `rating_overall` is derived from six sliders and not user-entered directly.
-- `rating_coffee` is legacy and nullable; new reviews use `rating_taste`, `rating_body`, and `rating_aroma`.
-- Review form now captures six sliders and derives `rating_overall` server-side.
+- `rating_overall` is derived from `(bucket, rank_position, bucket_size)`
+  via `compute_rating_overall(...)`, not user-entered. See
+  `docs/ranking.md`.
+- `rating_coffee` (the legacy nullable column) is untouched.
+- Review form captures two sliders (coffee + vibe) plus the bucket choice
+  and pairwise tournament; the six axis sliders no longer exist.
 - No public reviewer profiles or follow graph.
 - No auth or allowlist changes.
 
@@ -29,7 +40,7 @@ Add to `reviewers` table:
 New table `reviewer_axis_weights`:
 
 - `reviewer_id uuid references reviewers(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'experience'))`
+- `axis text check (axis in ('overall', 'coffee', 'vibe'))`
 - `weight numeric(4,3) not null default 0.500 check (weight >= 0 and weight <= 3)`
 - `review_count_in_axis int not null default 0`
 - `updated_at timestamptz not null default now()`
@@ -45,7 +56,7 @@ New table `reviewer_tenure`:
 New table `review_weights` — cached computed weight per review per axis:
 
 - `review_id uuid references reviews(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'experience'))`
+- `axis text check (axis in ('overall', 'coffee', 'vibe'))`
 - `weight numeric(5,4) not null check (weight >= 0 and weight <= 1)`
 - `computed_at timestamptz not null default now()`
 - Primary key `(review_id, axis)`
@@ -53,7 +64,7 @@ New table `review_weights` — cached computed weight per review per axis:
 New table `venue_axis_scores` — output read by the UI:
 
 - `venue_id uuid references venues(id) on delete cascade`
-- `axis text check (axis in ('overall', 'coffee', 'experience'))`
+- `axis text check (axis in ('overall', 'coffee', 'vibe'))`
 - `score numeric(4,2) not null check (score >= 1 and score <= 10)`
 - `confidence numeric(4,3) not null check (confidence >= 0 and confidence <= 1)`
 - `effective_review_count numeric(6,2) not null`
@@ -91,7 +102,7 @@ access, no imports from `utils/supabase/*`.
 ### File `lib/scoring/weights.ts`
 
 ```typescript
-export type Axis = 'overall' | 'coffee' | 'experience';
+export type Axis = 'overall' | 'coffee' | 'vibe';
 
 export type ReviewerState = {
   id: string;
@@ -122,7 +133,7 @@ export const SCORING_CONSTANTS = {
   TENURE_COUNT_WEIGHT: 0.5,
   TENURE_MONTHS_SATURATION: 12,
   TENURE_COUNT_SATURATION: 50,
-  PRIOR_SCORE_BY_AXIS: { overall: 6.0, coffee: 6.0, experience: 6.0 },
+  PRIOR_SCORE_BY_AXIS: { overall: 6.0, coffee: 6.0, vibe: 6.0 },
   PRIOR_STRENGTH: 5.0,
 };
 
@@ -393,22 +404,30 @@ Each PR updates `AGENTS.md` and `docs/scoring.md`.
 - No recency-bucketed separate analytics. The explain endpoint surfaces
   bucket percentages for transparency only.
 
-## Section 11: Interaction with the bucketed ranking system
+## Section 11: Interaction with the bucketed ranking system + two-axis collapse
 
 The Phase 1 ranking migration (`docs/ranking.md`) makes `rating_overall` a
-derived smallint computed from `(bucket, rank_position, bucket_size)` rather
-than a slider value. Three notes for this pipeline:
+derived smallint computed from `(bucket, rank_position, bucket_size)`
+rather than a slider value. The Phase 1 two-axis migration
+(`20260428000000_two_axis_collapse.sql`) drops the six-axis sliders and
+replaces them with `rating_coffee_5` / `rating_vibe_5`. Notes for this
+pipeline:
 
 1. **`rating_overall` is no longer a free-form 1-10 input.** For a given
    reviewer the value within a bucket is constrained to a 4-wide band
    (pilgrimage 7–10, detour 4–7, convenience 1–4). The pipeline's `overall`
    axis input therefore loses some resolution at single-bucket granularity.
-2. **Six-axis path is unchanged.** When `rating_taste`, `rating_body` and
-   `rating_aroma` are all present, the pipeline computes the `overall` axis
-   from those six axes via `deriveOverallScore` and ignores
-   `reviews.rating_overall`. The bucket-derived `rating_overall` only feeds
-   the pipeline for legacy reviews missing one of the coffee axes.
-3. **Low-N confidence at the venue level.** If a venue has only 1–2 reviews
+2. **Coffee and vibe axes read 1-5 columns scaled to 1-10.** The pipeline
+   reads `rating_coffee_5` / `rating_vibe_5` and multiplies by 2 (so the
+   value range becomes 2-10). The aggregate clamps to `[1, 10]` at write
+   time. Priors stay at 6.0 — the same midpoint they were on the 1-10
+   slider scale.
+3. **Old `'experience'` rows are deleted by the two-axis migration** in
+   `reviewer_axis_weights`, `review_weights`, and `venue_axis_scores`. The
+   axis CHECK constraints are tightened to `('overall', 'coffee', 'vibe')`
+   (path (a) from the brief). The next pipeline run after the migration
+   populates fresh `'vibe'` rows.
+4. **Low-N confidence at the venue level.** If a venue has only 1–2 reviews
    in a single user's pilgrimage bucket, the per-bucket band-mapping
    forces `rating_overall` to the top of the band (10 for `bucket_size = 1`,
    9 or 10 for `bucket_size = 2`), which combined with a high beaned-reviewer

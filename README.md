@@ -103,22 +103,27 @@ See `.env.example`:
 
 ## Scoring model
 
-Reviews capture six slider inputs (ambience, service, value, taste, body, aroma)
-plus a Michelin-style **bucket** (Pilgrimage / Detour / Convenience). The
-review flow at `/venues/[slug]/review` walks through:
+Reviews capture two 1-5 slider inputs (**Coffee** and **Vibe**, both
+required) plus a Michelin-style **bucket** (Pilgrimage / Detour /
+Convenience). The review flow at `/venues/[slug]/review` walks through:
 
 1. **Bucket** — pick where this venue lands in your list.
 2. **Tournament** — binary-search the new venue's rank within that bucket
    via head-to-head comparisons (skipped if the bucket is empty).
-3. **Six axes** — slider per axis, defaults to 5/10.
-4. **Notes** — visit date and free-text review.
-5. **Reveal** — animated "lands at #N of M pilgrimages" card.
+3. **Coffee + Vibe** — two 1-5 sliders, both required. No auto-fill default.
+4. **Notes** — visit date and an optional free-text review.
+5. **Reveal** — animated "lands at #N of M pilgrimages" card with the
+   chosen coffee + vibe scores.
 
-`rating_overall` is now derived smallint storage from
-`(bucket, rank_position, bucket_size)` rather than a free-form 1–10 slider.
-The scoring pipeline computes weighted venue composites for `overall`,
-`coffee`, and `experience`. See `docs/ranking.md` for the bucketed
-ranking design and `docs/scoring.md` for the weighted-scoring model.
+`rating_overall` is derived smallint storage from
+`(bucket, rank_position, bucket_size)` rather than a free-form 1–10
+slider. The scoring pipeline computes weighted venue composites for
+`overall`, `coffee`, and `vibe`. The previous six-axis schema (taste, body,
+aroma, ambience, service, value) was collapsed into the two axes above —
+existing reviews were mapped automatically by halving and rounding the
+relevant 3-axis averages. See `docs/ranking.md` for the bucketed-ranking
+design + the two-axis collapse, and `docs/scoring.md` for the
+weighted-scoring model.
 
 Your personal ranked list lives at `/list` — drag to reorder within or
 across buckets.
