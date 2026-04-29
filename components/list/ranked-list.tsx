@@ -17,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
@@ -153,6 +154,14 @@ export function RankedList({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
+      <style>{`
+        .ranked-row { transition: background 160ms, border-color 160ms; }
+        .ranked-row:hover {
+          background: rgba(255,255,255,0.05) !important;
+          border-color: rgba(255,255,255,0.18) !important;
+        }
+        .ranked-row:hover .lucide-grip-vertical { color: oklch(0.75 0.11 44) !important; }
+      `}</style>
       <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
         {error ? (
           <div
@@ -220,23 +229,42 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
   return (
     <li
       ref={setNodeRef}
+      className="ranked-row"
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        background: isDragging ? "rgba(241,168,113,0.06)" : "rgba(255,255,255,0.02)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: isDragging
+          ? "rgba(241,168,113,0.10)"
+          : "rgba(255,255,255,0.02)",
+        border: isDragging
+          ? "1px solid rgba(241,168,113,0.45)"
+          : "1px solid rgba(255,255,255,0.08)",
+        boxShadow: isDragging
+          ? "0 8px 24px rgba(0,0,0,0.4)"
+          : "none",
         borderRadius: 2,
         padding: "12px 14px",
         display: "flex",
         alignItems: "center",
         gap: 12,
-        cursor: "grab",
+        cursor: isDragging ? "grabbing" : "grab",
+        touchAction: "none",
+        userSelect: "none",
       }}
-      aria-label={`${item.venueName}, rank ${rank}`}
+      aria-label={`${item.venueName}, rank ${rank}. Drag to reorder.`}
       {...attributes}
       {...listeners}
     >
-      <span style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 50%)", minWidth: 32 }}>
+      <GripVertical
+        size={16}
+        aria-hidden
+        style={{
+          color: isDragging ? "oklch(0.75 0.11 44)" : "hsl(24 5.4% 45%)",
+          flexShrink: 0,
+          transition: "color 160ms",
+        }}
+      />
+      <span style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 50%)", minWidth: 28 }}>
         #{rank}
       </span>
       <Link

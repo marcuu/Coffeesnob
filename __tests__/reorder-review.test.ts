@@ -20,6 +20,10 @@ type State = {
   // UPDATE — exercises the action's fallback path that recomputes the
   // value from the post-update bucket ordering.
   stripRatingOverallOnReturn: boolean;
+  // When true, every UPDATE that touches rank_position is validated
+  // against the (reviewer_id, bucket, rank_position) unique constraint
+  // and a collision raises a 23505 error — mirroring the real DB.
+  enforceRankUnique: boolean;
 };
 
 const state: State = {
@@ -29,6 +33,7 @@ const state: State = {
   comparisonsTouched: 0,
   updateCount: 0,
   stripRatingOverallOnReturn: false,
+  enforceRankUnique: false,
 };
 
 function resetState() {
@@ -38,6 +43,7 @@ function resetState() {
   state.comparisonsTouched = 0;
   state.updateCount = 0;
   state.stripRatingOverallOnReturn = false;
+  state.enforceRankUnique = false;
 }
 
 const ID_A = "00000000-0000-4000-8000-000000000001";
@@ -152,6 +158,58 @@ function makeBuilder(table: string): any {
           if (reviewerFilter && r.reviewer_id !== reviewerFilter.val) return false;
           return true;
         });
+        // Optionally simulate the real (reviewer_id, bucket, rank_position)
+        // unique constraint. We snapshot, tentatively apply, validate; if
+        // a collision is detected, roll back and return a 23505 error.
+        if (state.enforceRankUnique) {
+          const snapshot = matches.map((m) => ({ ...m }));
+          for (const m of matches) Object.assign(m, pendingUpdate);
+          const seen = new Map<string, string>();
+          let conflictId: string | null = null;
+          for (const r of state.reviews) {
+            const key = `${r.reviewer_id}|${r.bucket}|${r.rank_position}`;
+            const existing = seen.get(key);
+            if (existing && existing !== r.id) {
+              conflictId = r.id;
+              break;
+            }
+            seen.set(key, r.id);
+          }
+          if (conflictId) {
+            // Roll back.
+            for (let i = 0; i < matches.length; i++) {
+              Object.assign(matches[i], snapshot[i]);
+            }
+            pendingUpdate = null;
+            return {
+              data: null,
+              error: {
+                code: "23505",
+                message:
+                  'duplicate key value violates unique constraint "reviews_reviewer_bucket_rank_unique"',
+              },
+            };
+          }
+          // Successful apply — fall through to trigger recompute.
+          for (const m of matches) state.updateCount++;
+          const touched = new Set<ReviewBucket>(
+            snapshot.map((s) => s.bucket as ReviewBucket),
+          );
+          for (const m of matches) touched.add(m.bucket);
+          for (const b of touched) {
+            recomputeBucket(state.user?.id ?? "", b);
+          }
+          pendingUpdate = null;
+          const sanitized = state.stripRatingOverallOnReturn
+            ? matches.map((m) => {
+                const { rating_overall: _ignore, ...rest } = m;
+                void _ignore;
+                return rest as Review;
+              })
+            : matches;
+          const data = sanitized.length === 1 ? sanitized[0] : sanitized;
+          return { data, error: null };
+        }
         // Mock the trigger: track the OLD bucket before applying the update
         // so a cross-bucket move recomputes both buckets, mirroring the
         // SQL trigger's behaviour.
@@ -388,5 +446,53 @@ describe("reorderReview", () => {
     if (result.status === "error") {
       expect(result.code).toBe("rank_collision_after_compact");
     }
+  });
+
+  it("succeeds under realistic unique-constraint enforcement when ranks are adjacent", async () => {
+    // Regression: with the (reviewer_id, bucket, rank_position) constraint
+    // checked per statement, the original compaction loop renumbered rows
+    // one-by-one and could collide either with the moving review's still-
+    // occupied old rank or with a sibling that hadn't been renumbered yet.
+    // Drop A onto B's slot when B and C are at adjacent integer ranks —
+    // this triggers compaction in the destination — and assert the action
+    // completes without hitting a duplicate-key error.
+    state.reviews = [
+      makeReview(ID_A, "user-1", "pilgrimage", 1000),
+      makeReview(ID_B, "user-1", "pilgrimage", 1001),
+      makeReview(ID_C, "user-1", "pilgrimage", 1002),
+    ];
+    state.enforceRankUnique = true;
+
+    const result = await reorderReview(ID_A, "pilgrimage", 1001);
+    expect(result.status).toBe("ok");
+
+    const ordered = state.reviews
+      .filter((r) => r.bucket === "pilgrimage")
+      .sort((a, b) => a.rank_position - b.rank_position);
+    expect(ordered.map((r) => r.id)).toEqual([ID_B, ID_A, ID_C]);
+    // Every rank is unique within the bucket.
+    const ranks = ordered.map((r) => r.rank_position);
+    expect(new Set(ranks).size).toBe(ranks.length);
+  });
+
+  it("succeeds under realistic unique-constraint enforcement on cross-bucket drop", async () => {
+    // Same regression but for a cross-bucket move into a slot occupied by
+    // an existing review.
+    state.reviews = [
+      makeReview(ID_A, "user-1", "detour", 1000, 5),
+      makeReview(ID_B, "user-1", "pilgrimage", 1000, 9),
+      makeReview(ID_C, "user-1", "pilgrimage", 1001, 8),
+    ];
+    state.enforceRankUnique = true;
+
+    const result = await reorderReview(ID_A, "pilgrimage", 1000);
+    expect(result.status).toBe("ok");
+
+    const pilgrimage = state.reviews
+      .filter((r) => r.bucket === "pilgrimage")
+      .sort((a, b) => a.rank_position - b.rank_position);
+    expect(pilgrimage.map((r) => r.id)).toContain(ID_A);
+    const ranks = pilgrimage.map((r) => r.rank_position);
+    expect(new Set(ranks).size).toBe(ranks.length);
   });
 });
