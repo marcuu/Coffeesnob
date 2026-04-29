@@ -83,8 +83,8 @@ export default async function VenueDetailPage({
   const coffeeScore = weightedScores?.displayable
     ? (weightedScores.axes.coffee?.score ?? null)
     : null;
-  const experienceScore = weightedScores?.displayable
-    ? (weightedScores.axes.experience?.score ?? null)
+  const vibeScore = weightedScores?.displayable
+    ? (weightedScores.axes.vibe?.score ?? null)
     : null;
 
   const explain =
@@ -169,7 +169,7 @@ export default async function VenueDetailPage({
             </div>
             <div style={{ ...MONO_LABEL, letterSpacing: "0.14em", marginTop: 10, textAlign: "right" }}>
               <div>Coffee {formatRating(coffeeScore)}</div>
-              <div style={{ marginTop: 4 }}>Experience {formatRating(experienceScore)}</div>
+              <div style={{ marginTop: 4 }}>Vibe {formatRating(vibeScore)}</div>
             </div>
           </div>
         </div>
@@ -253,15 +253,11 @@ export default async function VenueDetailPage({
                   <p style={{ fontSize: 14, lineHeight: 1.75, marginBottom: 16, whiteSpace: "pre-line" }}>{r.body}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
                     {[
-                      ["Taste", r.rating_taste],
-                      ["Body", r.rating_body],
-                      ["Aroma", r.rating_aroma],
-                      ["Ambience", r.rating_ambience],
-                      ["Service", r.rating_service],
-                      ["Value", r.rating_value],
+                      ["Coffee", r.rating_coffee_5],
+                      ["Vibe", r.rating_vibe_5],
                     ].map(([label, val]) => (
                       <span key={label as string} style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-muted-foreground)" }}>
-                        {label} <strong style={{ color: "var(--color-foreground)", fontWeight: 600 }}>{val ?? "—"}</strong>
+                        {label} <strong style={{ color: "var(--color-foreground)", fontWeight: 600 }}>{val}/5</strong>
                       </span>
                     ))}
                   </div>

@@ -28,12 +28,12 @@ function fullReviewer(overrides: Partial<ReviewerState> = {}): ReviewerState {
   const axisWeights: Record<Axis, number> = {
     overall: 3,
     coffee: 3,
-    experience: 3,
+    vibe: 3,
   };
   const reviewsByAxis: Record<Axis, number> = {
     overall: 10,
     coffee: 10,
-    experience: 10,
+    vibe: 10,
   };
   return {
     id: "r1",
@@ -53,7 +53,7 @@ function fullReview(overrides: Partial<ReviewForWeighting> = {}): ReviewForWeigh
     id: "rev1",
     reviewerId: "r1",
     visitedOn: NOW,
-    scores: { overall: 8, coffee: 8, experience: 7 },
+    scores: { overall: 8, coffee: 8, vibe: 7 },
     ...overrides,
   };
 }
@@ -223,7 +223,7 @@ describe("computeReviewWeight", () => {
       axisWeights: {
         overall: 10,
         coffee: 10,
-        experience: 10,
+        vibe: 10,
       },
     });
     const rev = fullReview();
@@ -235,7 +235,7 @@ describe("computeReviewWeight", () => {
       axisWeights: {
         overall: 0,
         coffee: 3,
-        experience: 3,
+        vibe: 3,
       },
     });
     const rev = fullReview();
@@ -254,7 +254,7 @@ describe("computeReviewWeight", () => {
 
   it("does not penalise completeness when exactly 3 axes are scored", () => {
     const r = fullReviewer();
-    const rev = fullReview({ scores: { overall: 8, coffee: 7, experience: 6 } });
+    const rev = fullReview({ scores: { overall: 8, coffee: 7, vibe: 6 } });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(1, 5);
   });
 
@@ -277,7 +277,7 @@ describe("computeReviewWeight", () => {
       scores: {
         overall: 8,
         coffee: undefined,
-        experience: undefined,
+        vibe: undefined,
       },
     });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
@@ -289,6 +289,6 @@ describe("computeReviewWeight", () => {
 
 describe("AXES", () => {
   it("contains exactly the three documented axes in spec order", () => {
-    expect(AXES).toEqual(["overall", "coffee", "experience"]);
+    expect(AXES).toEqual(["overall", "coffee", "vibe"]);
   });
 });

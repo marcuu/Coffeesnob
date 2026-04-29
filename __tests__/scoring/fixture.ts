@@ -138,7 +138,7 @@ export function buildFixture(): FixtureOutput {
     reviewsInAxisByReviewer.set(r.id, {
       overall: 0,
       coffee: 0,
-      experience: 0,
+      vibe: 0,
     });
     scoresByReviewer.set(r.id, []);
     reviewCountByReviewer.set(r.id, 0);

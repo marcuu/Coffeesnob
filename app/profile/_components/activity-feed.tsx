@@ -5,12 +5,8 @@ import { formatRelativeDate } from "@/lib/profile";
 export type ActivityReview = {
   id: string;
   rating_overall: number;
-  rating_taste: number | null;
-  rating_body: number | null;
-  rating_aroma: number | null;
-  rating_ambience: number;
-  rating_service: number;
-  rating_value: number;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
   body: string;
   visited_on: string;
   venue: {
@@ -20,11 +16,10 @@ export type ActivityReview = {
   };
 };
 
-function RatingPill({ value, label }: { value: number | null; label: string }) {
-  if (value === null) return null;
+function RatingPill({ value, label }: { value: number; label: string }) {
   return (
     <span style={{ color: "var(--color-muted-foreground)" }}>
-      {label} {value}
+      {label} {value}/5
     </span>
   );
 }
@@ -166,12 +161,8 @@ export function ActivityFeed({ reviews }: Props) {
                 fontFamily: "var(--font-mono)",
               }}
             >
-              <RatingPill value={r.rating_taste} label="Taste" />
-              <RatingPill value={r.rating_body} label="Body" />
-              <RatingPill value={r.rating_aroma} label="Aroma" />
-              <RatingPill value={r.rating_ambience} label="Ambience" />
-              <RatingPill value={r.rating_service} label="Service" />
-              <RatingPill value={r.rating_value} label="Value" />
+              <RatingPill value={r.rating_coffee_5} label="Coffee" />
+              <RatingPill value={r.rating_vibe_5} label="Vibe" />
             </div>
           </li>
         ))}

@@ -45,6 +45,8 @@ export type RankedItem = {
   venueSlug: string;
   venueName: string;
   rating_overall: number;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
 };
 
 export function RankedList({
@@ -252,6 +254,26 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
       >
         {item.venueName}
       </Link>
+      <span
+        style={{
+          ...MONO,
+          fontSize: 9,
+          color: "hsl(24 5.4% 56%)",
+        }}
+        aria-label={`Coffee ${item.rating_coffee_5} out of 5`}
+      >
+        ☕ {item.rating_coffee_5}
+      </span>
+      <span
+        style={{
+          ...MONO,
+          fontSize: 9,
+          color: "hsl(24 5.4% 56%)",
+        }}
+        aria-label={`Vibe ${item.rating_vibe_5} out of 5`}
+      >
+        🪑 {item.rating_vibe_5}
+      </span>
       <span
         style={{
           fontFamily: "var(--font-mono)",

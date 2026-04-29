@@ -63,13 +63,17 @@ auth.users ──1:1──▶ reviewers ──1:N──▶ reviews ◀──N:1�
   supports an exact-match city dropdown filter populated from known venue
   cities and defaults to ranking by displayed weighted score (high to low).
   The "Add venue" CTA lives only in the `/venues` page header.
-- **reviews** use six user-entered 1-10 axes (`taste`, `body`, `aroma`,
-  `ambience`, `service`, `value`) plus a derived `rating_overall` and a
-  nullable legacy `rating_coffee`. Unique on `(venue_id, reviewer_id,
-  visited_on)` — a reviewer can re-review the same venue on different visits.
-  The composite axes the scoring pipeline aggregates over are `overall`,
-  `coffee` (mean of taste/body/aroma) and `experience` (mean of
-  ambience/service/value).
+- **reviews** use two user-entered 1-5 axes (`rating_coffee_5`,
+  `rating_vibe_5`, both required) plus a derived `rating_overall` (1-10
+  smallint, computed from the bucket / rank-position pair) and a nullable
+  legacy `rating_coffee`. Each review also carries a `bucket` enum
+  (`pilgrimage` / `detour` / `convenience`) and a sparse-integer
+  `rank_position` for in-bucket ordering. Unique on `(venue_id,
+  reviewer_id, visited_on)` — a reviewer can re-review the same venue on
+  different visits. The composite axes the scoring pipeline aggregates over
+  are `overall`, `coffee` (= `rating_coffee_5 * 2`) and `vibe` (=
+  `rating_vibe_5 * 2`). Schema documentation here is best-effort;
+  `supabase/migrations/` is authoritative.
 - **landing page** (`/`) doubles as the personalised venue feed for signed-in
   users and a public leaderboard for visitors. Server component detects auth
   via `getUser()` and branches: signed-in users get `<OnboardingApp>` with
@@ -115,9 +119,12 @@ Mutations go through server actions that:
 
 Actions used with `useActionState` return a `{ status, message, fieldErrors }`
 shape so forms can render inline Zod messages without round-tripping. The
-review flow lives on `/venues/[slug]/review` as a six-step experience with
-progress indicators; each slider starts at `5/10` and includes travel-time
-calibration hints for third-wave expectations.
+review flow lives on `/venues/[slug]/review` as a four-stage experience:
+bucket selection (Pilgrimage / Detour / Convenience) → pairwise tournament
+inside the chosen bucket → two required 1-5 sliders (coffee + vibe, no
+auto-fill default) → notes → reveal. See `docs/ranking.md` for the
+ranking system and `docs/scoring.md` for how the two axes feed the
+weighted-scoring pipeline.
 
 ## Testing
 

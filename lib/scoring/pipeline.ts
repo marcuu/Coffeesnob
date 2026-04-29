@@ -20,7 +20,7 @@ import {
   type ReviewerState,
   type ReviewerStatus,
 } from "@/lib/scoring/weights";
-import { deriveCoffeeScore, deriveExperienceScore, deriveOverallScore } from "@/lib/review-scoring";
+import { deriveCoffeeScore, deriveVibeScore } from "@/lib/review-scoring";
 import { aggregateVenueAxis } from "@/lib/scoring/aggregation";
 
 // Score-movement threshold for `venuesMovedOverall` in the run report.
@@ -61,12 +61,8 @@ type ReviewRow = {
   reviewer_id: string;
   visited_on: string;
   rating_overall: number;
-  rating_ambience: number;
-  rating_service: number;
-  rating_value: number;
-  rating_taste: number | null;
-  rating_body: number | null;
-  rating_aroma: number | null;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
 };
 
 async function fetchReviewers(
@@ -88,7 +84,7 @@ async function fetchReviewsByReviewers(
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee_5, rating_vibe_5",
     )
     .in("reviewer_id", reviewerIds);
   if (error) throw error;
@@ -103,7 +99,7 @@ async function fetchReviewsByVenues(
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee_5, rating_vibe_5",
     )
     .in("venue_id", venueIds);
   if (error) throw error;
@@ -115,7 +111,7 @@ async function fetchReviewsByIds(sb: Sb, ids: string[]): Promise<ReviewRow[]> {
   const { data, error } = await sb
     .from("reviews")
     .select(
-      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_ambience, rating_service, rating_value, rating_taste, rating_body, rating_aroma",
+      "id, venue_id, reviewer_id, visited_on, rating_overall, rating_coffee_5, rating_vibe_5",
     )
     .in("id", ids);
   if (error) throw error;
@@ -135,32 +131,14 @@ async function fetchAllVenueIds(sb: Sb): Promise<string[]> {
 }
 
 function reviewScores(r: ReviewRow): Record<Axis, number> {
-  const taste = r.rating_taste;
-  const body = r.rating_body;
-  const aroma = r.rating_aroma;
-  const hasCoffeeInputs =
-    typeof taste === "number" && typeof body === "number" && typeof aroma === "number";
-
-  const coffee = hasCoffeeInputs
-    ? deriveCoffeeScore({ rating_taste: taste, rating_body: body, rating_aroma: aroma })
-    : r.rating_overall;
-  const experience = deriveExperienceScore({
-    rating_ambience: r.rating_ambience,
-    rating_service: r.rating_service,
-    rating_value: r.rating_value,
-  });
-  const overall = hasCoffeeInputs
-    ? deriveOverallScore({
-        rating_ambience: r.rating_ambience,
-        rating_service: r.rating_service,
-        rating_value: r.rating_value,
-        rating_taste: taste,
-        rating_body: body,
-        rating_aroma: aroma,
-      })
-    : r.rating_overall;
-
-  return { overall, coffee, experience };
+  // 1-5 → 1-10 internal scale via deriveCoffeeScore / deriveVibeScore. The
+  // 'overall' axis stays on the 1-10 scale produced by the bucket+rank
+  // derivation in compute_rating_overall.
+  return {
+    overall: r.rating_overall,
+    coffee: deriveCoffeeScore({ rating_coffee_5: r.rating_coffee_5 }),
+    vibe: deriveVibeScore({ rating_vibe_5: r.rating_vibe_5 }),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -246,7 +224,7 @@ export async function updateReviewerAxisWeights(
     perReviewerAxisCount.set(r.id, {
       overall: 0,
       coffee: 0,
-      experience: 0,
+      vibe: 0,
     });
   }
   for (const rev of reviews) {
@@ -403,12 +381,12 @@ async function loadReviewerStates(
         weights: {
           overall: 0,
           coffee: 0,
-          experience: 0,
+          vibe: 0,
         },
         counts: {
           overall: 0,
           coffee: 0,
-          experience: 0,
+          vibe: 0,
         },
       };
       axisByReviewer.set(row.reviewer_id, entry);
@@ -547,7 +525,7 @@ async function loadReviewWeights(
         entry = {
           overall: 0,
           coffee: 0,
-          experience: 0,
+          vibe: 0,
         };
         out.set(row.review_id, entry);
       }
@@ -578,7 +556,7 @@ async function loadVenueAxisScores(
       entry = {
         overall: 0,
         coffee: 0,
-        experience: 0,
+        vibe: 0,
       };
       out.set(row.venue_id, entry);
     }

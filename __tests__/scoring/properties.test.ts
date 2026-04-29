@@ -29,7 +29,7 @@ const axisRecord = (values: fc.Arbitrary<number>) =>
   fc.record({
     overall: values,
     coffee: values,
-    experience: values,
+    vibe: values,
   });
 
 const reviewerStateArb: fc.Arbitrary<ReviewerState> = fc.record({

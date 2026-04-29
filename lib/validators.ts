@@ -27,7 +27,7 @@ const slug = z
     "Use lowercase letters, numbers and hyphens only",
   );
 
-const rating = z.number().int().min(1).max(10);
+const rating5 = z.number().int().min(1).max(5);
 
 export const venueCreateSchema = z.object({
   slug,
@@ -56,26 +56,10 @@ export type VenueCreateInput = z.infer<typeof venueCreateSchema>;
 export const venueUpdateSchema = venueCreateSchema.partial();
 export type VenueUpdateInput = z.infer<typeof venueUpdateSchema>;
 
-export const reviewCreateSchema = z.object({
-  venue_id: z.string().uuid(),
-  rating_taste: rating,
-  rating_body: rating,
-  rating_aroma: rating,
-  rating_ambience: rating,
-  rating_service: rating,
-  rating_value: rating,
-  body: z.string().trim().max(5000).optional(),
-  visited_on: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
-});
-
-export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;
-
 // Ranked-review submission. Replaces the old rating_overall slider with a
 // bucket choice + a client-side binary tournament. The six axis sliders
-// remain required and unchanged. The history is replayed server-side to
-// validate the claimed rankPosition.
+// have been replaced by two — coffee + vibe — both 1-5 and required. The
+// history is replayed server-side to validate the claimed rankPosition.
 export const comparisonHistoryEntrySchema = z.object({
   against_review_id: z.string().uuid(),
   result: z.enum(["better", "worse", "same"]),
@@ -90,13 +74,9 @@ export const rankedReviewCreateSchema = z.object({
   bucket: z.enum(REVIEW_BUCKETS),
   rank_position: z.number().int(),
   history: z.array(comparisonHistoryEntrySchema).max(64),
-  rating_taste: rating,
-  rating_body: rating,
-  rating_aroma: rating,
-  rating_ambience: rating,
-  rating_service: rating,
-  rating_value: rating,
-  body: z.string().trim().min(10).max(5000),
+  rating_coffee_5: rating5,
+  rating_vibe_5: rating5,
+  body: z.string().trim().max(5000).optional(),
 });
 
 export type RankedReviewCreateInput = z.infer<typeof rankedReviewCreateSchema>;

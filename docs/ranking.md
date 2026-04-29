@@ -3,9 +3,13 @@
 Coffeesnob's review input is a **pairwise tournament inside a Michelin-style
 bucket**, replacing the old `rating_overall` slider. The reviewer picks one
 of three buckets, then binary-searches the new venue into the existing list
-in that bucket. The six axis sliders (`taste`, `body`, `aroma`, `ambience`,
-`service`, `value`) and the legacy `rating_coffee` are unchanged from the
-pre-ranking flow.
+in that bucket.
+
+The six axis sliders that used to live alongside `rating_overall` —
+`rating_taste`, `rating_body`, `rating_aroma`, `rating_ambience`,
+`rating_service`, `rating_value` — were collapsed into two: **`rating_coffee_5`**
+and **`rating_vibe_5`**, both 1-5 and required (see _Two-axis model_ below).
+The legacy nullable `rating_coffee` column on `public.reviews` is untouched.
 
 ## Buckets
 
@@ -145,13 +149,57 @@ diff /tmp/scores-before.sql /tmp/scores-after.sql
 If `diff` produces output, something in the migration accidentally
 re-derived `rating_overall` and the scoring pipeline picked up the change.
 
+## Two-axis model (coffee + vibe, 1-5)
+
+Migration `20260428000000_two_axis_collapse.sql` replaces the six per-axis
+sliders with two:
+
+- **`rating_coffee_5 smallint not null check (rating_coffee_5 between 1 and 5)`** — how was the cup itself.
+- **`rating_vibe_5 smallint not null check (rating_vibe_5 between 1 and 5)`** — how was everything around it.
+
+The collapse is justified on the hypothesis that the six axes are roughly
+collinear into two latent factors (coffee-quality and overall-experience).
+Trading a bit of dimensionality for much less submission friction (six
+sliders → two) is the conscious bet.
+
+### Backfill mapping
+
+The migration preserves every existing review by averaging the three
+relevant axes, halving (1-10 → 1-5), half-up rounding, and clamping:
+
+```sql
+rating_coffee_5 = greatest(1, least(5,
+  round(((rating_taste + rating_body + rating_aroma) / 3.0) / 2.0)::int))
+rating_vibe_5   = greatest(1, least(5,
+  round(((rating_ambience + rating_service + rating_value) / 3.0) / 2.0)::int))
+```
+
+After backfill, both columns are set NOT NULL and the six old columns are
+dropped from `public.reviews`.
+
+### Scoring-pipeline integration
+
+The pipeline reads `rating_coffee_5` and `rating_vibe_5` and scales them
+back to the 1-10 internal scale by multiplying by 2. The axis enum on
+`reviewer_axis_weights`, `review_weights`, and `venue_axis_scores` is
+restricted to `('overall', 'coffee', 'vibe')` — see `docs/scoring.md` for
+the rest of that story. Old `'experience'` rows are deleted in the
+migration; the pipeline rerun on next deploy populates fresh `'vibe'` rows.
+
 ## File layout
 
-- `supabase/migrations/20260427000000_pairwise_ranking.sql` — schema +
-  backfill + trigger.
+- `supabase/migrations/20260427000000_pairwise_ranking.sql` — pairwise
+  schema + backfill + trigger.
+- `supabase/migrations/20260428000000_two_axis_collapse.sql` — six-axis
+  collapse: add `rating_coffee_5` / `rating_vibe_5`, backfill, drop old
+  columns, update axis CHECK constraints.
 - `lib/types.ts` — `ReviewBucket`, `Review.bucket`, `Review.rank_position`,
-  `ReviewComparison`, `ComparisonHistory`.
+  `Review.rating_coffee_5`, `Review.rating_vibe_5`, `ReviewComparison`,
+  `ComparisonHistory`.
 - `lib/ranking/binary-tournament.ts` — pure tournament functions.
+- `lib/review-scoring.ts` — `deriveCoffeeScore` / `deriveVibeScore`
+  (1-5 → 1-10 scale conversion).
+- `components/review/two-axis-sliders.tsx` — the two-slider UI.
 - `__tests__/binary-tournament.test.ts` — unit tests for the pure
   functions.
 - `__tests__/compute-rating-overall.test.ts` — TS mirror of the SQL
@@ -166,4 +214,4 @@ re-derived `rating_overall` and the scoring pipeline picked up the change.
 - OG share-card image generation for the reveal screen — separate PR.
 - Migrating `rating_overall` to numeric — explicitly rejected; stays
   smallint.
-- Making axis sliders optional — separate product decision.
+- Touching the legacy nullable `rating_coffee` column.

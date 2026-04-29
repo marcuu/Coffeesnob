@@ -59,11 +59,24 @@ export function OnboardingClient({
             fontSize: 15,
             color: "hsl(24 5.4% 70%)",
             lineHeight: 1.7,
+            marginBottom: 12,
           }}
         >
           Have a look — drag to refine within a bucket, or move a venue to a
           different bucket if it lands wrong. Once you&apos;re happy, hit
           &ldquo;Looks right&rdquo; below.
+        </p>
+        <p
+          style={{
+            fontSize: 13,
+            color: "hsl(24 5.4% 60%)",
+            lineHeight: 1.7,
+          }}
+        >
+          We&apos;ve also simplified your old ratings into two scores —{" "}
+          <strong style={{ color: "hsl(60 9.1% 90%)" }}>Coffee</strong> and{" "}
+          <strong style={{ color: "hsl(60 9.1% 90%)" }}>Vibe</strong>, both 1-5
+          — mapped automatically from your previous reviews.
         </p>
       </header>
 

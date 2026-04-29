@@ -21,6 +21,11 @@ export type RankingEvent =
       final_rank: number;
     }
   | {
+      name: "axes_completed";
+      coffee: number;
+      vibe: number;
+    }
+  | {
       name: "review_submitted";
       bucket: ReviewBucket;
       list_changed?: boolean;

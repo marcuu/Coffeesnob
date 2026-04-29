@@ -1,4 +1,7 @@
-import type { BucketCounts } from "@/app/profile/_lib/fetch-profile";
+import type {
+  BucketCounts,
+  ReviewWithVenue,
+} from "@/app/profile/_lib/fetch-profile";
 
 const MONO: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
@@ -13,7 +16,19 @@ const ORDER: Array<{ key: keyof BucketCounts; label: string }> = [
   { key: "convenience", label: "Convenience" },
 ];
 
-export function BucketDistribution({ counts }: { counts: BucketCounts }) {
+function avg(numbers: number[]): number | null {
+  if (numbers.length === 0) return null;
+  const sum = numbers.reduce((a, b) => a + b, 0);
+  return sum / numbers.length;
+}
+
+export function BucketDistribution({
+  counts,
+  reviews,
+}: {
+  counts: BucketCounts;
+  reviews?: ReviewWithVenue[];
+}) {
   const total = counts.pilgrimage + counts.detour + counts.convenience;
   if (total === 0) return null;
 
@@ -25,6 +40,10 @@ export function BucketDistribution({ counts }: { counts: BucketCounts }) {
       : ORDER;
 
   const pilgrimagePercent = Math.round((counts.pilgrimage / total) * 100);
+
+  const pilgrimages = (reviews ?? []).filter((r) => r.bucket === "pilgrimage");
+  const avgCoffee = avg(pilgrimages.map((r) => r.rating_coffee_5));
+  const avgVibe = avg(pilgrimages.map((r) => r.rating_vibe_5));
 
   return (
     <section style={{ marginBottom: 32 }}>
@@ -60,6 +79,18 @@ export function BucketDistribution({ counts }: { counts: BucketCounts }) {
           </div>
         ))}
       </div>
+      {avgCoffee !== null && avgVibe !== null ? (
+        <div
+          style={{
+            ...MONO,
+            color: "var(--color-muted-foreground)",
+            marginBottom: 12,
+            fontSize: 11,
+          }}
+        >
+          Avg pilgrimage: ☕ {avgCoffee.toFixed(1)} · 🪑 {avgVibe.toFixed(1)}
+        </div>
+      ) : null}
       <p
         style={{
           fontSize: 12,

@@ -9,7 +9,9 @@ import {
   type PairwiseResult,
 } from "@/components/review/pairwise-tournament";
 import { ReviewSubmitReveal } from "@/components/review/review-submit-reveal";
+import { TwoAxisSliders } from "@/components/review/two-axis-sliders";
 import { Textarea } from "@/components/ui/textarea";
+import { track } from "@/lib/analytics";
 import type { Review, ReviewBucket } from "@/lib/types";
 
 import { submitRankedReview, type SubmitRankedReviewResult } from "./actions";
@@ -21,17 +23,6 @@ const MONO: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
-const AXES = [
-  { name: "rating_taste" as const, label: "Taste", desc: "Flavour clarity, sweetness, balance." },
-  { name: "rating_body" as const, label: "Body", desc: "Mouthfeel and texture." },
-  { name: "rating_aroma" as const, label: "Aroma", desc: "The fragrance before and during the cup." },
-  { name: "rating_ambience" as const, label: "Ambience", desc: "Setting, noise, lighting, comfort." },
-  { name: "rating_service" as const, label: "Service", desc: "Friendliness, knowledge, speed." },
-  { name: "rating_value" as const, label: "Value", desc: "Was it worth what you paid?" },
-] as const;
-type AxisName = (typeof AXES)[number]["name"];
-const DEFAULT_RATING = 5;
-
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -39,7 +30,7 @@ function today(): string {
 type Stage =
   | { kind: "bucket" }
   | { kind: "tournament"; bucket: ReviewBucket }
-  | { kind: "axes"; bucket: ReviewBucket; tournament: PairwiseResult; axisStep: number }
+  | { kind: "axes"; bucket: ReviewBucket; tournament: PairwiseResult }
   | { kind: "notes"; bucket: ReviewBucket; tournament: PairwiseResult }
   | {
       kind: "reveal";
@@ -65,20 +56,17 @@ export function ReviewForm({
   handle?: string;
 }) {
   const [stage, setStage] = useState<Stage>({ kind: "bucket" });
-  const [values, setValues] = useState<Record<AxisName, number>>({
-    rating_taste: DEFAULT_RATING,
-    rating_body: DEFAULT_RATING,
-    rating_aroma: DEFAULT_RATING,
-    rating_ambience: DEFAULT_RATING,
-    rating_service: DEFAULT_RATING,
-    rating_value: DEFAULT_RATING,
-  });
+  // No defaults: spec requires user to explicitly choose both axes before
+  // they can submit. null = untouched.
+  const [coffee, setCoffee] = useState<number | null>(null);
+  const [vibe, setVibe] = useState<number | null>(null);
   const [body, setBody] = useState("");
   const [visitedOn, setVisitedOn] = useState(today());
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const handleBucket = (bucket: ReviewBucket) => {
+    track({ name: "bucket_selected", bucket });
     const candidates = reviewsByBucket[bucket] ?? [];
     if (candidates.length === 0) {
       // No tournament needed; treat as already converged.
@@ -86,9 +74,9 @@ export function ReviewForm({
         kind: "axes",
         bucket,
         tournament: { rankPosition: 1000, history: [] },
-        axisStep: 0,
       });
     } else {
+      track({ name: "tournament_started", bucket_size: candidates.length });
       setStage({ kind: "tournament", bucket });
     }
   };
@@ -97,13 +85,17 @@ export function ReviewForm({
     bucket: ReviewBucket,
     result: PairwiseResult,
   ) => {
-    setStage({ kind: "axes", bucket, tournament: result, axisStep: 0 });
+    setStage({ kind: "axes", bucket, tournament: result });
   };
 
   const submit = (
     bucket: ReviewBucket,
     tournament: PairwiseResult,
   ) => {
+    if (coffee === null || vibe === null) {
+      setSubmitError("Pick a coffee and vibe rating before submitting.");
+      return;
+    }
     setSubmitError(null);
     startTransition(async () => {
       const result: SubmitRankedReviewResult = await submitRankedReview(
@@ -113,12 +105,8 @@ export function ReviewForm({
           bucket,
           rank_position: tournament.rankPosition,
           history: tournament.history,
-          rating_taste: values.rating_taste,
-          rating_body: values.rating_body,
-          rating_aroma: values.rating_aroma,
-          rating_ambience: values.rating_ambience,
-          rating_service: values.rating_service,
-          rating_value: values.rating_value,
+          rating_coffee_5: coffee,
+          rating_vibe_5: vibe,
           body,
         },
         { slug },
@@ -150,6 +138,8 @@ export function ReviewForm({
         listChanged={stage.list_changed}
         backHref={`/venues/${slug}`}
         handle={handle}
+        coffee={coffee ?? undefined}
+        vibe={vibe ?? undefined}
       />
     );
   }
@@ -220,31 +210,63 @@ export function ReviewForm({
         )}
 
         {stage.kind === "axes" && (
-          <AxisStep
-            stage={stage}
-            values={values}
-            setValues={setValues}
-            onBack={() => {
-              if (stage.axisStep === 0) {
-                // Go back to tournament if there was one, else bucket selector.
-                const hasCandidates = (reviewsByBucket[stage.bucket] ?? []).length > 0;
-                setStage(
-                  hasCandidates
-                    ? { kind: "tournament", bucket: stage.bucket }
-                    : { kind: "bucket" },
-                );
-              } else {
-                setStage({ ...stage, axisStep: stage.axisStep - 1 });
-              }
-            }}
-            onNext={() => {
-              if (stage.axisStep === AXES.length - 1) {
-                setStage({ kind: "notes", bucket: stage.bucket, tournament: stage.tournament });
-              } else {
-                setStage({ ...stage, axisStep: stage.axisStep + 1 });
-              }
-            }}
-          />
+          <div style={{ width: "100%", maxWidth: 480 }}>
+            <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
+              Score it
+            </div>
+            <h2
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(24px,4vw,36px)",
+                fontWeight: 400,
+                color: "hsl(60 9.1% 97.8%)",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+                marginBottom: 12,
+              }}
+            >
+              Coffee and vibe
+            </h2>
+            <p style={{ fontSize: 14, color: "hsl(24 5.4% 52%)", lineHeight: 1.7, marginBottom: 28 }}>
+              Two scores, both required. Coffee is the cup itself; vibe is everything around it.
+            </p>
+
+            <TwoAxisSliders
+              coffee={coffee}
+              vibe={vibe}
+              onChange={(next) => {
+                if (next.coffee !== undefined) setCoffee(next.coffee);
+                if (next.vibe !== undefined) setVibe(next.vibe);
+              }}
+            />
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 32 }}>
+              <NavButton
+                variant="ghost"
+                onClick={() => {
+                  const hasCandidates =
+                    (reviewsByBucket[stage.bucket] ?? []).length > 0;
+                  setStage(
+                    hasCandidates
+                      ? { kind: "tournament", bucket: stage.bucket }
+                      : { kind: "bucket" },
+                  );
+                }}
+              >
+                ← Back
+              </NavButton>
+              <NavButton
+                onClick={() => {
+                  if (coffee === null || vibe === null) return;
+                  track({ name: "axes_completed", coffee, vibe });
+                  setStage({ kind: "notes", bucket: stage.bucket, tournament: stage.tournament });
+                }}
+                disabled={coffee === null || vibe === null}
+              >
+                Next →
+              </NavButton>
+            </div>
+          </div>
         )}
 
         {stage.kind === "notes" && (
@@ -260,7 +282,6 @@ export function ReviewForm({
                 kind: "axes",
                 bucket: stage.bucket,
                 tournament: stage.tournament,
-                axisStep: AXES.length - 1,
               })
             }
             onSubmit={() => submit(stage.bucket, stage.tournament)}
@@ -286,102 +307,12 @@ function stageLabel(stage: Stage): string {
     case "tournament":
       return "Step 2 · ranking";
     case "axes":
-      return `Step 3 · ${AXES[stage.axisStep].label.toLowerCase()}`;
+      return "Step 3 · scores";
     case "notes":
       return "Step 4 · notes";
     default:
       return "";
   }
-}
-
-function AxisStep({
-  stage,
-  values,
-  setValues,
-  onBack,
-  onNext,
-}: {
-  stage: Extract<Stage, { kind: "axes" }>;
-  values: Record<AxisName, number>;
-  setValues: React.Dispatch<React.SetStateAction<Record<AxisName, number>>>;
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  const axis = AXES[stage.axisStep];
-  return (
-    <div style={{ width: "100%", maxWidth: 480 }}>
-      <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
-        {axis.label}
-      </div>
-      <h2
-        style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "clamp(24px,4vw,36px)",
-          fontWeight: 400,
-          color: "hsl(60 9.1% 97.8%)",
-          letterSpacing: "-0.02em",
-          lineHeight: 1.1,
-          marginBottom: 12,
-        }}
-      >
-        How was the {axis.label.toLowerCase()}?
-      </h2>
-      <p style={{ fontSize: 14, color: "hsl(24 5.4% 52%)", lineHeight: 1.7, marginBottom: 28 }}>
-        {axis.desc}
-      </p>
-
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 64,
-            color: "oklch(0.75 0.11 44)",
-            lineHeight: 1,
-          }}
-        >
-          {values[axis.name]}
-        </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 16, color: "hsl(24 5.4% 36%)" }}>
-          /10
-        </div>
-      </div>
-
-      <input
-        type="range"
-        min={1}
-        max={10}
-        value={values[axis.name]}
-        onChange={(e) =>
-          setValues((prev) => ({ ...prev, [axis.name]: Number(e.target.value) }))
-        }
-        style={{
-          width: "100%",
-          accentColor: "oklch(0.75 0.11 44)",
-          cursor: "pointer",
-          marginBottom: 8,
-        }}
-      />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          ...MONO,
-          fontSize: 9,
-          color: "hsl(24 5.4% 36%)",
-          marginBottom: 32,
-        }}
-      >
-        <span>Poor</span>
-        <span>Good</span>
-        <span>Exceptional</span>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <NavButton onClick={onBack} variant="ghost">← Back</NavButton>
-        <NavButton onClick={onNext}>Next →</NavButton>
-      </div>
-    </div>
-  );
 }
 
 function NotesStep({
@@ -455,7 +386,7 @@ function NotesStep({
           htmlFor="body"
           style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
         >
-          Review (10–5000 characters)
+          Review (optional, max 5000 characters)
         </label>
         <Textarea
           id="body"
@@ -485,7 +416,7 @@ function NotesStep({
         </NavButton>
         <NavButton
           onClick={onSubmit}
-          disabled={pending || body.trim().length < 10}
+          disabled={pending}
         >
           {pending ? "Posting…" : "Submit review"}
         </NavButton>

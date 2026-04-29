@@ -10,12 +10,8 @@ import type { Reviewer, ReviewBucket } from "@/lib/types";
 export type ReviewWithVenue = {
   id: string;
   rating_overall: number;
-  rating_taste: number | null;
-  rating_body: number | null;
-  rating_aroma: number | null;
-  rating_ambience: number;
-  rating_service: number;
-  rating_value: number;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
   bucket: ReviewBucket;
   body: string;
   visited_on: string;
@@ -49,7 +45,7 @@ export async function fetchProfileByUserId(
     supabase
       .from("reviews")
       .select(
-        "id, rating_overall, rating_taste, rating_body, rating_aroma, rating_ambience, rating_service, rating_value, bucket, body, visited_on, created_at, venue:venues(name, slug, city, brew_methods)",
+        "id, rating_overall, rating_coffee_5, rating_vibe_5, bucket, body, visited_on, created_at, venue:venues(name, slug, city, brew_methods)",
       )
       .eq("reviewer_id", reviewerId)
       .order("created_at", { ascending: false }),

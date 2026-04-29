@@ -75,10 +75,14 @@ const GOLDEN_OVERALL: Record<string, number> = {
   "venue-04": 5.32,
 };
 
+// Refresh on the two-axis collapse: 'experience' replaced by 'vibe'. The
+// new fixture builder (and pipeline) produce the values asserted below; if
+// they shift again, regenerate via __tests__/scoring/fixture.ts and explain
+// in the PR description (see docs/scoring.md Section 7).
 const GOLDEN_VENUE_00: Record<Axis, number> = {
   overall: 5.92,
   coffee: 5.92,
-  experience: 5.95,
+  vibe: 5.95,
 };
 
 const GOLDEN_CONFIDENCE: Record<string, number> = {
