@@ -113,7 +113,7 @@ export function Leaderboard({ venues }: LeaderboardProps) {
               color: "var(--color-foreground)",
             }}
           >
-            Coffeesnob
+            Caffeinesnobs
           </Link>
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <VenueSearch />
