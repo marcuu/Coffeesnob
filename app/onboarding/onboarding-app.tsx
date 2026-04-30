@@ -10,7 +10,8 @@ import type { OnboardingVenue, Prefs, Region } from "./data";
 import { Feed } from "./feed";
 import { Sidebar } from "./sidebar";
 
-const KEY = "coffeesnob.v2.prefs";
+const KEY = "caffeinesnobs.v2.prefs";
+const LEGACY_KEY = "coffeesnob.v2.prefs";
 
 const NAV_LINK: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
@@ -49,7 +50,7 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as Partial<Prefs>;
         const regionIds = new Set(regions.map((r) => r.id));
@@ -67,6 +68,7 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
     if (!hydrated) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(prefs));
+      localStorage.removeItem(LEGACY_KEY);
     } catch {
       // ignore
     }
@@ -156,7 +158,7 @@ export function OnboardingApp({ venues, regions, profileHref }: OnboardingAppPro
               color: "var(--color-foreground)",
             }}
           >
-            Coffeesnob
+            Caffeinesnobs
           </Link>
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <VenueSearch />
