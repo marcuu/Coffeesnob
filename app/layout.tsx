@@ -24,8 +24,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Coffeesnob",
-  description: "Coffeesnob",
+  metadataBase: new URL("https://caffeinesnobs.co.uk"),
+  title: "Caffeinesnobs",
+  description: "UK third-wave coffee, reviewed honestly.",
 };
 
 export default function RootLayout({
