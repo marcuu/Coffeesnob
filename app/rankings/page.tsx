@@ -20,15 +20,15 @@ import { createClient } from "@/utils/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Coffeesnob Rankings — Top UK Specialty Coffee",
+  title: "Caffeinesnobs Rankings — Top UK Specialty Coffee",
   description:
     "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
   openGraph: {
-    title: "Coffeesnob Rankings — Top UK Specialty Coffee",
+    title: "Caffeinesnobs Rankings — Top UK Specialty Coffee",
     description:
       "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
     type: "website",
-    siteName: "Coffeesnob",
+    siteName: "Caffeinesnobs",
   },
 };
 
@@ -80,7 +80,7 @@ export default async function RankingsPage() {
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Coffeesnob Rankings
+              Caffeinesnobs Rankings
             </h1>
             <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
               The top UK specialty coffee shops.
