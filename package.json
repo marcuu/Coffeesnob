@@ -15,7 +15,11 @@
     "db:reset": "supabase db reset",
     "scoring:run": "tsx scripts/scoring-run.ts",
     "scoring:backfill": "tsx scripts/scoring-backfill.ts",
-    "scoring:simulate": "tsx scripts/simulate.ts"
+    "scoring:simulate": "tsx scripts/simulate.ts",
+    "simulation:seed-personas": "tsx scripts/simulation-seed-personas.ts",
+    "simulation:seed-bramford": "tsx scripts/simulation-seed-bramford.ts",
+    "simulation:bootstrap-history": "tsx scripts/simulation-bootstrap-history.ts",
+    "simulation:run-tick": "tsx scripts/simulation-run-tick.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
