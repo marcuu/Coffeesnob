@@ -1,11 +1,4 @@
-// Landing page — the public leaderboard.
-//
-// Signed-in users land at /onboarding on first sign-in (auth callback) and
-// at /list once they've completed onboarding. The flavour-pair quiz that
-// previously lived on / has been replaced by the priming flow at
-// /onboarding (see app/onboarding/page.tsx). Both signed-in and signed-out
-// users see the same score-sorted leaderboard at /; signed-in users get
-// the SiteHeader for navigation.
+// Landing page - the public real-city leaderboard.
 
 import type { Metadata } from "next";
 
@@ -19,7 +12,7 @@ import { mapDbVenuesToOnboarding } from "./onboarding/venue-mapping";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Caffeinesnobs — UK third-wave coffee, reviewed honestly",
+  title: "Caffeinesnobs - UK third-wave coffee, reviewed honestly",
   description:
     "The UK third-wave coffee leaderboard, ranked by weighted reviewer scores. Sign in to personalise the feed for your taste.",
 };
@@ -29,7 +22,8 @@ export default async function HomePage() {
 
   const { data, error } = await supabase
     .from("venues")
-    .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
+    .select("id,slug,name,city,roasters,bew_methods:brew_methods,brew_methods,has_plant_milk,notes,is_fictional")
+    .eq("is_fictional", false)
     .order("name", { ascending: true });
 
   if (error) {
