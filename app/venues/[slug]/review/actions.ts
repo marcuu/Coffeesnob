@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { track } from "@/lib/analytics";
+import type { ReviewBucket } from "@/lib/types";
 import {
   persistRankedReview,
   type PersistRankedReviewResult,
@@ -10,6 +11,10 @@ import {
 import { createClient } from "@/utils/supabase/server";
 
 export type SubmitRankedReviewResult = PersistRankedReviewResult;
+
+function isReviewBucket(value: unknown): value is ReviewBucket {
+  return value === "pilgrimage" || value === "detour" || value === "convenience";
+}
 
 export async function submitRankedReview(
   rawInput: unknown,
@@ -37,11 +42,14 @@ export async function submitRankedReview(
   revalidatePath("/bramford");
   revalidatePath("/list");
 
-  track({
-    name: "review_submitted",
-    bucket: (rawInput as { bucket?: string }).bucket,
-    list_changed: result.list_changed || undefined,
-  });
+  const bucket = (rawInput as { bucket?: unknown }).bucket;
+  if (isReviewBucket(bucket)) {
+    track({
+      name: "review_submitted",
+      bucket,
+      list_changed: result.list_changed || undefined,
+    });
+  }
 
   return result;
 }
