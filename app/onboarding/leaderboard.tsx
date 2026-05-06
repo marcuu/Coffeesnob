@@ -54,9 +54,10 @@ const SUBHEAD: React.CSSProperties = {
 
 type LeaderboardProps = {
   venues: OnboardingVenue[];
+  isSignedIn?: boolean;
 };
 
-export function Leaderboard({ venues }: LeaderboardProps) {
+export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
   const [top, ...rest] = venues;
 
   if (venues.length === 0) {
@@ -66,14 +67,20 @@ export function Leaderboard({ venues }: LeaderboardProps) {
           No venues yet.
         </h1>
         <p style={SUBHEAD}>
-          The leaderboard fills up once the first venue is added.{" "}
-          <Link
-            href="/login"
-            style={{ color: "var(--color-accent)", textDecoration: "underline" }}
-          >
-            Sign in
-          </Link>{" "}
-          to add one.
+          {isSignedIn ? (
+            "The leaderboard fills up once the first venue is added."
+          ) : (
+            <>
+              The leaderboard fills up once the first venue is added.{" "}
+              <Link
+                href="/login"
+                style={{ color: "var(--color-accent)", textDecoration: "underline" }}
+              >
+                Sign in
+              </Link>{" "}
+              to add one.
+            </>
+          )}
         </p>
       </main>
     );
@@ -120,12 +127,26 @@ export function Leaderboard({ venues }: LeaderboardProps) {
             <Link href="/rankings" style={NAV_LINK}>
               Rankings
             </Link>
-            <Link
-              href="/login"
-              style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
-            >
-              Sign in
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link href="/list" style={NAV_LINK}>
+                  Your list
+                </Link>
+                <Link
+                  href="/profile"
+                  style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
+                >
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
+              >
+                Sign in
+              </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -139,17 +160,32 @@ export function Leaderboard({ venues }: LeaderboardProps) {
         </h1>
         <p style={SUBHEAD}>
           Venues ranked by weighted reviewer scores.{" "}
-          <Link
-            href="/login"
-            style={{
-              color: "var(--color-foreground)",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-            }}
-          >
-            Sign in
-          </Link>{" "}
-          to personalise the feed.
+          {isSignedIn ? (
+            <Link
+              href="/list"
+              style={{
+                color: "var(--color-foreground)",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Open your list
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                style={{
+                  color: "var(--color-foreground)",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                }}
+              >
+                Sign in
+              </Link>{" "}
+              to personalise the feed.
+            </>
+          )}
         </p>
 
         <div style={{ display: "grid", gap: 8, marginTop: 48 }}>

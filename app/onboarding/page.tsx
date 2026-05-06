@@ -1,4 +1,4 @@
-// /onboarding — mandatory cold-start priming flow for new users. See
+// /onboarding - mandatory cold-start priming flow for new users. See
 // docs/cold-start.md (PRD) for the user journey. Once seen_onboarding_at
 // is set, the gate in utils/supabase/middleware.ts unblocks the rest of
 // the app and a re-visit redirects to /list.
@@ -9,6 +9,7 @@ import type { Review } from "@/lib/types";
 import { sanitizeNext } from "@/lib/sanitize-next";
 import { createClient } from "@/utils/supabase/server";
 
+import { OnboardingEscape } from "./onboarding-escape";
 import { PrimingApp, type PrimingVenue, type PrimingReviewSummary } from "./priming-app";
 
 export const dynamic = "force-dynamic";
@@ -103,11 +104,14 @@ export default async function OnboardingPage({
   }
 
   return (
-    <PrimingApp
-      venues={venues}
-      existingByVenue={existingByVenue}
-      displayName={reviewer?.display_name ?? "you"}
-      nextHref={next}
-    />
+    <>
+      <PrimingApp
+        venues={venues}
+        existingByVenue={existingByVenue}
+        displayName={reviewer?.display_name ?? "you"}
+        nextHref={next}
+      />
+      <OnboardingEscape nextHref={next} />
+    </>
   );
 }
