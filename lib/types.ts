@@ -18,6 +18,8 @@ export interface Reviewer {
   bio: string | null;
   home_city: string | null;
   status: "beaned" | "invited" | "active";
+  is_synthetic: boolean;
+  persona_yaml: string | null;
   review_count: number;
   venues_reviewed_count: number;
   first_review_at: string | null;
@@ -47,6 +49,7 @@ export interface Venue {
   notes: string | null;
   photo_url: string | null;
   created_by: string;
+  is_fictional: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -64,6 +67,7 @@ export interface Review {
   rank_position: number;
   body: string;
   visited_on: string;
+  is_synthetic: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -77,11 +81,6 @@ export interface ReviewComparison {
   created_at: string;
 }
 
-// One entry per comparison made during a tournament. Captured client-side and
-// replayed server-side on submit so the persistence layer can validate the
-// claimed rank position. step_index is 0-based and monotonic within a
-// tournament; against_review_id is the existing review the new venue was
-// compared against at that step.
 export type ComparisonHistory = Array<{
   against_review_id: string;
   result: "better" | "worse" | "same";
