@@ -1,129 +1,45 @@
 # Coffeesnob
 
-Next.js 15 + Supabase scaffold.
+Next.js 15 + Supabase coffee review app.
 
-## Tech stack
-
-- **Framework:** Next.js 15 (App Router, Turbopack)
-- **Language:** TypeScript
-- **Auth / DB / Storage:** Supabase (Google OAuth, Postgres with RLS)
-- **Styling:** Tailwind CSS v4 + shadcn/ui (Radix primitives)
-- **Validation:** Zod v4
-- **Testing:** Vitest
-- **Package manager:** npm
-
-See `AGENTS.md` for project conventions and `docs/architecture.md` for the
-architecture overview.
-
-## Getting started
-
-Prerequisites: Node 20+, Docker running (for the local Supabase stack).
+## Getting Started
 
 ```bash
 npm install
-npm run db:start            # boots local Supabase in Docker
-cp .env.example .env.local  # then paste the API URL + anon key from db:start output
-npm run dev                 # http://localhost:3000
+npm run db:start
+cp .env.example .env.local
+npm run dev
 ```
 
-The first `db:start` applies `supabase/migrations/` and runs `supabase/seed.sql`,
-which creates three email/password test users (all password `password123`):
-
-| email                      | display name |
-| -------------------------- | ------------ |
-| alice@coffeesnob.local     | Alice        |
-| bob@coffeesnob.local       | Bob          |
-| carol@coffeesnob.local     | Carol        |
-
-...along with four London/Leeds venues and a handful of reviews.
-The `/venues` page includes an **All cities / specific city** dropdown filter
-driven by cities present in the database, and defaults to sorting venues by
-displayed score (high to low).
-
-### Useful URLs when the stack is up
-
-- App / leaderboard (public): http://localhost:3000
-  - Logged-out visitors see the score-desc leaderboard with "Sign in to personalise".
-  - Signed-in users see the personalised ranked feed with sidebar, aha reveal, and nudge.
-  - `/onboarding` redirects to `/` with a 308.
-- Venues (auth-gated): http://localhost:3000/venues
-- Supabase Studio: http://localhost:54323
-- Inbucket (emails): http://localhost:54324
-- Postgres: `postgresql://postgres:postgres@localhost:54322/postgres`
-
-To wipe and re-seed:
+## Core Scripts
 
 ```bash
+npm run dev
+npm run build
+npm run typecheck
+npm test
 npm run db:reset
+npm run scoring:run
 ```
 
-### Signing in locally
+## Bramford Simulation
 
-The login page offers a magic-link flow. Enter one of the seeded emails (or
-any email — Supabase local accepts all), click **Send magic link**, then open
-Inbucket at http://localhost:54324 and click the link in the received email.
-Google OAuth on the same page is disabled locally unless you configure
-`[auth.external.google]` in `supabase/config.toml`.
-
-### Production setup
-
-Run the SQL in `supabase/migrations/` against your Supabase project (easiest:
-`supabase db push` with the project linked), then insert your email into
-`allowed_users` so RLS will allow reads/writes.
-
-## Scripts
+Bramford is the public calibration city: fictional venues plus labelled synthetic reviewers used to exercise the ranking and scoring system before real user density is high.
 
 ```bash
-npm run dev         # Next dev server (Turbopack)
-npm run build       # production build
-npm run start       # run production build
-npm run lint        # next lint
-npm run typecheck   # tsc --noEmit
-npm test            # vitest run
-npm run test:watch  # vitest watch
-npm run db:start    # supabase start (local stack)
-npm run db:stop     # supabase stop
-npm run db:reset    # re-apply migrations + re-seed
+npm run simulation:seed-personas
+npm run simulation:seed-bramford
+npm run simulation:bootstrap-history
+npm run simulation:run-tick
 ```
 
-## Environment variables
+The daily cron endpoint is `/api/simulation/tick` and requires `Authorization: Bearer $SIMULATION_CRON_SECRET` or Vercel's `CRON_SECRET`.
 
-See `.env.example`:
+Key boundaries:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Synthetic reviewers only review fictional Bramford venues.
+- Real reviewers cannot review Bramford venues.
+- Real-world leaderboards exclude `is_fictional=true` venues.
+- `/bramford` and `/about/calibration` are public disclosure surfaces.
 
-## Theme notes
-
-- Color tokens are defined in `app/globals.css` via `@theme` and have dedicated
-  dark-mode overrides in `@media (prefers-color-scheme: dark)`.
-- When adding new UI states, use semantic tokens (`--color-muted`,
-  `--color-foreground`, `--color-accent-soft`, etc.) instead of hardcoded light
-  values so onboarding and modal surfaces remain legible in both themes.
-
-## Scoring model
-
-Reviews capture two 1-5 slider inputs (**Coffee** and **Vibe**, both
-required) plus a Michelin-style **bucket** (Pilgrimage / Detour /
-Convenience). The review flow at `/venues/[slug]/review` walks through:
-
-1. **Bucket** — pick where this venue lands in your list.
-2. **Tournament** — binary-search the new venue's rank within that bucket
-   via head-to-head comparisons (skipped if the bucket is empty).
-3. **Coffee + Vibe** — two 1-5 sliders, both required. No auto-fill default.
-4. **Notes** — visit date and an optional free-text review.
-5. **Reveal** — animated "lands at #N of M pilgrimages" card with the
-   chosen coffee + vibe scores.
-
-`rating_overall` is derived smallint storage from
-`(bucket, rank_position, bucket_size)` rather than a free-form 1–10
-slider. The scoring pipeline computes weighted venue composites for
-`overall`, `coffee`, and `vibe`. The previous six-axis schema (taste, body,
-aroma, ambience, service, value) was collapsed into the two axes above —
-existing reviews were mapped automatically by halving and rounding the
-relevant 3-axis averages. See `docs/ranking.md` for the bucketed-ranking
-design + the two-axis collapse, and `docs/scoring.md` for the
-weighted-scoring model.
-
-Your personal ranked list lives at `/list` — drag to reorder within or
-across buckets.
+See `docs/simulation-design.md` for details.
