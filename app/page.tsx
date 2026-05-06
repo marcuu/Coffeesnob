@@ -22,7 +22,7 @@ export default async function HomePage() {
 
   const { data, error } = await supabase
     .from("venues")
-    .select("id,slug,name,city,roasters,bew_methods:brew_methods,brew_methods,has_plant_milk,notes,is_fictional")
+    .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes,is_fictional")
     .eq("is_fictional", false)
     .order("name", { ascending: true });
 
