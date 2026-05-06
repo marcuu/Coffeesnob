@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service";
 import { fetchProfileByUserId } from "@/app/profile/_lib/fetch-profile";
 import { ProfileView } from "@/app/profile/_components/profile-view";
 
@@ -9,38 +10,28 @@ import { WishlistSection, type WishlistItem } from "./wishlist";
 
 export const dynamic = "force-dynamic";
 
-// Visible to any signed-in (allowlisted) user. Auth is required because
-// reviewer data is gated by the is_allowed_email() RLS policy.
-export default async function SharedProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
+export default async function SharedProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
-  const { data: reviewerRow } = await supabase
+  const lookupClient = user ? supabase : createServiceRoleClient();
+  const { data: reviewerRow } = await lookupClient
     .from("reviewers")
-    .select("id")
+    .select("id, is_synthetic")
     .eq("username", username)
     .maybeSingle();
 
   if (!reviewerRow) notFound();
+  if (!user && !reviewerRow.is_synthetic) redirect("/login");
 
-  const profileData = await fetchProfileByUserId(supabase, reviewerRow.id);
+  const profileData = await fetchProfileByUserId(lookupClient, reviewerRow.id);
   if (!profileData) notFound();
-  // notFound() throws — assertion tells TS the value is defined below.
-  const data = profileData!;
 
-  const isOwnProfile = user.id === reviewerRow.id;
-
-  // Wishlist (PRD §6 FR7). Public-by-default per PRD §11 Q3.
-  const { data: wishlistRows } = await supabase
+  const isOwnProfile = user?.id === reviewerRow.id;
+  const { data: wishlistRows } = await lookupClient
     .from("review_wishlist")
     .select("venue_id, added_at, venue:venues(name, slug, city)")
     .eq("reviewer_id", reviewerRow.id)
@@ -54,26 +45,15 @@ export default async function SharedProfilePage({
     }>
   )
     .filter((r) => r.venue !== null)
-    .map((r) => ({
-      venueId: r.venue_id,
-      slug: r.venue!.slug,
-      name: r.venue!.name,
-      city: r.venue!.city,
-      addedAt: r.added_at,
-    }));
+    .map((r) => ({ venueId: r.venue_id, slug: r.venue!.slug, name: r.venue!.name, city: r.venue!.city, addedAt: r.added_at }));
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
-      <Link
-        href="/"
-        className="mb-8 block text-sm text-[var(--color-muted-foreground)] hover:underline"
-      >
-        ← Home
+      <Link href={profileData.reviewer.is_synthetic ? "/bramford" : "/"} className="mb-8 block text-sm text-[var(--color-muted-foreground)] hover:underline">
+        Back
       </Link>
-
-      <ProfileView data={data} isOwnProfile={isOwnProfile} />
-
-      <WishlistSection items={wishlist} isOwnProfile={isOwnProfile} />
+      <ProfileView data={profileData} isOwnProfile={Boolean(isOwnProfile)} />
+      {!profileData.reviewer.is_synthetic ? <WishlistSection items={wishlist} isOwnProfile={Boolean(isOwnProfile)} /> : null}
     </main>
   );
 }
