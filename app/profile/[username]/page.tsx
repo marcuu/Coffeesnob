@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/server";
 import { fetchProfileByUserId } from "@/app/profile/_lib/fetch-profile";
 import { ProfileView } from "@/app/profile/_components/profile-view";
 
+import { WishlistSection, type WishlistItem } from "./wishlist";
+
 export const dynamic = "force-dynamic";
 
 // Visible to any signed-in (allowlisted) user. Auth is required because
@@ -37,6 +39,29 @@ export default async function SharedProfilePage({
 
   const isOwnProfile = user.id === reviewerRow.id;
 
+  // Wishlist (PRD §6 FR7). Public-by-default per PRD §11 Q3.
+  const { data: wishlistRows } = await supabase
+    .from("review_wishlist")
+    .select("venue_id, added_at, venue:venues(name, slug, city)")
+    .eq("reviewer_id", reviewerRow.id)
+    .order("added_at", { ascending: false });
+
+  const wishlist: WishlistItem[] = (
+    (wishlistRows ?? []) as unknown as Array<{
+      venue_id: string;
+      added_at: string;
+      venue: { name: string; slug: string; city: string } | null;
+    }>
+  )
+    .filter((r) => r.venue !== null)
+    .map((r) => ({
+      venueId: r.venue_id,
+      slug: r.venue!.slug,
+      name: r.venue!.name,
+      city: r.venue!.city,
+      addedAt: r.added_at,
+    }));
+
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
       <Link
@@ -47,6 +72,8 @@ export default async function SharedProfilePage({
       </Link>
 
       <ProfileView data={data} isOwnProfile={isOwnProfile} />
+
+      <WishlistSection items={wishlist} isOwnProfile={isOwnProfile} />
     </main>
   );
 }

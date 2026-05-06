@@ -140,6 +140,29 @@ export function computeReviewerTenure(
   );
 }
 
+// Cold-start credibility smoothing. For users with fewer than
+// COLD_START_THRESHOLD reviews in an axis, blend their measured weight
+// toward a population prior so the displayed Coffee IQ feels stable from
+// review one. This is a *display-time* smoothing applied on top of the
+// stored reviewer_axis_weights row — the underlying value remains the
+// pipeline's measured weight, and venue aggregation continues to use
+// PRIOR_STRENGTH=3.0 (see lib/scoring/aggregation.ts).
+//
+// Formula matches PRD §8: (n*observed + k*populationPrior) / (n+k).
+export const COLD_START_THRESHOLD = 5;
+export const COLD_START_K = 10;
+
+export function applyColdStartSmoothing(
+  observedWeight: number,
+  axisReviewCount: number,
+  populationPrior: number,
+  k: number = COLD_START_K,
+): number {
+  if (axisReviewCount >= COLD_START_THRESHOLD) return observedWeight;
+  const n = Math.max(0, axisReviewCount);
+  return (n * observedWeight + k * populationPrior) / (n + k);
+}
+
 export function computeReviewerConsistency(reviewerScores: number[]): number {
   if (reviewerScores.length < 5) return 0.5;
 

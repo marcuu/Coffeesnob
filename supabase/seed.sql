@@ -82,7 +82,7 @@ begin
 
   insert into public.venues
     (slug, name, address_line1, city, postcode, roasters, brew_methods,
-     has_decaf, has_plant_milk, notes, created_by)
+     has_decaf, has_plant_milk, notes, created_by, is_priming_venue)
   values
     ('prufrock-coffee', 'Prufrock Coffee',
      '23-25 Leather Lane', 'London', 'EC1N 7TE',
@@ -90,12 +90,12 @@ begin
      array['espresso','filter','batch_brew'],
      true, true,
      'Long-running Leather Lane fixture; Square Mile brews and a decent filter bar.',
-     alice)
+     alice, true)
   returning id into prufrock;
 
   insert into public.venues
     (slug, name, address_line1, city, postcode, roasters, brew_methods,
-     has_decaf, has_plant_milk, notes, created_by)
+     has_decaf, has_plant_milk, notes, created_by, is_priming_venue)
   values
     ('kaffeine-fitzrovia', 'Kaffeine',
      '66 Great Titchfield Street', 'London', 'W1W 7QJ',
@@ -103,12 +103,12 @@ begin
      array['espresso','filter'],
      true, true,
      'Tight Fitzrovia shop, reliable espresso. Morning queue is real.',
-     alice)
+     alice, true)
   returning id into kaffeine;
 
   insert into public.venues
     (slug, name, address_line1, city, postcode, roasters, brew_methods,
-     has_decaf, has_plant_milk, notes, created_by)
+     has_decaf, has_plant_milk, notes, created_by, is_priming_venue)
   values
     ('ozone-shoreditch', 'Ozone Coffee Roasters',
      '11 Leonard Street', 'London', 'EC2A 4AQ',
@@ -116,12 +116,12 @@ begin
      array['espresso','filter','batch_brew'],
      true, true,
      'Roastery and kitchen in Shoreditch; own beans, sit-down food.',
-     bob)
+     bob, true)
   returning id into ozone;
 
   insert into public.venues
     (slug, name, address_line1, city, postcode, roasters, brew_methods,
-     has_decaf, has_plant_milk, notes, created_by)
+     has_decaf, has_plant_milk, notes, created_by, is_priming_venue)
   values
     ('north-star-leeds', 'North Star Coffee Shop',
      'Leeds Dock', 'Leeds', 'LS10 1PZ',
@@ -129,8 +129,138 @@ begin
      array['espresso','filter','pour_over','batch_brew'],
      true, true,
      'North Star''s dockside flagship. Full pour-over menu.',
-     carol)
+     carol, true)
   returning id into northstar;
+
+  -- Additional priming venues spanning the UK third-wave taste space.
+  -- Mix of universally-loved classics, divisive pours, regional standouts,
+  -- and chains as bottom-anchors per PRD §5.2.
+  insert into public.venues
+    (slug, name, address_line1, city, postcode, roasters, brew_methods,
+     has_decaf, has_plant_milk, notes, created_by, is_priming_venue)
+  values
+    ('workshop-marylebone', 'Workshop Coffee', '75 Wigmore Street',
+     'London', 'W1U 1QD', array['Workshop'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Workshop''s Marylebone room. Their own roast, careful brews.', alice, true),
+    ('monmouth-borough', 'Monmouth Coffee', '2 Park Street',
+     'London', 'SE1 9AB', array['Monmouth'],
+     array['espresso','filter','pour_over'], true, true,
+     'Borough Market institution. Purist heaven or tourist trap, depending who you ask.',
+     alice, true),
+    ('origin-charlotte-street', 'Origin Coffee', '65 Charlotte Street',
+     'London', 'W1T 4PF', array['Origin'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Origin''s Fitzrovia shop. Cornish roast, clean brews.', bob, true),
+    ('curators-fenchurch', 'Curators Coffee Studio',
+     '9A Cullum Street', 'London', 'EC3M 7JJ',
+     array['Nude','Workshop'], array['espresso','filter'], true, true,
+     'Tucked-away City studio with rotating roasters.', bob, true),
+    ('caravan-kings-cross', 'Caravan Coffee Roasters',
+     '1 Granary Square', 'London', 'N1C 4AA', array['Caravan'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Big Granary Square room; own roast, all-day kitchen.', carol, true),
+    ('climpsons-broadway', 'Climpson & Sons',
+     '67 Broadway Market', 'London', 'E8 4PH', array['Climpson & Sons'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Broadway Market original. Climpson''s own beans on a tight bar.',
+     alice, true),
+    ('allpress-shoreditch', 'Allpress Espresso',
+     '58 Redchurch Street', 'London', 'E2 7DP', array['Allpress'],
+     array['espresso','filter'], true, true,
+     'NZ-roasted espresso, Shoreditch backstreet.', bob, true),
+    ('nude-spitalfields', 'Nude Espresso',
+     '26 Hanbury Street', 'London', 'E1 6QR', array['Nude'],
+     array['espresso','filter'], true, true,
+     'Long-running Spitalfields espresso bar. Own roast.', carol, true),
+    ('tap-rathbone', 'Tap Coffee',
+     '193 Wardour Street', 'London', 'W1F 8ZF', array['Workshop'],
+     array['espresso','filter'], true, true,
+     'Soho tap-style espresso; small room, quick turnover.', alice, true),
+    ('department-leather-lane', 'Department of Coffee and Social Affairs',
+     '14-16 Leather Lane', 'London', 'EC1N 7SU', array['Department'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Leather Lane flagship. Reliable, broad menu.', bob, true),
+    ('assembly-brixton', 'Assembly Coffee',
+     '17 Roupell Street', 'London', 'SE1 8TB', array['Assembly'],
+     array['espresso','filter'], true, true,
+     'Brixton roaster; clean filter, careful espresso.', carol, true),
+    ('square-mile-bethnal-green', 'Square Mile Coffee Roasters',
+     'Unit 5, Pratt Mews', 'London', 'NW1 0AD', array['Square Mile'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Square Mile roastery cafe. Reference espresso for many UK shops.',
+     alice, true),
+    ('tamper-sellers-wheel', 'Tamper Sellers Wheel',
+     '149 Arundel Street', 'Sheffield', 'S1 2NU', array['Workshop'],
+     array['espresso','filter','pour_over'], true, true,
+     'Kiwi-run Sheffield landmark. Brunch + pour-over.', bob, true),
+    ('foundation-edinburgh', 'Foundation Coffee House',
+     '2 Hunter Square', 'Edinburgh', 'EH1 1QW', array['Steampunk'],
+     array['espresso','filter'], true, true,
+     'Old Town Edinburgh shop with rotating Scottish roasters.',
+     carol, true),
+    ('brew-lab-edinburgh', 'Brew Lab',
+     '6-8 South College Street', 'Edinburgh', 'EH8 9AA', array['Has Bean'],
+     array['espresso','filter','aeropress','pour_over'], true, true,
+     'Edinburgh science-bar. Heavy on filter methods.', alice, true),
+    ('north-tea-power-mcr', 'North Tea Power',
+     '36 Tib Street', 'Manchester', 'M4 1LA', array['Has Bean'],
+     array['espresso','filter'], true, true,
+     'Northern Quarter mainstay; coffee + loose-leaf tea.', bob, true),
+    ('takk-northern-quarter', 'Takk',
+     '6 Tariff Street', 'Manchester', 'M1 2FF', array['Coffee Collective','Workshop'],
+     array['espresso','filter'], true, true,
+     'Icelandic-inflected NQ shop; Coffee Collective on bar.',
+     carol, true),
+    ('atkinsons-lancaster', 'J. Atkinsons & Co',
+     '12 China Street', 'Lancaster', 'LA1 1EX', array['Atkinsons'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Victorian-era Lancaster roaster, still going.', alice, true),
+    ('small-street-bristol', 'Small Street Espresso',
+     '23 Small Street', 'Bristol', 'BS1 1DW', array['Round Hill','Workshop'],
+     array['espresso','filter'], true, true,
+     'Tiny Bristol bar. Espresso-focused.', bob, true),
+    ('full-court-press-bristol', 'Full Court Press',
+     '59 Broad Street', 'Bristol', 'BS1 2EJ', array['Round Hill','Workshop'],
+     array['espresso','filter','pour_over'], true, true,
+     'Bristol filter destination. Multiple guest roasters.', carol, true),
+    ('clifton-coffee-bristol', 'Clifton Coffee Roasters',
+     'Unit 5C The Brewery', 'Bristol', 'BS1 6XN', array['Clifton'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Bristol roastery taproom; own beans, training-bar feel.',
+     alice, true),
+    ('extract-coffee-bristol', 'Extract Coffee Roasters',
+     'Gatton Road', 'Bristol', 'BS2 9SH', array['Extract'],
+     array['espresso','filter','batch_brew'], true, true,
+     'Roastery cafe on the city''s edge. Own beans only.', bob, true),
+    ('round-hill-bath', 'Round Hill Roastery',
+     'Roseberry Road', 'Bath', 'BA2 3DU', array['Round Hill'],
+     array['espresso','filter','pour_over'], true, true,
+     'Bath roaster; weekday-only cafe.', carol, true),
+    ('hatch-cardiff', 'Hard Lines',
+     '57 Castle Arcade', 'Cardiff', 'CF10 1BU', array['Hard Lines'],
+     array['espresso','filter'], true, true,
+     'Cardiff''s flagship third-wave shop and roaster.', alice, true),
+    ('machina-edinburgh', 'Machina Espresso',
+     '6 Brougham Place', 'Edinburgh', 'EH3 9HW', array['Machina'],
+     array['espresso','filter'], true, true,
+     'Edinburgh roaster + bar. Tight espresso programme.', bob, true),
+    -- Bottom-anchor chains (PRD risk 1 mitigation).
+    ('pret-a-manger-victoria', 'Pret A Manger',
+     'Victoria Station Concourse', 'London', 'SW1V 1JU', array[]::text[],
+     array['espresso','filter'], true, true,
+     'Pret. The chain. Anchor for the ''convenience'' end of the spectrum.',
+     alice, true),
+    ('costa-coffee-paddington', 'Costa Coffee',
+     'Paddington Station', 'London', 'W2 1HQ', array[]::text[],
+     array['espresso','filter'], true, true,
+     'Costa. The other chain. Same anchor purpose.',
+     bob, true),
+    ('caffe-nero-bond-street', 'Caffè Nero',
+     '99 New Bond Street', 'London', 'W1S 1RJ', array[]::text[],
+     array['espresso','filter'], true, true,
+     'Caffè Nero. Italian-coded, mainstream-priced.',
+     carol, true);
 
   -- The bucket and rank_position columns are populated by the trigger and
   -- the pairwise-ranking backfill in migration 20260427000000. They get
