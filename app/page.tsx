@@ -4,8 +4,8 @@
 // at /list once they've completed onboarding. The flavour-pair quiz that
 // previously lived on / has been replaced by the priming flow at
 // /onboarding (see app/onboarding/page.tsx). Both signed-in and signed-out
-// users see the same score-sorted leaderboard at /; signed-in users get
-// the SiteHeader for navigation.
+// users see the same score-sorted leaderboard at /, with nav/copy adjusted
+// for the current session.
 
 import type { Metadata } from "next";
 
@@ -26,10 +26,13 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from("venues")
-    .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
+    .select("id,slug,name,city,roasters,brow_methods,has_plant_milk,notes".replace("brow_methods", "brew_methods"))
     .order("name", { ascending: true });
 
   if (error) {
@@ -54,5 +57,5 @@ export default async function HomePage() {
 
   const venues = mapDbVenuesToOnboarding(dbVenues, scores);
   const sorted = [...venues].sort((a, b) => b.score - a.score);
-  return <Leaderboard venues={sorted} />;
+  return <Leaderboard venues={sorted} isSignedIn={!!user} />;
 }
