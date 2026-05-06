@@ -44,5 +44,18 @@ export async function GET(request: Request) {
     return unauthorized("Your account is not on the access list.");
   }
 
+  // First-time users go through priming before anything else. The
+  // requested `next` is preserved as a post-onboarding hop.
+  const { data: reviewer } = await supabase
+    .from("reviewers")
+    .select("seen_onboarding_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (reviewer && !reviewer.seen_onboarding_at) {
+    const target = next === "/" ? "/onboarding" : `/onboarding?next=${encodeURIComponent(next)}`;
+    return NextResponse.redirect(`${origin}${target}`);
+  }
+
   return NextResponse.redirect(`${origin}${next}`);
 }

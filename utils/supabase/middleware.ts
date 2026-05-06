@@ -51,5 +51,34 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Cold-start gate: authenticated users without a completed onboarding
+  // are pinned to /onboarding (and a small set of allowed paths) until
+  // they finish. The flag is read once per request; once set, gating is a
+  // no-op so the steady-state cost is one indexed PK lookup.
+  if (session) {
+    const allowedDuringOnboarding =
+      pathname === "/onboarding" ||
+      pathname === "/" ||
+      pathname === "/login" ||
+      pathname.startsWith("/auth/") ||
+      pathname.startsWith("/_next") ||
+      pathname === "/favicon.ico";
+
+    if (!allowedDuringOnboarding) {
+      const { data: reviewer } = await supabase
+        .from("reviewers")
+        .select("seen_onboarding_at")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (reviewer && !reviewer.seen_onboarding_at) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/onboarding";
+        url.search = "";
+        return NextResponse.redirect(url);
+      }
+    }
+  }
+
   return supabaseResponse;
 }

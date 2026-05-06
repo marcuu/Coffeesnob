@@ -1,18 +1,11 @@
-// Landing page — also the personalised venue feed for signed-in users.
+// Landing page — the public leaderboard.
 //
-// Routing note: the /onboarding experience previously lived at app/onboarding/
-// and is now served from / (this file). The app/onboarding/ directory is kept
-// intact so that test imports from @/app/onboarding/data and
-// @/app/onboarding/venue-mapping continue to resolve without changes.
-// app/onboarding/page.tsx issues a 308 permanent redirect to / instead.
-//
-// Auth branching:
-//   Logged-in  → <OnboardingApp> with full personalisation (sidebar, localStorage,
-//                aha reveal, nudge).
-//   Logged-out → <Leaderboard> with score-desc feed only; no personalisation.
-//
-// The middleware marks "/" as public so unauthenticated requests are not
-// redirected to /login before reaching this page.
+// Signed-in users land at /onboarding on first sign-in (auth callback) and
+// at /list once they've completed onboarding. The flavour-pair quiz that
+// previously lived on / has been replaced by the priming flow at
+// /onboarding (see app/onboarding/page.tsx). Both signed-in and signed-out
+// users see the same score-sorted leaderboard at /; signed-in users get
+// the SiteHeader for navigation.
 
 import type { Metadata } from "next";
 
@@ -21,11 +14,7 @@ import type { Venue as DbVenue } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 
 import { Leaderboard } from "./onboarding/leaderboard";
-import { OnboardingApp } from "./onboarding/onboarding-app";
-import {
-  buildRegionOptions,
-  mapDbVenuesToOnboarding,
-} from "./onboarding/venue-mapping";
+import { mapDbVenuesToOnboarding } from "./onboarding/venue-mapping";
 
 export const dynamic = "force-dynamic";
 
@@ -38,24 +27,10 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: { user } }, { data, error }] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase
-      .from("venues")
-      .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
-      .order("name", { ascending: true }),
-  ]);
-
-  // Resolve profile URL for the nav link (only needed for the signed-in path).
-  let profileHref = "/profile";
-  if (user) {
-    const { data: reviewer } = await supabase
-      .from("reviewers")
-      .select("username")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (reviewer?.username) profileHref = `/profile/${reviewer.username}`;
-  }
+  const { data, error } = await supabase
+    .from("venues")
+    .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
+    .order("name", { ascending: true });
 
   if (error) {
     return (
@@ -78,13 +53,6 @@ export default async function HomePage() {
       : new Map();
 
   const venues = mapDbVenuesToOnboarding(dbVenues, scores);
-
-  if (user) {
-    const regions = buildRegionOptions(venues);
-    return <OnboardingApp venues={venues} regions={regions} profileHref={profileHref} />;
-  }
-
-  // Logged-out path: sort by weighted score descending for the leaderboard.
   const sorted = [...venues].sort((a, b) => b.score - a.score);
   return <Leaderboard venues={sorted} />;
 }
