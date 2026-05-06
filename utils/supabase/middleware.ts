@@ -12,38 +12,35 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(
-          cookiesToSet: {
-            name: string;
-            value: string;
-            options?: CookieOptions;
-          }[],
-        ) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
         },
       },
     },
   );
 
-  // JWT-only check: fast, no network round-trip. Server actions and API
-  // routes must still call getUser() for authoritative validation.
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   const { pathname } = request.nextUrl;
+  const isPublicVenueRead =
+    pathname.startsWith("/venues/") &&
+    !pathname.startsWith("/venues/new") &&
+    !pathname.endsWith("/review");
+  const isPublicProfileRead = pathname.startsWith("/profile/") && pathname !== "/profile/edit";
   const isPublic =
     pathname === "/" ||
+    pathname === "/bramford" ||
+    pathname === "/about/calibration" ||
     pathname === "/login" ||
     pathname.startsWith("/auth/callback") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico";
+    pathname === "/favicon.ico" ||
+    isPublicVenueRead ||
+    isPublicProfileRead;
 
   if (!session && !isPublic) {
     const url = request.nextUrl.clone();
@@ -51,14 +48,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Cold-start gate: authenticated users without a completed onboarding
-  // are pinned to /onboarding (and a small set of allowed paths) until
-  // they finish. The flag is read once per request; once set, gating is a
-  // no-op so the steady-state cost is one indexed PK lookup.
   if (session) {
     const allowedDuringOnboarding =
       pathname === "/onboarding" ||
       pathname === "/" ||
+      pathname === "/bramford" ||
+      pathname === "/about/calibration" ||
       pathname === "/login" ||
       pathname.startsWith("/auth/") ||
       pathname.startsWith("/_next") ||
