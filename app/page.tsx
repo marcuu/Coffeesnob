@@ -32,7 +32,7 @@ export default async function HomePage() {
 
   const { data, error } = await supabase
     .from("venues")
-    .select("id,slug,name,city,roasters,brow_methods,has_plant_milk,notes".replace("brow_methods", "brew_methods"))
+    .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
     .order("name", { ascending: true });
 
   if (error) {
