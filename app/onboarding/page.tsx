@@ -64,6 +64,17 @@ export default async function OnboardingPage({
     notes: v.notes,
   }));
 
+  // Safety valve: if the priming-venue catalogue is empty (e.g. production
+  // deployment shipped before any venues were tagged), don't brick new
+  // users on a screen with no path forward. Auto-complete and redirect.
+  if (venues.length === 0) {
+    await supabase
+      .from("reviewers")
+      .update({ seen_onboarding_at: new Date().toISOString() })
+      .eq("id", user.id);
+    redirect(next);
+  }
+
   // Resume: pull existing reviews this user has already submitted against
   // the priming catalogue (if any) so the UI shows them as already-ranked
   // and the tournament can re-seed.

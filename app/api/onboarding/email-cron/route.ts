@@ -34,9 +34,12 @@ export async function POST(request: Request): Promise<NextResponse> {
 }
 
 async function handle(request: Request): Promise<NextResponse> {
-  const secret = process.env.ONBOARDING_EMAIL_CRON_SECRET;
+  // Vercel Cron sends `Authorization: Bearer $CRON_SECRET`. Use that env
+  // var to match the platform default; manual / external invocations need
+  // to send the same secret.
+  const secret = process.env.CRON_SECRET;
   if (!secret) {
-    console.error("[onboarding/email-cron] secret not configured");
+    console.error("[onboarding/email-cron] CRON_SECRET not configured");
     return NextResponse.json({ error: "internal_error" }, { status: 500 });
   }
 

@@ -77,3 +77,10 @@ create table if not exists public.onboarding_emails_sent (
 );
 
 alter table public.onboarding_emails_sent enable row level security;
+
+-- Mark every backfilled reviewer as already-emailed so the cron doesn't
+-- treat the synthetic seen_onboarding_at = now() above as a real
+-- completion and email all existing users.
+insert into public.onboarding_emails_sent (reviewer_id, sent_at)
+select id, now() from public.reviewers
+on conflict (reviewer_id) do nothing;
