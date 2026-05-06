@@ -65,13 +65,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ sl
   const rank = computeRank(venueRow.id, regionalScores);
   const rankingSummary = buildVenueRankingSummary(venueRow.id, regionalScores.get(venueRow.id), rank, scopeLabel);
 
-  const MONO_LABEL: React.CSSProperties = {
-    fontFamily: "var(--font-mono)",
-    fontSize: 9,
-    letterSpacing: "0.22em",
-    textTransform: "uppercase",
-    color: "var(--color-muted-foreground)",
-  };
+  const MONO_LABEL: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-muted-foreground)" };
 
   return (
     <>
@@ -99,7 +93,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ sl
           {rankingSummary.isUnranked ? (
             <><span style={{ ...MONO_LABEL, letterSpacing: "0.14em" }}>Unranked</span><SignalBadge label={rankingSummary.signalLabel} /></>
           ) : (
-            <><RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} /><ScoreBandBadge label={rankingSummary.scoreLabel} tone={rankingSummary.scoreTone} /><SignalBadge label={rankingSummary.signalLabel} /></>
+            <>{rankingSummary.rank !== null ? <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} /> : null}<ScoreBandBadge label={rankingSummary.scoreLabel} tone={rankingSummary.scoreTone} /><SignalBadge label={rankingSummary.signalLabel} /></>
           )}
         </div>
 
@@ -120,14 +114,11 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ sl
               {reviews.map((r) => (
                 <div key={r.id} style={{ padding: "24px 0", borderBottom: "1px solid var(--color-border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-                    {r.reviewer?.username ? (
-                      <Link href={`/profile/${r.reviewer.username}`} style={{ fontWeight: 600, fontSize: 15, color: "var(--color-foreground)", textDecoration: "none" }}>{r.reviewer.display_name}</Link>
-                    ) : <span style={{ fontWeight: 600, fontSize: 15 }}>{r.reviewer?.display_name ?? "Unknown reviewer"}</span>}
+                    {r.reviewer?.username ? <Link href={`/profile/${r.reviewer.username}`} style={{ fontWeight: 600, fontSize: 15, color: "var(--color-foreground)", textDecoration: "none" }}>{r.reviewer.display_name}</Link> : <span style={{ fontWeight: 600, fontSize: 15 }}>{r.reviewer?.display_name ?? "Unknown reviewer"}</span>}
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: 18 }}>{r.rating_overall}/10</span>
                   </div>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 14 }}>
-                    Visited {r.visited_on}{r.reviewer ? ` - ${r.reviewer.review_count} review${r.reviewer.review_count === 1 ? "" : "s"}` : ""}
-                    {r.reviewer?.is_synthetic ? " - Calibration reviewer" : ""}
+                    Visited {r.visited_on}{r.reviewer ? ` - ${r.reviewer.review_count} review${r.reviewer.review_count === 1 ? "" : "s"}` : ""}{r.reviewer?.is_synthetic ? " - Calibration reviewer" : ""}
                   </div>
                   <p style={{ fontSize: 14, lineHeight: 1.75, marginBottom: 16, whiteSpace: "pre-line" }}>{r.body}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
