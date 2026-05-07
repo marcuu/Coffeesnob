@@ -54,10 +54,17 @@ const SUBHEAD: React.CSSProperties = {
 
 type LeaderboardProps = {
   venues: OnboardingVenue[];
-  isSignedIn?: boolean;
+  isLoggedIn?: boolean;
+  profileHref?: string;
+  profileLabel?: string;
 };
 
-export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
+export function Leaderboard({
+  venues,
+  isLoggedIn = false,
+  profileHref = "/login",
+  profileLabel = "Sign in",
+}: LeaderboardProps) {
   const [top, ...rest] = venues;
 
   if (venues.length === 0) {
@@ -67,20 +74,14 @@ export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
           No venues yet.
         </h1>
         <p style={SUBHEAD}>
-          {isSignedIn ? (
-            "The leaderboard fills up once the first venue is added."
-          ) : (
-            <>
-              The leaderboard fills up once the first venue is added.{' '}
-              <Link
-                href="/login"
-                style={{ color: "var(--color-accent)", textDecoration: "underline" }}
-              >
-                Sign in
-              </Link>{' '}
-              to add one.
-            </>
-          )}
+          The leaderboard fills up once the first venue is added.{" "}
+          <Link
+            href={isLoggedIn ? "/list" : "/login"}
+            style={{ color: "var(--color-accent)", textDecoration: "underline" }}
+          >
+            {isLoggedIn ? "Go to your list" : "Sign in"}
+          </Link>{" "}
+          to add one.
         </p>
       </main>
     );
@@ -127,26 +128,17 @@ export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
             <Link href="/rankings" style={NAV_LINK}>
               Rankings
             </Link>
-            {isSignedIn ? (
-              <>
-                <Link href="/list" style={NAV_LINK}>
-                  Your list
-                </Link>
-                <Link
-                  href="/profile"
-                  style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
-                >
-                  Profile
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
-              >
-                Sign in
+            {isLoggedIn && (
+              <Link href="/list" style={NAV_LINK}>
+                Your list
               </Link>
             )}
+            <Link
+              href={profileHref}
+              style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
+            >
+              {profileLabel}
+            </Link>
           </nav>
         </div>
       </header>
@@ -159,8 +151,8 @@ export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
           reviewed harshly.
         </h1>
         <p style={SUBHEAD}>
-          Venues ranked by weighted reviewer scores.{' '}
-          {isSignedIn ? (
+          Venues ranked by weighted reviewer scores.{" "}
+          {isLoggedIn ? (
             <Link
               href="/list"
               style={{
@@ -169,23 +161,21 @@ export function Leaderboard({ venues, isSignedIn = false }: LeaderboardProps) {
                 textUnderlineOffset: 3,
               }}
             >
-              Open your list
+              Go to your list
             </Link>
           ) : (
-            <>
-              <Link
-                href="/login"
-                style={{
-                  color: "var(--color-foreground)",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                }}
-              >
-                Sign in
-              </Link>{' '}
-              to personalise the feed.
-            </>
-          )}
+            <Link
+              href="/login"
+              style={{
+                color: "var(--color-foreground)",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Sign in
+            </Link>
+          )}{" "}
+          to personalise the feed.
         </p>
 
         <div style={{ display: "grid", gap: 8, marginTop: 48 }}>
