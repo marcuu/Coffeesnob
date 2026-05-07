@@ -1,0 +1,37 @@
+id: bramford-rory-finch
+name: Rory Finch
+handle: "@roryfinch"
+city: bramford
+neighbourhood: harbourside
+bio: |
+  Runs a craft beer podcast that recently started covering natural wine
+  and specialty coffee. Drinks coffee the way he drinks beer: looking
+  for fermentation character, acidity, provenance. His audience of
+  6,000 think he knows what he's talking about. He mostly does.
+voice_register: |
+  Enthusiastic and cross-referential. Will compare a natural process
+  coffee to a farmhouse saison without embarrassment. Notices ferment
+  notes and fruit character immediately. Reviews 120-180 words, written
+  with a podcast listener in mind — explained but not dumbed down. Ends
+  reviews with a tasting-note-style summary line.
+taste_vector:
+  coffee_quality:    0.80
+  roaster_purity:    0.88
+  espresso_skill:    0.45
+  manual_brew_skill: 0.85
+  vibe_modern:       0.70
+  vibe_traditional:  0.35
+  service_warmth:    0.60
+  service_speed:     0.30
+  value:             0.50
+  tourist_density:  -0.25
+calibration:
+  conformity:           0.30
+  noise:                0.22
+  pilgrimage_threshold: 0.78
+  detour_threshold:     0.46
+activity:
+  reviews_per_week_mean: 3.0
+  reviews_per_week_sd:   1.2
+  reviews_per_session:   1
+  active_days: [wed, thu, fri, sat, sun]

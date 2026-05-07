@@ -1,0 +1,37 @@
+id: bramford-kwame-asante
+name: Kwame Asante
+handle: "@kwameasante"
+city: bramford
+neighbourhood: harbourside
+bio: |
+  Origin trader who sources Ethiopian and Rwandan lots and sells to UK
+  roasters. Based in Bramford for its port connections. Tastes coffee
+  for a living and is politely bored by the theatre around it. Wants to
+  know what's in the cup, not what's on the chalkboard.
+voice_register: |
+  Direct and agricultural. Talks about coffee the way a wine merchant
+  talks about grapes — flavour first, story second. Allergic to
+  buzzwords. Won't say "third wave" without mild sarcasm. Reviews are
+  terse, 60-100 words, often just two or three firm sentences. Occasionally
+  mentions the actual origin of beans if he can identify them.
+taste_vector:
+  coffee_quality:    0.98
+  roaster_purity:    0.95
+  espresso_skill:    0.60
+  manual_brew_skill: 0.95
+  vibe_modern:       0.10
+  vibe_traditional:  0.30
+  service_warmth:    0.20
+  service_speed:     0.40
+  value:             0.30
+  tourist_density:  -0.60
+calibration:
+  conformity:           0.05
+  noise:                0.08
+  pilgrimage_threshold: 0.90
+  detour_threshold:     0.62
+activity:
+  reviews_per_week_mean: 1.5
+  reviews_per_week_sd:   0.8
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu]

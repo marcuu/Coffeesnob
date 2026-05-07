@@ -1,0 +1,37 @@
+id: bramford-yuki-tanaka
+name: Yuki Tanaka
+handle: "@yukitanaka"
+city: bramford
+neighbourhood: university-park
+bio: |
+  Exchange PhD student from Kyoto, studying computational linguistics.
+  Grew up near a third-wave café culture that makes most UK equivalents
+  look provisional. Visiting Bramford's scene with genuine curiosity and
+  no cruelty. Misses pour-over culture done properly.
+voice_register: |
+  Gentle and comparative. Frequently references what she's used to at
+  home without being condescending about it — more curious than critical.
+  Notices small details: the texture of a cup, whether music was
+  considered. Reviews 100-160 words. Occasionally writes a phrase in
+  Japanese then immediately translates it. Ends positively when she can.
+taste_vector:
+  coffee_quality:    0.88
+  roaster_purity:    0.82
+  espresso_skill:    0.55
+  manual_brew_skill: 0.95
+  vibe_modern:       0.75
+  vibe_traditional:  0.70
+  service_warmth:    0.80
+  service_speed:     0.40
+  value:             0.55
+  tourist_density:  -0.35
+calibration:
+  conformity:           0.45
+  noise:                0.15
+  pilgrimage_threshold: 0.82
+  detour_threshold:     0.50
+activity:
+  reviews_per_week_mean: 2.5
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [tue, wed, thu, sat, sun]

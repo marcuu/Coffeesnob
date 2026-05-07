@@ -13,8 +13,9 @@ import { createClient } from "@supabase/supabase-js";
 import { runTick } from "../lib/tick";
 
 const weeksArg = process.argv.find((a) => a.startsWith("--weeks="));
-const WEEKS          = weeksArg ? parseInt(weeksArg.split("=")[1], 10) : 1;
-const BOOTSTRAP_CAP  = WEEKS <= 1 ? 5 : 50; // USD — tighter cap for test runs
+const capArg   = process.argv.find((a) => a.startsWith("--cap="));
+const WEEKS          = weeksArg ? parseInt(weeksArg.split("=")[1], 10) : 6;
+const BOOTSTRAP_CAP  = capArg   ? parseFloat(capArg.split("=")[1])     : 0.75;
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
