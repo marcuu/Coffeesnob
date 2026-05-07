@@ -10,7 +10,7 @@ export type VenueAxisAggregate = {
   rawCount: number;
 };
 
-const MIN_EFFECTIVE_WEIGHT = 0.05;
+const MIN_EFFECTIVE_WEIGHT = 0.01;
 
 export function aggregateVenueAxis(
   reviews: WeightedReview[],
