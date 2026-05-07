@@ -1,13 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { Persona } from "./persona-loader";
 import type { MappedScores } from "./bucket-mapping";
 
-const apiKey = process.env.GOOGLE_API_KEY;
-if (!apiKey) throw new Error("GOOGLE_API_KEY is required");
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const MODEL = "gemini-3-flash";
+const GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
+const MODEL = "google/gemini-3-flash";
 
 export type ReviewWriterInput = {
   persona: Persona;
@@ -30,27 +25,43 @@ export async function writeReview(
 ): Promise<ReviewWriterOutput> {
   const { persona } = input;
 
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    systemInstruction: buildSystem(persona),
-  });
+  const apiKey = process.env.AI_GATEWAY_API_KEY;
+  if (!apiKey) throw new Error("AI_GATEWAY_API_KEY is required");
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: buildPrompt(input) }] }],
-    generationConfig: {
-      maxOutputTokens: 400,
+  const res = await fetch(GATEWAY_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 400,
       // Noisier personas get slightly higher temperature for less predictable prose.
       temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5),
-    },
+      messages: [
+        { role: "system", content: buildSystem(persona) },
+        { role: "user", content: buildPrompt(input) },
+      ],
+    }),
   });
 
-  const body = result.response.text().trim();
-  const usage = result.response.usageMetadata;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`AI Gateway error ${res.status}: ${text}`);
+  }
+
+  const json = await res.json() as {
+    choices: { message: { content: string } }[];
+    usage: { prompt_tokens: number; completion_tokens: number };
+  };
+
+  const body = json.choices[0]?.message?.content?.trim() ?? "";
 
   return {
     body,
-    promptTokens: usage?.promptTokenCount ?? 0,
-    completionTokens: usage?.candidatesTokenCount ?? 0,
+    promptTokens: json.usage?.prompt_tokens ?? 0,
+    completionTokens: json.usage?.completion_tokens ?? 0,
   };
 }
 
