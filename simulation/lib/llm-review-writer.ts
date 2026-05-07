@@ -1,16 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { Persona } from "./persona-loader";
 import type { MappedScores } from "./bucket-mapping";
 
-// If AI_GATEWAY_API_KEY is set, route through Vercel AI Gateway (uses free credits).
-// Otherwise fall back to direct Anthropic via ANTHROPIC_API_KEY.
-const gatewayKey = process.env.AI_GATEWAY_API_KEY;
-const client = gatewayKey
-  ? new Anthropic({ apiKey: gatewayKey, baseURL: "https://ai-gateway.vercel.sh" })
-  : new Anthropic();
-
-// Gateway requires provider-prefixed model names; direct API uses bare names.
-const MODEL = gatewayKey ? "anthropic/claude-sonnet-4-6" : "claude-sonnet-4-6";
+const GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
+const MODEL = "google/gemini-3-flash";
 
 export type ReviewWriterInput = {
   persona: Persona;
@@ -33,22 +25,43 @@ export async function writeReview(
 ): Promise<ReviewWriterOutput> {
   const { persona } = input;
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 400,
-    // Noisier personas get slightly higher temperature for less predictable prose.
-    temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5) as Anthropic.MessageCreateParams["temperature"],
-    system: buildSystem(persona),
-    messages: [{ role: "user", content: buildPrompt(input) }],
+  const apiKey = process.env.AI_GATEWAY_API_KEY;
+  if (!apiKey) throw new Error("AI_GATEWAY_API_KEY is required");
+
+  const res = await fetch(GATEWAY_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 400,
+      // Noisier personas get slightly higher temperature for less predictable prose.
+      temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5),
+      messages: [
+        { role: "system", content: buildSystem(persona) },
+        { role: "user", content: buildPrompt(input) },
+      ],
+    }),
   });
 
-  const block = response.content[0];
-  const body = block.type === "text" ? block.text.trim() : "";
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`AI Gateway error ${res.status}: ${text}`);
+  }
+
+  const json = await res.json() as {
+    choices: { message: { content: string } }[];
+    usage: { prompt_tokens: number; completion_tokens: number };
+  };
+
+  const body = json.choices[0]?.message?.content?.trim() ?? "";
 
   return {
     body,
-    promptTokens: response.usage.input_tokens,
-    completionTokens: response.usage.output_tokens,
+    promptTokens: json.usage?.prompt_tokens ?? 0,
+    completionTokens: json.usage?.completion_tokens ?? 0,
   };
 }
 
