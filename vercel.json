@@ -3,6 +3,10 @@
     {
       "path": "/api/onboarding/email-cron",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/simulation/tick",
+      "schedule": "0 8 * * *"
     }
   ]
 }

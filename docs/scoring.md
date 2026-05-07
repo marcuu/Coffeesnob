@@ -440,3 +440,40 @@ pipeline:
    addressing it would likely involve interpolating within the band based
    on `rank_position` rather than `round()`-ing the linear formula, and is
    out of scope for the bucketed-ranking PR.
+
+## Section 11: Dual-Population Behaviour (Simulation)
+
+The Bramford simulation (`simulation/`) introduces synthetic reviewers and
+reviews into the same database. The pipeline treats both populations uniformly
+with one exception:
+
+### What the pipeline does (unchanged)
+
+Steps 1–4 run on **all** reviewers — real and synthetic. Synthetic reviewers
+have `status = 'active'` so their base credibility weight is `0.5` (not the
+`3.0` anchor given to `beaned` reviewers). After writing 20+ reviews their
+axis weight saturates at `0.5 × 1.5 = 0.75`. Bramford venue scores are
+therefore populated via the standard pipeline without any special casing.
+
+### What is filtered
+
+**Display-time population prior only.** `lib/scoring/population-prior.ts`
+exports `fetchRealReviewerWeightPrior()`, which queries `reviewer_axis_weights`
+with `reviewers.is_synthetic = false`. This function is the sole source of
+the `populationPrior` argument to `applyColdStartSmoothing()` for new real
+users. Synthetic reviewers don't contaminate the "what does a typical human
+credibility weight look like" baseline.
+
+### Invariant
+
+Real-city leaderboards are 100% real reviews. Synthetic reviewers can only
+post against `is_fictional = true` venues — enforced by a gate in
+`submitRankedReview` (`app/venues/[slug]/review/actions.ts`) that checks
+the venue's `is_fictional` flag before accepting the submission.
+
+### Recovery after schema change
+
+If a migration makes old synthetic reviews invalid (e.g., an axis is renamed),
+truncate all rows where `is_synthetic = true` in `reviews`, `review_weights`,
+and `venue_axis_scores` for Bramford venues, then re-run
+`npm run simulation:bootstrap`.

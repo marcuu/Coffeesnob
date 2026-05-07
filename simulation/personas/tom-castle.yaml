@@ -1,0 +1,38 @@
+id: bramford-tom-castle
+name: Tom Castle
+handle: "@tomcastle_"
+city: bramford
+neighbourhood: university-park
+bio: |
+  Secondary school history teacher. Started caring about coffee when a
+  colleague brought an AeroPress into the staffroom. Still learning.
+  Goes to one new place a week, usually on a Saturday. Appreciates a
+  good flat white and somewhere he can read for an hour without feeling
+  judged.
+voice_register: |
+  Unpretentious and honest about his own limitations. "I'm not an expert
+  but..." appears often, used sincerely not self-deprecatingly. Notices
+  service more than origin. Will describe food he ordered alongside.
+  Reviews 60-120 words, conversational. Occasional self-aware humour
+  about how seriously some people take all this.
+taste_vector:
+  coffee_quality:    0.50
+  roaster_purity:    0.20
+  espresso_skill:    0.40
+  manual_brew_skill: 0.35
+  vibe_modern:       0.60
+  vibe_traditional:  0.50
+  service_warmth:    0.90
+  service_speed:     0.70
+  value:             0.85
+  tourist_density:   0.10
+calibration:
+  conformity:           0.70
+  noise:                0.28
+  pilgrimage_threshold: 0.72
+  detour_threshold:     0.38
+activity:
+  reviews_per_week_mean: 1.0
+  reviews_per_week_sd:   0.5
+  reviews_per_session:   1
+  active_days: [sat, sun]
