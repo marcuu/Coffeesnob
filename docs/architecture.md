@@ -126,10 +126,49 @@ auto-fill default) → notes → reveal. See `docs/ranking.md` for the
 ranking system and `docs/scoring.md` for how the two axes feed the
 weighted-scoring pipeline.
 
+## Simulation Layer (Bramford)
+
+`simulation/` contains everything needed to run the Bramford fictional-city
+simulation. It is self-contained; the rest of the app doesn't import from it.
+
+```
+simulation/
+├── lib/
+│   ├── persona-loader.ts       # YAML → typed Persona (Zod)
+│   ├── preference.ts           # taste_vector × attribute_vector dot product
+│   ├── bucket-mapping.ts       # preference score → bucket + coffee_5/vibe_5
+│   ├── llm-review-writer.ts    # Claude Sonnet 4.6 review prose generation
+│   ├── tournament-injection.ts # Direct DB insert with synthetic pairwise history
+│   └── tick.ts                 # Daily tick orchestrator
+├── scripts/
+│   ├── seed-personas.ts        # One-off: create auth users + reviewer rows
+│   ├── seed-bramford.ts        # One-off: create fictional venue rows
+│   ├── bootstrap-history.ts    # One-off: simulate 12 weeks of history (~$50)
+│   └── run-tick.ts             # Local dev single-tick runner
+├── personas/                   # Hand-authored YAML files (50 personas)
+└── venues/
+    └── bramford-seed.yaml      # 80 fictional venue definitions
+```
+
+**Cron**: `app/api/simulation/tick/route.ts` runs daily at 08:00 UTC via
+Vercel cron, secured with `SIMULATION_CRON_SECRET`. A monthly cost circuit
+breaker ($20 cap) stops ticks if the limit is reached.
+
+**Observability**: `/admin/simulation` shows tick history, monthly spend, and
+per-agent review counts. Gated by `ADMIN_EMAILS` env var.
+
+**Disclosure**: Synthetic reviews show a "Calibration Reviewer" badge on
+reviewer names. Venue pages with synthetic reviews show a link to
+`/about/calibration`. All Bramford venues are marked `is_fictional = true`.
+
+See `docs/scoring.md` §11 for how the dual-population is handled in the
+scoring pipeline.
+
 ## Testing
 
 - Vitest + jsdom + Testing Library. Add tests under `__tests__/` alongside new
   logic in `lib/` and for page/component regressions where the output is stable
   enough to render in Vitest.
 - Current coverage: `cn` class-merge helper, Zod venue + review validators,
-  and the `summariseVenue` / `formatRating` aggregation helpers.
+  `summariseVenue` / `formatRating` aggregation helpers, and simulation math
+  (`preference.ts`, `bucket-mapping.ts`).

@@ -184,6 +184,17 @@ function makeReviewsBuilder(table: string): any {
     maybeSingle() {
       return Promise.resolve({ data: null, error: null });
     },
+    single() {
+      // Used by the fictional-venue gate in submitRankedReview.
+      // Venues in the test harness are real (is_fictional: false) by default.
+      if (table === "venues") {
+        return Promise.resolve({
+          data: { id: filters.find((f) => f.col === "id")?.val ?? "test-venue", is_fictional: false },
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: null, error: null });
+    },
   };
   return builder;
 }

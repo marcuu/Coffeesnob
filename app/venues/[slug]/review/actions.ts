@@ -134,6 +134,24 @@ export async function submitRankedReview(
   }
   const parsed = parsedResult.data;
 
+  // Gate: real reviewers cannot post against fictional (Bramford) venues.
+  const { data: venue, error: venueErr } = await supabase
+    .from("venues")
+    .select("id, is_fictional")
+    .eq("id", parsed.venue_id)
+    .single();
+  if (venueErr || !venue) {
+    return { status: "error", code: "venue_not_found", message: "Venue not found" };
+  }
+  if ((venue as { id: string; is_fictional: boolean }).is_fictional) {
+    return {
+      status: "error",
+      code: "fictional_venue",
+      message:
+        "Bramford venues are part of Coffeesnob's calibration simulation and cannot be reviewed by real users.",
+    };
+  }
+
   // Re-fetch the current bucket. If the user concurrently mutated their
   // list during the tournament, we'll see the up-to-date state here.
   const { data: bucketReviews, error: fetchError } = await supabase

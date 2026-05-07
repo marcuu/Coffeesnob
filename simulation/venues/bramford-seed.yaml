@@ -1,0 +1,535 @@
+# Bramford fictional venue seed — v1 proof-of-concept (20 venues).
+# City: Bramford, a fictional UK-coastal coffee-obsessed city. Population ~400k.
+# Neighbourhoods: harbourside | the-quarter | north-bank | old-town | university-park
+# Postcodes use the fictional BM prefix.
+# All venues are is_fictional=true in the database.
+
+venues:
+
+  # ── Universally loved third-wave classics ─────────────────────────────────
+
+  - id: bramford-driftwood
+    name: Driftwood
+    slug: bramford-driftwood
+    neighbourhood: harbourside
+    address_line1: 14 Harbour Walk
+    address_line2: harbourside
+    city: bramford
+    postcode: BM1 1AA
+    description: |
+      The original third-wave anchor of Bramford's harbourside. Single-origin
+      filter programme rotates weekly; espresso is tight and precise. No wifi,
+      no laptop policy after 10am, no apologies. The founder trained in Oslo
+      and it shows. Low ceiling, salvaged timber, the smell of good coffee
+      before you've opened the door.
+    attribute_vector:
+      coffee_quality:    0.95
+      roaster_purity:    0.90
+      espresso_skill:    0.85
+      manual_brew_skill: 0.92
+      vibe_modern:       0.30
+      vibe_traditional:  0.80
+      service_warmth:    0.40
+      service_speed:     0.35
+      value:             0.50
+      tourist_density:   0.25
+
+  - id: bramford-the-bench
+    name: The Bench
+    slug: bramford-the-bench
+    neighbourhood: the-quarter
+    address_line1: 3 Archer Street
+    address_line2: the-quarter
+    city: bramford
+    postcode: BM2 3PQ
+    description: |
+      Run by two former competition baristas who met on the circuit. Espresso
+      is their religion; filter their hobby. Known for a revolving guest
+      espresso alongside the house blend. The bench seating along the window
+      is a Bramford institution. Serious without being cold.
+    attribute_vector:
+      coffee_quality:    0.92
+      roaster_purity:    0.80
+      espresso_skill:    0.97
+      manual_brew_skill: 0.65
+      vibe_modern:       0.55
+      vibe_traditional:  0.65
+      service_warmth:    0.60
+      service_speed:     0.55
+      value:             0.55
+      tourist_density:   0.30
+
+  - id: bramford-ravelin-and-co
+    name: Ravelin & Co
+    slug: bramford-ravelin-and-co
+    neighbourhood: north-bank
+    address_line1: 22 Ravelin Lane
+    address_line2: north-bank
+    city: bramford
+    postcode: BM3 5RR
+    description: |
+      North Bank stalwart with a decade of tenure. Roasts in-house in a
+      converted warehouse at the back; the roasting schedule is posted on
+      the window each Monday. Filter programme is encyclopaedic — V60,
+      Chemex, Aeropress, and a cold drip tower that takes 12 hours and
+      produces something extraordinary.
+    attribute_vector:
+      coffee_quality:    0.93
+      roaster_purity:    0.95
+      espresso_skill:    0.75
+      manual_brew_skill: 0.98
+      vibe_modern:       0.45
+      vibe_traditional:  0.70
+      service_warmth:    0.55
+      service_speed:     0.30
+      value:             0.45
+      tourist_density:   0.15
+
+  # ── Mid-tier solid venues ──────────────────────────────────────────────────
+
+  - id: bramford-pilot-house
+    name: Pilot House
+    slug: bramford-pilot-house
+    neighbourhood: harbourside
+    address_line1: 8 Marina Road
+    address_line2: harbourside
+    city: bramford
+    postcode: BM1 2MR
+    description: |
+      Reliable harbourside café with a nautical theme that stops well short
+      of kitsch. Good flat whites, solid croissants, a loyal local crowd.
+      Not trying to be Driftwood; knows its lane and owns it. Busy weekend
+      mornings but the queue moves. House espresso from a Manchester roaster.
+    attribute_vector:
+      coffee_quality:    0.68
+      roaster_purity:    0.50
+      espresso_skill:    0.65
+      manual_brew_skill: 0.35
+      vibe_modern:       0.60
+      vibe_traditional:  0.55
+      service_warmth:    0.75
+      service_speed:     0.72
+      value:             0.70
+      tourist_density:   0.45
+
+  - id: bramford-counter-house
+    name: Counter House
+    slug: bramford-counter-house
+    neighbourhood: the-quarter
+    address_line1: 17 Cross Street
+    address_line2: the-quarter
+    city: bramford
+    postcode: BM2 4CS
+    description: |
+      A large airy room above a bookshop. Great wifi, plenty of sockets,
+      the coffee is genuinely good without being obsessive about it. Uses
+      Hasbean as its primary roaster. Popular with remote workers and
+      students. The cheese toastie is outstanding. Excellent plant milk
+      selection.
+    attribute_vector:
+      coffee_quality:    0.70
+      roaster_purity:    0.55
+      espresso_skill:    0.60
+      manual_brew_skill: 0.50
+      vibe_modern:       0.75
+      vibe_traditional:  0.30
+      service_warmth:    0.80
+      service_speed:     0.65
+      value:             0.75
+      tourist_density:   0.25
+
+  - id: bramford-the-lock
+    name: The Lock
+    slug: bramford-the-lock
+    neighbourhood: north-bank
+    address_line1: 1 Canal Side
+    address_line2: north-bank
+    city: bramford
+    postcode: BM3 2CN
+    description: |
+      Canalside café that gets the light all afternoon. Coffee from a small
+      Devon roaster, rotated quarterly. Not flashy, not aspirational, just
+      a good cup of coffee in a nice room. The owner used to run a deli and
+      the pastries reflect that. A place for conversations.
+    attribute_vector:
+      coffee_quality:    0.72
+      roaster_purity:    0.60
+      espresso_skill:    0.58
+      manual_brew_skill: 0.55
+      vibe_modern:       0.50
+      vibe_traditional:  0.65
+      service_warmth:    0.85
+      service_speed:     0.55
+      value:             0.70
+      tourist_density:   0.20
+
+  - id: bramford-guild-coffee
+    name: Guild Coffee
+    slug: bramford-guild-coffee
+    neighbourhood: old-town
+    address_line1: 5 Cutlers Row
+    address_line2: old-town
+    city: bramford
+    postcode: BM4 1CR
+    description: |
+      Occupies a former silversmith's workshop. The exposed stone and
+      original fittings give it more character than anything designed could.
+      Coffee is a consistent second-tier third-wave; well sourced, well
+      extracted. The owner is a local historian and the walls are covered
+      in old-town maps. Often has a small exhibition.
+    attribute_vector:
+      coffee_quality:    0.72
+      roaster_purity:    0.58
+      espresso_skill:    0.65
+      manual_brew_skill: 0.55
+      vibe_modern:       0.25
+      vibe_traditional:  0.90
+      service_warmth:    0.75
+      service_speed:     0.50
+      value:             0.65
+      tourist_density:   0.40
+
+  # ── Divisive specialists ───────────────────────────────────────────────────
+
+  - id: bramford-zero-degrees
+    name: Zero Degrees
+    slug: bramford-zero-degrees
+    neighbourhood: the-quarter
+    address_line1: 31 Brook Passage
+    address_line2: the-quarter
+    city: bramford
+    postcode: BM2 6BP
+    description: |
+      Manual-brew-only bar. No espresso machine; if you ask for a latte
+      they will hand you a card explaining why they don't serve one. Brews
+      exclusively from their own roast, all filter, all light, all the time.
+      The coffee for those who treat the drink as an intellectual project.
+      Polarises everyone who walks in.
+    attribute_vector:
+      coffee_quality:    0.90
+      roaster_purity:    0.99
+      espresso_skill:    0.00
+      manual_brew_skill: 0.99
+      vibe_modern:       0.70
+      vibe_traditional:  0.10
+      service_warmth:    0.20
+      service_speed:     0.10
+      value:             0.30
+      tourist_density:   0.10
+
+  - id: bramford-bando
+    name: Bando
+    slug: bramford-bando
+    neighbourhood: harbourside
+    address_line1: 44 Quay Steps
+    address_line2: harbourside
+    city: bramford
+    postcode: BM1 4QS
+    description: |
+      Tiny espresso bar with seven stools and a commitment to the
+      Neapolitan tradition. House blend is dark, sweet, and deliberately
+      unmodern. Ristretto only; if you want a long drink they'll direct
+      you elsewhere. The barista-owner trained in Naples for three years.
+      Italian espresso traditionalists consider it a pilgrimage; third-wave
+      purists consider it a provocation.
+    attribute_vector:
+      coffee_quality:    0.80
+      roaster_purity:    0.25
+      espresso_skill:    0.95
+      manual_brew_skill: 0.00
+      vibe_modern:      -0.20
+      vibe_traditional:  0.98
+      service_warmth:    0.50
+      service_speed:     0.85
+      value:             0.60
+      tourist_density:   0.20
+
+  - id: bramford-surface-tension
+    name: Surface Tension
+    slug: bramford-surface-tension
+    neighbourhood: north-bank
+    address_line1: 9 Ironmonger Way
+    address_line2: north-bank
+    city: bramford
+    postcode: BM3 3IW
+    description: |
+      The latte art venue. Competitions, workshops, Instagram moments.
+      The baristas are genuinely skilled and the milk technique is the
+      best in Bramford. The coffee underneath the art is merely decent.
+      If you care about latte art it is a pilgrimage; if you don't,
+      you'll be suspicious of the aesthetic and right to be.
+    attribute_vector:
+      coffee_quality:    0.60
+      roaster_purity:    0.40
+      espresso_skill:    0.75
+      manual_brew_skill: 0.20
+      vibe_modern:       0.95
+      vibe_traditional:  0.10
+      service_warmth:    0.65
+      service_speed:     0.50
+      value:             0.50
+      tourist_density:   0.55
+
+  # ── Broadly disliked venues ────────────────────────────────────────────────
+
+  - id: bramford-grand-harbour-hotel-cafe
+    name: Grand Harbour Hotel Café
+    slug: bramford-grand-harbour-hotel-cafe
+    neighbourhood: harbourside
+    address_line1: Grand Harbour Hotel, Harbour Square
+    address_line2: harbourside
+    city: bramford
+    postcode: BM1 1HS
+    description: |
+      The hotel café that exists to serve hotel guests who didn't plan their
+      morning. Pre-ground supermarket coffee, pod machines poorly maintained,
+      pastries from a contract supplier. The view of the harbour is genuinely
+      good. That is the extent of it.
+    attribute_vector:
+      coffee_quality:    0.15
+      roaster_purity:    0.05
+      espresso_skill:    0.20
+      manual_brew_skill: 0.00
+      vibe_modern:       0.45
+      vibe_traditional:  0.35
+      service_warmth:    0.55
+      service_speed:     0.70
+      value:             0.25
+      tourist_density:   0.90
+
+  - id: bramford-cups-franchise
+    name: Cups
+    slug: bramford-cups-franchise
+    neighbourhood: the-quarter
+    address_line1: 88 Market Street
+    address_line2: the-quarter
+    city: bramford
+    postcode: BM2 1MS
+    description: |
+      National chain outlet in a prime shopping position. Functional,
+      consistent, anonymous. The loyalty app works well. The baristas are
+      trained to a minimum standard and hit it reliably. If you need a
+      warm drink while shopping you won't be offended. If you care about
+      coffee you won't come here.
+    attribute_vector:
+      coffee_quality:    0.25
+      roaster_purity:    0.10
+      espresso_skill:    0.35
+      manual_brew_skill: 0.05
+      vibe_modern:       0.55
+      vibe_traditional:  0.30
+      service_warmth:    0.60
+      service_speed:     0.85
+      value:             0.40
+      tourist_density:   0.75
+
+  - id: bramford-old-town-tearoom
+    name: Old Town Tearoom
+    slug: bramford-old-town-tearoom
+    neighbourhood: old-town
+    address_line1: 2 Guildhall Passage
+    address_line2: old-town
+    city: bramford
+    postcode: BM4 1GP
+    description: |
+      A tearoom that has reluctantly added an espresso machine to meet
+      tourist demand. The scones are genuinely excellent. The coffee is
+      an afterthought brewed from a blade grinder and pre-ground bags
+      from a cash-and-carry. Beloved by visitors who don't drink coffee
+      and ignored by everyone who does.
+    attribute_vector:
+      coffee_quality:    0.12
+      roaster_purity:    0.05
+      espresso_skill:    0.15
+      manual_brew_skill: 0.00
+      vibe_modern:       0.10
+      vibe_traditional:  0.70
+      service_warmth:    0.80
+      service_speed:     0.55
+      value:             0.50
+      tourist_density:   0.85
+
+  # ── Rising star venues ─────────────────────────────────────────────────────
+
+  - id: bramford-yard-collective
+    name: Yard Collective
+    slug: bramford-yard-collective
+    neighbourhood: north-bank
+    address_line1: Unit 4, Tanners Yard
+    address_line2: north-bank
+    city: bramford
+    postcode: BM3 4TY
+    description: |
+      Six months old. Opened in a converted tannery by a barista who left
+      Ravelin & Co to do her own thing. The extraction programme is
+      ambitious and still finding its feet — some days extraordinary,
+      some days inconsistent. Espresso is the focus; filter is coming.
+      Opinion is forming.
+    attribute_vector:
+      coffee_quality:    0.82
+      roaster_purity:    0.78
+      espresso_skill:    0.80
+      manual_brew_skill: 0.45
+      vibe_modern:       0.80
+      vibe_traditional:  0.25
+      service_warmth:    0.70
+      service_speed:     0.50
+      value:             0.60
+      tourist_density:   0.10
+
+  - id: bramford-still-life
+    name: Still Life
+    slug: bramford-still-life
+    neighbourhood: university-park
+    address_line1: 11 Croft Road
+    address_line2: university-park
+    city: bramford
+    postcode: BM5 2CR
+    description: |
+      Eight weeks old and already worth watching. A former fine-dining pastry
+      chef and a competition barista teamed up in a beautiful minimal space.
+      The food-coffee pairing concept is unproven at scale but the execution
+      is already confident. The natural process Ethiopian is something to
+      experience.
+    attribute_vector:
+      coffee_quality:    0.88
+      roaster_purity:    0.82
+      espresso_skill:    0.72
+      manual_brew_skill: 0.85
+      vibe_modern:       0.92
+      vibe_traditional:  0.15
+      service_warmth:    0.65
+      service_speed:     0.35
+      value:             0.45
+      tourist_density:   0.08
+
+  # ── Additional mid-tier ────────────────────────────────────────────────────
+
+  - id: bramford-the-archivist
+    name: The Archivist
+    slug: bramford-the-archivist
+    neighbourhood: old-town
+    address_line1: 19 Stationery Row
+    address_line2: old-town
+    city: bramford
+    postcode: BM4 3SR
+    description: |
+      Inside a former printing house. The smell of old paper competes
+      pleasantly with fresh coffee. Run by two sisters; one does coffee,
+      one does pastry. Reliable Aeropress programme. The vibe is studious
+      and quiet. Good choice before or after the Old Town Museum.
+    attribute_vector:
+      coffee_quality:    0.68
+      roaster_purity:    0.60
+      espresso_skill:    0.55
+      manual_brew_skill: 0.72
+      vibe_modern:       0.35
+      vibe_traditional:  0.80
+      service_warmth:    0.80
+      service_speed:     0.55
+      value:             0.70
+      tourist_density:   0.35
+
+  - id: bramford-margin
+    name: Margin
+    slug: bramford-margin
+    neighbourhood: the-quarter
+    address_line1: 2a Artists Row
+    address_line2: the-quarter
+    city: bramford
+    postcode: BM2 5AR
+    description: |
+      Co-run with the independent gallery next door. Coffee during gallery
+      hours, which means unusual opening times. The artwork changes monthly
+      and the coffee programme changes with it — the owner picks a roaster
+      that pairs thematically. Conceptually interesting; occasionally maddening
+      in practice.
+    attribute_vector:
+      coffee_quality:    0.75
+      roaster_purity:    0.70
+      espresso_skill:    0.60
+      manual_brew_skill: 0.65
+      vibe_modern:       0.85
+      vibe_traditional:  0.20
+      service_warmth:    0.65
+      service_speed:     0.30
+      value:             0.55
+      tourist_density:   0.20
+
+  - id: bramford-northlight
+    name: Northlight
+    slug: bramford-northlight
+    neighbourhood: university-park
+    address_line1: 45 University Road
+    address_line2: university-park
+    city: bramford
+    postcode: BM5 1UR
+    description: |
+      The best café in the university district by a distance. Caters to
+      staff more than students; the academics have good taste and
+      Northlight obliges. Strong filter programme, excellent allpress
+      espresso, and a working partnership with a local Portuguese bakery.
+      Gets very busy at 9am and 3pm.
+    attribute_vector:
+      coffee_quality:    0.78
+      roaster_purity:    0.65
+      espresso_skill:    0.70
+      manual_brew_skill: 0.72
+      vibe_modern:       0.65
+      vibe_traditional:  0.55
+      service_warmth:    0.70
+      service_speed:     0.65
+      value:             0.72
+      tourist_density:   0.15
+
+  - id: bramford-portside
+    name: Portside
+    slug: bramford-portside
+    neighbourhood: harbourside
+    address_line1: 62 Dock Road
+    address_line2: harbourside
+    city: bramford
+    postcode: BM1 5DR
+    description: |
+      A workers' café from the dock era that added a La Marzocca and called
+      it a rebrand. The old regulars sat at the counter eating bacon rolls
+      still mix with the newcomers ordering pour-overs. An unlikely success
+      that works precisely because it hasn't tried too hard. The espresso
+      is better than it looks.
+    attribute_vector:
+      coffee_quality:    0.65
+      roaster_purity:    0.45
+      espresso_skill:    0.65
+      manual_brew_skill: 0.25
+      vibe_modern:       0.30
+      vibe_traditional:  0.80
+      service_warmth:    0.90
+      service_speed:     0.78
+      value:             0.85
+      tourist_density:   0.30
+
+  - id: bramford-signal-box
+    name: Signal Box
+    slug: bramford-signal-box
+    neighbourhood: north-bank
+    address_line1: Former Signal Box, Waterside Junction
+    address_line2: north-bank
+    city: bramford
+    postcode: BM3 6WJ
+    description: |
+      Converted Victorian signal box, now a tiny specialty coffee bar
+      with six seats inside and a bench outside. The novelty of the
+      building fills the first visit; the coffee earns the return.
+      V60 as the default method; a rotating guest espresso on weekends.
+      Closed Tuesday and Wednesday.
+    attribute_vector:
+      coffee_quality:    0.80
+      roaster_purity:    0.75
+      espresso_skill:    0.60
+      manual_brew_skill: 0.85
+      vibe_modern:       0.50
+      vibe_traditional:  0.75
+      service_warmth:    0.70
+      service_speed:     0.40
+      value:             0.60
+      tourist_density:   0.30

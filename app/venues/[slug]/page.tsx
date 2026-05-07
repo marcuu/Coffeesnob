@@ -20,11 +20,12 @@ import {
 import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
+import { SyntheticBadge } from "@/components/simulation/SyntheticBadge";
 
 export const dynamic = "force-dynamic";
 
 type ReviewWithReviewer = Review & {
-  reviewer: { display_name: string; review_count: number; username: string | null } | null;
+  reviewer: { display_name: string; review_count: number; username: string | null; is_synthetic: boolean } | null;
 };
 
 export default async function VenueDetailPage({
@@ -64,7 +65,7 @@ export default async function VenueDetailPage({
   ] = await Promise.all([
     supabase
       .from("reviews")
-      .select("*, reviewer:reviewers(display_name, review_count, username)")
+      .select("*, reviewer:reviewers(display_name, review_count, username, is_synthetic)")
       .eq("venue_id", venueRow.id)
       .order("created_at", { ascending: false }),
     getVenueScores(supabase, venueRow.id),
@@ -222,6 +223,14 @@ export default async function VenueDetailPage({
           <div style={{ ...MONO_LABEL, marginBottom: 24 }}>
             Reviews · {count}
           </div>
+          {reviews.some((r) => r.is_synthetic) && (
+            <p style={{ fontSize: 13, color: "var(--color-muted-foreground)", marginBottom: 16 }}>
+              Some reviews on this page are from Coffeesnob&apos;s calibration panel.{" "}
+              <Link href="/about/calibration" style={{ textDecoration: "underline" }}>
+                Learn more →
+              </Link>
+            </p>
+          )}
           {reviews.length === 0 ? (
             <p style={{ fontSize: 14, color: "var(--color-muted-foreground)" }}>No reviews yet.</p>
           ) : (
@@ -229,19 +238,22 @@ export default async function VenueDetailPage({
               {reviews.map((r) => (
                 <div key={r.id} style={{ padding: "24px 0", borderBottom: "1px solid var(--color-border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-                    {r.reviewer?.username ? (
-                      <Link
-                        href={`/profile/${r.reviewer.username}`}
-                        className="hover:underline"
-                        style={{ fontWeight: 600, fontSize: 15, color: "var(--color-foreground)", textDecoration: "none" }}
-                      >
-                        {r.reviewer.display_name}
-                      </Link>
-                    ) : (
-                      <span style={{ fontWeight: 600, fontSize: 15 }}>
-                        {r.reviewer?.display_name ?? "Unknown reviewer"}
-                      </span>
-                    )}
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {r.reviewer?.username ? (
+                        <Link
+                          href={`/profile/${r.reviewer.username}`}
+                          className="hover:underline"
+                          style={{ fontWeight: 600, fontSize: 15, color: "var(--color-foreground)", textDecoration: "none" }}
+                        >
+                          {r.reviewer.display_name}
+                        </Link>
+                      ) : (
+                        <span style={{ fontWeight: 600, fontSize: 15 }}>
+                          {r.reviewer?.display_name ?? "Unknown reviewer"}
+                        </span>
+                      )}
+                      {r.reviewer?.is_synthetic && <SyntheticBadge />}
+                    </span>
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 400, letterSpacing: "-0.01em" }}>
                       {r.rating_overall}/10
                     </span>

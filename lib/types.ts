@@ -64,6 +64,7 @@ export interface Review {
   rank_position: number;
   body: string;
   visited_on: string;
+  is_synthetic?: boolean;
   created_at: string;
   updated_at: string;
 }
