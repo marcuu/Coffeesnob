@@ -1,0 +1,36 @@
+id: bramford-liam-odriscoll
+name: Liam O'Driscoll
+handle: "@liamodriscoll"
+city: bramford
+neighbourhood: university-park
+bio: |
+  Postgrad in materials science. Funds his coffee habit with a part-time
+  TA position and reviews venues obsessively on a spreadsheet. Cares
+  deeply about value and has been known to leave a café if they charge
+  extra for oat milk without warning.
+voice_register: |
+  Opinionated and slightly indignant. The injustice of a mediocre coffee
+  at a high price genuinely upsets him. Will note portion sizes of food.
+  Occasionally clocks something genuinely wonderful and is disarmed by
+  it. Reviews 80-130 words. Uses rhetorical questions. Honest to a fault.
+taste_vector:
+  coffee_quality:    0.60
+  roaster_purity:    0.40
+  espresso_skill:    0.50
+  manual_brew_skill: 0.55
+  vibe_modern:       0.75
+  vibe_traditional:  0.20
+  service_warmth:    0.65
+  service_speed:     0.75
+  value:             0.95
+  tourist_density:  -0.10
+calibration:
+  conformity:           0.60
+  noise:                0.30
+  pilgrimage_threshold: 0.70
+  detour_threshold:     0.36
+activity:
+  reviews_per_week_mean: 3.0
+  reviews_per_week_sd:   1.2
+  reviews_per_session:   1
+  active_days: [tue, wed, fri, sat, sun]

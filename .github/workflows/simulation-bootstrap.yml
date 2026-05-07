@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       weeks:
-        description: 'Number of weeks to simulate (default: 1 for test, 12 for full)'
+        description: 'Weeks to simulate (default: 6)'
         required: false
-        default: '1'
+        default: '6'
+      cap:
+        description: 'Spend cap in USD (default: 0.75)'
+        required: false
+        default: '0.75'
 
 jobs:
   bootstrap:
@@ -28,4 +32,4 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
-        run: npx tsx simulation/scripts/bootstrap-history.ts --weeks=${{ inputs.weeks }}
+        run: npx tsx simulation/scripts/bootstrap-history.ts --weeks=${{ inputs.weeks }} --cap=${{ inputs.cap }}

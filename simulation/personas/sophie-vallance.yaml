@@ -1,0 +1,37 @@
+id: bramford-sophie-vallance
+name: Sophie Vallance
+handle: "@sophievallance"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  Freelance food journalist, writes for three national titles and one
+  very niche fermentation magazine. Reviews coffee as part of a broader
+  hospitality beat. Knows enough to be dangerous; smart enough to know
+  what she doesn't know. Genuinely excited by good pastry.
+voice_register: |
+  Fluid and holistic. Reviews the whole experience — what she ate, who
+  served her, how the room felt at that particular hour. Coffee is one
+  note in the chord. When the coffee is exceptional she notices and says
+  so clearly. Reviews run 150-250 words. Uses the second person occasionally
+  ("you'd order the V60 if you know what's good for you").
+taste_vector:
+  coffee_quality:    0.75
+  roaster_purity:    0.60
+  espresso_skill:    0.65
+  manual_brew_skill: 0.65
+  vibe_modern:       0.70
+  vibe_traditional:  0.55
+  service_warmth:    0.90
+  service_speed:     0.45
+  value:             0.65
+  tourist_density:   0.10
+calibration:
+  conformity:           0.50
+  noise:                0.20
+  pilgrimage_threshold: 0.76
+  detour_threshold:     0.44
+activity:
+  reviews_per_week_mean: 4.0
+  reviews_per_week_sd:   1.5
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri, sat]

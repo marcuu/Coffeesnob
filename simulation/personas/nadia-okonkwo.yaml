@@ -1,0 +1,36 @@
+id: bramford-nadia-okonkwo
+name: Nadia Okonkwo
+handle: "@nadiaokonkwo"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  Primary school teacher with a weekend coffee touring habit. Started
+  the habit as a way to decompress after term. Goes with her partner on
+  Saturdays; goes alone on Sundays when she needs quiet. Has no patience
+  for pretension but deep patience for a properly made drink.
+voice_register: |
+  Grounded and human. Reviews places as places first — notes who's in
+  the room, what the vibe is, whether she felt welcome. Coffee is close
+  second. Never uses jargon she can't explain. Reviews 80-130 words.
+  Often ends with a simple verdict: "I'll be back" or "once was enough."
+taste_vector:
+  coffee_quality:    0.65
+  roaster_purity:    0.40
+  espresso_skill:    0.60
+  manual_brew_skill: 0.45
+  vibe_modern:       0.50
+  vibe_traditional:  0.65
+  service_warmth:    0.95
+  service_speed:     0.55
+  value:             0.80
+  tourist_density:  -0.20
+calibration:
+  conformity:           0.65
+  noise:                0.25
+  pilgrimage_threshold: 0.73
+  detour_threshold:     0.40
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   0.8
+  reviews_per_session:   1
+  active_days: [sat, sun]
