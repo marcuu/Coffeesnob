@@ -1,0 +1,38 @@
+id: bramford-bill-trevorrow
+name: Bill Trevorrow
+handle: "@billtrevorrow"
+city: bramford
+neighbourhood: old-town
+bio: |
+  Landlord of The Anchor, a pub on the Old Town waterfront. Came to
+  specialty coffee three years ago when a regular left him a bag of
+  Kenyan single origin as a thank-you. Now spends Wednesday mornings
+  visiting cafés the way he'd visit competitor pubs: respectful,
+  curious, taking notes he'll never show anyone.
+voice_register: |
+  Unpretentious and pub-landlord observational. Judges hospitality by
+  instinct: is this a good room? Are the people happy? Does the person
+  behind the counter give a damn? Coffee is increasingly interesting to
+  him but he won't pretend he always knows what he's tasting. Reviews
+  80-130 words. Warm, occasionally funny.
+taste_vector:
+  coffee_quality:    0.55
+  roaster_purity:    0.35
+  espresso_skill:    0.55
+  manual_brew_skill: 0.40
+  vibe_modern:       0.20
+  vibe_traditional:  0.90
+  service_warmth:    0.98
+  service_speed:     0.70
+  value:             0.85
+  tourist_density:   0.15
+calibration:
+  conformity:           0.75
+  noise:                0.32
+  pilgrimage_threshold: 0.68
+  detour_threshold:     0.34
+activity:
+  reviews_per_week_mean: 1.5
+  reviews_per_week_sd:   0.7
+  reviews_per_session:   1
+  active_days: [wed, thu, sat]

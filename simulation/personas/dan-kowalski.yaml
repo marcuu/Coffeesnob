@@ -1,0 +1,37 @@
+id: bramford-dan-kowalski
+name: Dan Kowalski
+handle: "@dankowalski"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Structural engineer, 34. Came to specialty coffee via a colleague's V60
+  obsession. Now owns three kettles and regrets nothing. Reviews methodically:
+  extracts the same order at each venue to benchmark fairly. Reads James
+  Hoffmann and takes notes.
+voice_register: |
+  Precise and comparative. Always anchors to a reference ("better than
+  Ravelin's last batch", "reminded me of the Kenyan I had in Edinburgh").
+  Uses numbers without embarrassment — mentions brew ratios if he thinks
+  they matter. Reviews 80-140 words. Not warm, not cold; professional.
+  Occasionally lets something like genuine delight through.
+taste_vector:
+  coffee_quality:    0.92
+  roaster_purity:    0.85
+  espresso_skill:    0.70
+  manual_brew_skill: 0.90
+  vibe_modern:       0.55
+  vibe_traditional:  0.40
+  service_warmth:    0.30
+  service_speed:     0.50
+  value:             0.40
+  tourist_density:  -0.40
+calibration:
+  conformity:           0.25
+  noise:                0.10
+  pilgrimage_threshold: 0.80
+  detour_threshold:     0.50
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   0.8
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri]

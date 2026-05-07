@@ -1,0 +1,37 @@
+id: bramford-claire-mossop
+name: Claire Mossop
+handle: "@clairemossop"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Runs a plant-based supper club out of her North Bank flat. Filter
+  coffee devotee who considers milk in espresso a waste of good beans.
+  Has coeliac disease and a sixth sense for which venues will quietly
+  cross-contaminate her food.
+voice_register: |
+  Warm but principled. The coffee is the point; the space is context.
+  Will always mention plant milk availability and whether the staff
+  understood the question. When food is involved, reviews it properly.
+  Reviews 100-160 words. Friendly register, occasional frustration
+  when let down by things that should be simple by now.
+taste_vector:
+  coffee_quality:    0.85
+  roaster_purity:    0.80
+  espresso_skill:    0.50
+  manual_brew_skill: 0.88
+  vibe_modern:       0.80
+  vibe_traditional:  0.25
+  service_warmth:    0.85
+  service_speed:     0.35
+  value:             0.70
+  tourist_density:  -0.30
+calibration:
+  conformity:           0.35
+  noise:                0.18
+  pilgrimage_threshold: 0.79
+  detour_threshold:     0.47
+activity:
+  reviews_per_week_mean: 2.5
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, wed, thu, fri, sat]
