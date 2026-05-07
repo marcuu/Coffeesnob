@@ -1,18 +1,20 @@
-// One-off script: generate 12 weeks of simulated history to populate the DB
-// before opening to real users. Advances day by day from 12 weeks ago to today.
+// One-off script: generate simulated history to populate the DB
+// before opening to real users. Advances day by day from WEEKS ago to today.
 //
 // Run with: npm run simulation:bootstrap
-// Expected output: 8,000-15,000 reviews, ~$50 total cost.
+// Pass --weeks=N to override the default (default: 1 for test, 12 for full run).
+// Expected output (1 week): ~700-1,400 reviews, ~$4 total cost.
 //
-// Cost circuit breaker: stops at $50 regardless of progress.
+// Cost circuit breaker: stops at BOOTSTRAP_CAP regardless of progress.
 // Progress is printed after each day. The script is safe to resume after
 // interruption — it will skip venues/dates already reviewed (unique constraint).
 
 import { createClient } from "@supabase/supabase-js";
 import { runTick } from "../lib/tick";
 
-const WEEKS          = 12;
-const BOOTSTRAP_CAP  = 50; // USD
+const weeksArg = process.argv.find((a) => a.startsWith("--weeks="));
+const WEEKS          = weeksArg ? parseInt(weeksArg.split("=")[1], 10) : 1;
+const BOOTSTRAP_CAP  = WEEKS <= 1 ? 5 : 50; // USD — tighter cap for test runs
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -32,7 +34,7 @@ async function main() {
   let totalCost      = 0;
   const allErrors: string[] = [];
 
-  console.log(`Bootstrap: ${totalDays} days from ${startDate.toISOString().split("T")[0]}`);
+  console.log(`Bootstrap: ${WEEKS}w / ${totalDays} days from ${startDate.toISOString().split("T")[0]} (cap $${BOOTSTRAP_CAP})`);
 
   for (let day = 0; day < totalDays; day++) {
     if (totalCost >= BOOTSTRAP_CAP) {

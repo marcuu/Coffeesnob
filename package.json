@@ -19,6 +19,7 @@
     "simulation:seed-personas": "tsx simulation/scripts/seed-personas.ts",
     "simulation:seed-bramford": "tsx simulation/scripts/seed-bramford.ts",
     "simulation:bootstrap": "tsx simulation/scripts/bootstrap-history.ts",
+    "simulation:bootstrap:full": "tsx simulation/scripts/bootstrap-history.ts --weeks=12",
     "simulation:tick": "tsx simulation/scripts/run-tick.ts"
   },
   "dependencies": {
