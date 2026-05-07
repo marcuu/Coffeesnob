@@ -2,7 +2,15 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { Persona } from "./persona-loader";
 import type { MappedScores } from "./bucket-mapping";
 
-const client = new Anthropic();
+// If AI_GATEWAY_API_KEY is set, route through Vercel AI Gateway (uses free credits).
+// Otherwise fall back to direct Anthropic via ANTHROPIC_API_KEY.
+const gatewayKey = process.env.AI_GATEWAY_API_KEY;
+const client = gatewayKey
+  ? new Anthropic({ apiKey: gatewayKey, baseURL: "https://ai-gateway.vercel.sh" })
+  : new Anthropic();
+
+// Gateway requires provider-prefixed model names; direct API uses bare names.
+const MODEL = gatewayKey ? "anthropic/claude-sonnet-4-6" : "claude-sonnet-4-6";
 
 export type ReviewWriterInput = {
   persona: Persona;
@@ -26,7 +34,7 @@ export async function writeReview(
   const { persona } = input;
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
+    model: MODEL,
     max_tokens: 400,
     // Noisier personas get slightly higher temperature for less predictable prose.
     temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5) as Anthropic.MessageCreateParams["temperature"],
