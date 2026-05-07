@@ -111,7 +111,7 @@ export async function runTick(
       });
 
       reviewsGenerated++;
-      const costUsd = (promptTokens * 3 + completionTokens * 15) / 1_000_000;
+      const costUsd = (promptTokens * 0.075 + completionTokens * 0.30) / 1_000_000;
       totalCostUsd += costUsd;
 
       await updateAgentState(sb, reviewerId, agentState, venue.id, promptTokens, completionTokens);

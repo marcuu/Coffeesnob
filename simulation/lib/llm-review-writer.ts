@@ -1,16 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { Persona } from "./persona-loader";
 import type { MappedScores } from "./bucket-mapping";
 
-// If AI_GATEWAY_API_KEY is set, route through Vercel AI Gateway (uses free credits).
-// Otherwise fall back to direct Anthropic via ANTHROPIC_API_KEY.
-const gatewayKey = process.env.AI_GATEWAY_API_KEY;
-const client = gatewayKey
-  ? new Anthropic({ apiKey: gatewayKey, baseURL: "https://ai-gateway.vercel.sh" })
-  : new Anthropic();
+const apiKey = process.env.GOOGLE_API_KEY;
+if (!apiKey) throw new Error("GOOGLE_API_KEY is required");
 
-// Gateway requires provider-prefixed model names; direct API uses bare names.
-const MODEL = gatewayKey ? "anthropic/claude-sonnet-4-6" : "claude-sonnet-4-6";
+const genAI = new GoogleGenerativeAI(apiKey);
+
+const MODEL = "gemini-3-flash";
 
 export type ReviewWriterInput = {
   persona: Persona;
@@ -33,22 +30,27 @@ export async function writeReview(
 ): Promise<ReviewWriterOutput> {
   const { persona } = input;
 
-  const response = await client.messages.create({
+  const model = genAI.getGenerativeModel({
     model: MODEL,
-    max_tokens: 400,
-    // Noisier personas get slightly higher temperature for less predictable prose.
-    temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5) as Anthropic.MessageCreateParams["temperature"],
-    system: buildSystem(persona),
-    messages: [{ role: "user", content: buildPrompt(input) }],
+    systemInstruction: buildSystem(persona),
   });
 
-  const block = response.content[0];
-  const body = block.type === "text" ? block.text.trim() : "";
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: buildPrompt(input) }] }],
+    generationConfig: {
+      maxOutputTokens: 400,
+      // Noisier personas get slightly higher temperature for less predictable prose.
+      temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5),
+    },
+  });
+
+  const body = result.response.text().trim();
+  const usage = result.response.usageMetadata;
 
   return {
     body,
-    promptTokens: response.usage.input_tokens,
-    completionTokens: response.usage.output_tokens,
+    promptTokens: usage?.promptTokenCount ?? 0,
+    completionTokens: usage?.candidatesTokenCount ?? 0,
   };
 }
 
