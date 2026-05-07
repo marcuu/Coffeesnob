@@ -12,7 +12,7 @@ export default function CalibrationPage() {
       <h1>Calibration Reviewers &amp; the City of Bramford</h1>
 
       <p>
-        Coffeesnob's leaderboards are powered by a weighted-credibility algorithm
+        Coffeesnob&apos;s leaderboards are powered by a weighted-credibility algorithm
         that learns which reviewers have consistent, discerning taste over time.
         Before we opened to real users, the algorithm had no data to learn from —
         a cold-start problem.
@@ -26,9 +26,9 @@ export default function CalibrationPage() {
       <h2>What is Bramford?</h2>
       <p>
         Bramford is a fictional UK-coastal city with a rich (invented) third-wave
-        coffee scene. Its venues don't exist. Its reviewers are synthetic personas
+        coffee scene. Its venues don&apos;t exist. Its reviewers are synthetic personas
         — each with a distinct voice, set of opinions, and taste profile — running
-        on a daily schedule and reviewing Bramford's fictional cafés.
+        on a daily schedule and reviewing Bramford&apos;s fictional cafés.
       </p>
       <p>
         You can browse Bramford, read its reviews, and see how the leaderboard
@@ -40,8 +40,8 @@ export default function CalibrationPage() {
       <p>
         Each calibration reviewer has a hand-authored persona: a biography, a
         voice register, and a taste vector that defines what they care about in
-        coffee. A daily process uses this persona, the venue's characteristics,
-        and a large language model to write a review that reflects the reviewer's
+        coffee. A daily process uses this persona, the venue&apos;s characteristics,
+        and a large language model to write a review that reflects the reviewer&apos;s
         opinions.
       </p>
       <p>
@@ -54,9 +54,9 @@ export default function CalibrationPage() {
       <p>
         No. Calibration reviewers only post reviews of Bramford venues.
         Real-city leaderboards — London, Bristol, Edinburgh — are 100% from
-        real human reviewers. The algorithm's credibility calibration uses
+        real human reviewers. The algorithm&apos;s credibility calibration uses
         only real reviewers as its baseline, so the synthetic population
-        doesn't contaminate it.
+        doesn&apos;t contaminate it.
       </p>
       <p>
         The purpose of Bramford is to give the algorithm enough data to work
@@ -66,7 +66,7 @@ export default function CalibrationPage() {
       <h2>Why tell us this?</h2>
       <p>
         Because the honest answer is the only answer worth giving.
-        Coffeesnob's value is trustworthy signal about real coffee. Using hidden
+        Coffeesnob&apos;s value is trustworthy signal about real coffee. Using hidden
         synthetic data to inflate that signal would undermine the whole point.
         Bramford is clearly labelled, clearly fictional, and clearly separate
         from real-city content.
