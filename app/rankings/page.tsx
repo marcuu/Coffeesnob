@@ -41,8 +41,8 @@ export default async function RankingsPage() {
     { data: cityRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("venues").select("*").order("name", { ascending: true }),
-    supabase.from("venues").select("city").order("city", { ascending: true }),
+    supabase.from("venues").select("*").neq("city", "bramford").order("name", { ascending: true }),
+    supabase.from("venues").select("city").neq("city", "bramford").order("city", { ascending: true }),
   ]);
 
   if (error) {
