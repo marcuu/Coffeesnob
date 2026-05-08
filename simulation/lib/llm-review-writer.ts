@@ -28,41 +28,55 @@ export async function writeReview(
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error("AI_GATEWAY_API_KEY is required");
 
-  const res = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 400,
-      // Noisier personas get slightly higher temperature for less predictable prose.
-      temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5),
-      messages: [
-        { role: "system", content: buildSystem(persona) },
-        { role: "user", content: buildPrompt(input) },
-      ],
-    }),
-  });
+  const maxAttempts = 6;
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`AI Gateway error ${res.status}: ${text}`);
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await fetch(GATEWAY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 400,
+        // Noisier personas get slightly higher temperature for less predictable prose.
+        temperature: Math.min(1.0, 0.75 + persona.calibration.noise * 0.5),
+        messages: [
+          { role: "system", content: buildSystem(persona) },
+          { role: "user", content: buildPrompt(input) },
+        ],
+      }),
+    });
+
+    if (res.status === 429 && attempt < maxAttempts) {
+      // Exponential backoff: 4s, 8s, 16s, 32s, 64s
+      const waitMs = 4_000 * Math.pow(2, attempt - 1);
+      console.error(`\n  [rate-limit] waiting ${waitMs / 1000}s before retry ${attempt}/${maxAttempts - 1}…`);
+      await new Promise((r) => setTimeout(r, waitMs));
+      continue;
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`AI Gateway error ${res.status}: ${text}`);
+    }
+
+    const json = await res.json() as {
+      choices: { message: { content: string } }[];
+      usage: { prompt_tokens: number; completion_tokens: number };
+    };
+
+    const body = json.choices[0]?.message?.content?.trim() ?? "";
+
+    return {
+      body,
+      promptTokens: json.usage?.prompt_tokens ?? 0,
+      completionTokens: json.usage?.completion_tokens ?? 0,
+    };
   }
 
-  const json = await res.json() as {
-    choices: { message: { content: string } }[];
-    usage: { prompt_tokens: number; completion_tokens: number };
-  };
-
-  const body = json.choices[0]?.message?.content?.trim() ?? "";
-
-  return {
-    body,
-    promptTokens: json.usage?.prompt_tokens ?? 0,
-    completionTokens: json.usage?.completion_tokens ?? 0,
-  };
+  throw new Error("AI Gateway error 429: max retries exceeded");
 }
 
 function buildSystem(persona: Persona): string {
