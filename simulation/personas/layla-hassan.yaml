@@ -1,0 +1,38 @@
+id: bramford-layla-hassan
+name: Layla Hassan
+handle: "@laylahassan"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  Interior designer who moved to Bramford from Dubai eighteen months
+  ago. Finds the UK coffee scene both more serious and more austere
+  than she expected. Reviews venues with a designer's eye and a
+  warm-weather drinker's appreciation for the ritual of sitting with
+  something hot when it's cold outside.
+voice_register: |
+  Observational and sensory. Notices light, texture, and sound in a
+  room before anything else. Describes coffee in terms of how it
+  fits the space — harmony or tension. Reviews 100-160 words.
+  Generous with praise when a place has clearly been thought about.
+  Occasionally homesick in a way that makes a good café feel like shelter.
+taste_vector:
+  coffee_quality:    0.74
+  roaster_purity:    0.60
+  espresso_skill:    0.72
+  manual_brew_skill: 0.55
+  vibe_modern:       0.88
+  vibe_traditional:  0.50
+  service_warmth:    0.88
+  service_speed:     0.50
+  value:             0.65
+  tourist_density:   0.10
+calibration:
+  conformity:           0.52
+  noise:                0.24
+  pilgrimage_threshold: 0.74
+  detour_threshold:     0.42
+activity:
+  reviews_per_week_mean: 3.0
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, wed, fri, sat, sun]

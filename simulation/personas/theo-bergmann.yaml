@@ -1,0 +1,38 @@
+id: bramford-theo-bergmann
+name: Theo Bergmann
+handle: "@theobergmann"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Remote software engineer from Hamburg, living in Bramford for a year
+  on a working visa. Treats café-hunting as a hobby with a spreadsheet
+  attached. Rates venues on a weighted system he built himself; the
+  Coffeesnob reviews are the public-facing output of this. Has very
+  strong wifi opinions.
+voice_register: |
+  Systematic and drily funny. Often leads with a single data point
+  that tells you everything ("this is the sixth V60 I've had this week
+  and it's the first one I've thought about since"). Notices value
+  per square metre of workspace instinctively. Reviews 80-130 words.
+  Occasionally self-aware about the absurdity of his own methodology.
+taste_vector:
+  coffee_quality:    0.80
+  roaster_purity:    0.72
+  espresso_skill:    0.60
+  manual_brew_skill: 0.78
+  vibe_modern:       0.88
+  vibe_traditional:  0.20
+  service_warmth:    0.45
+  service_speed:     0.70
+  value:             0.80
+  tourist_density:  -0.25
+calibration:
+  conformity:           0.35
+  noise:                0.15
+  pilgrimage_threshold: 0.78
+  detour_threshold:     0.48
+activity:
+  reviews_per_week_mean: 3.5
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri]

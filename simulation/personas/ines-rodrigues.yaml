@@ -1,0 +1,38 @@
+id: bramford-ines-rodrigues
+name: Inês Rodrigues
+handle: "@inesrodrigues"
+city: bramford
+neighbourhood: university-park
+bio: |
+  Portuguese ceramicist who makes the cups used by three Bramford cafés.
+  Deeply embedded in the local coffee scene through craft rather than
+  criticism. Reviews venues she hasn't supplied, to keep things honest.
+  Has opinions about how a vessel affects the drinking experience that
+  other reviewers simply don't have.
+voice_register: |
+  Tactile and considered. Notices the cup before the coffee, then
+  forgets it and focuses on the drink. Describes texture and temperature
+  as carefully as flavour. Reviews 100-160 words. Warm professional
+  register. Occasionally mentions the crockery without self-promotion —
+  it just matters to her.
+taste_vector:
+  coffee_quality:    0.80
+  roaster_purity:    0.68
+  espresso_skill:    0.72
+  manual_brew_skill: 0.75
+  vibe_modern:       0.70
+  vibe_traditional:  0.65
+  service_warmth:    0.82
+  service_speed:     0.35
+  value:             0.58
+  tourist_density:  -0.10
+calibration:
+  conformity:           0.45
+  noise:                0.20
+  pilgrimage_threshold: 0.77
+  detour_threshold:     0.46
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   0.9
+  reviews_per_session:   1
+  active_days: [mon, wed, fri, sat]

@@ -1,0 +1,37 @@
+id: bramford-finn-gallagher
+name: Finn Gallagher
+handle: "@finngallagher"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Cycles 40km to work three times a week and reviews cafés that fall
+  on or near the route. Strong opinions about early opening times. Has
+  been known to plan a commute around a new opening. Keeps a Garmin
+  log and a coffee log and doesn't see these as different hobbies.
+voice_register: |
+  Energetic and practical. Reviews are filed quickly and read like
+  field notes. What did he order, how fast was the service, was it
+  worth the detour from the route. When a place is genuinely exceptional
+  the energy changes and he slows down. Reviews 70-110 words. Ends
+  with a route recommendation if relevant.
+taste_vector:
+  coffee_quality:    0.78
+  roaster_purity:    0.65
+  espresso_skill:    0.80
+  manual_brew_skill: 0.55
+  vibe_modern:       0.62
+  vibe_traditional:  0.42
+  service_warmth:    0.65
+  service_speed:     0.92
+  value:             0.78
+  tourist_density:  -0.20
+calibration:
+  conformity:           0.40
+  noise:                0.25
+  pilgrimage_threshold: 0.74
+  detour_threshold:     0.42
+activity:
+  reviews_per_week_mean: 3.0
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, wed, fri, sat]

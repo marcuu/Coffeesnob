@@ -1,0 +1,37 @@
+id: bramford-declan-fogarty
+name: Declan Fogarty
+handle: "@declanfogarty"
+city: bramford
+neighbourhood: harbourside
+bio: |
+  Runs a small quiet blog called "Ordinary Thursdays" about unremarkable
+  pleasures. Coffee features heavily. His readership is small and loyal.
+  He is not trying to go viral. Reviews places he returns to, which
+  means his coverage skews toward the genuinely good.
+voice_register: |
+  Gentle and reflective. Interested in the atmosphere and how a place
+  makes time feel different. Coffee is part of a broader picture.
+  Reviews 120-180 words, structured as observation rather than
+  assessment. Will sometimes describe the other people in the room.
+  Always specific; never effusive.
+taste_vector:
+  coffee_quality:    0.70
+  roaster_purity:    0.55
+  espresso_skill:    0.58
+  manual_brew_skill: 0.62
+  vibe_modern:       0.42
+  vibe_traditional:  0.78
+  service_warmth:    0.90
+  service_speed:     0.30
+  value:             0.72
+  tourist_density:  -0.35
+calibration:
+  conformity:           0.60
+  noise:                0.22
+  pilgrimage_threshold: 0.70
+  detour_threshold:     0.38
+activity:
+  reviews_per_week_mean: 1.5
+  reviews_per_week_sd:   0.7
+  reviews_per_session:   1
+  active_days: [thu, fri, sat, sun]

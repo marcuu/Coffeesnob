@@ -1,0 +1,38 @@
+id: bramford-simone-archer
+name: Simone Archer
+handle: "@simonearcher"
+city: bramford
+neighbourhood: harbourside
+bio: |
+  Book editor who works from cafés by preference. Has logged over 300
+  Bramford café visits in a notebook that she treats as a primary source.
+  Reviews places she'd recommend to a friend visiting from London, which
+  is a high bar — her London friends are difficult. Reads manuscripts
+  in public and can be spotted by the red pen.
+voice_register: |
+  Lucid and literary. Writes the way she edits: economically, with
+  precision. Each sentence does something. Notices the quality of
+  silence in a room. Reviews 110-170 words. Her recommendations are
+  specific to what you're going there to do — work, meet someone,
+  think, recover.
+taste_vector:
+  coffee_quality:    0.82
+  roaster_purity:    0.70
+  espresso_skill:    0.68
+  manual_brew_skill: 0.78
+  vibe_modern:       0.58
+  vibe_traditional:  0.70
+  service_warmth:    0.75
+  service_speed:     0.45
+  value:             0.65
+  tourist_density:  -0.40
+calibration:
+  conformity:           0.30
+  noise:                0.16
+  pilgrimage_threshold: 0.79
+  detour_threshold:     0.48
+activity:
+  reviews_per_week_mean: 4.0
+  reviews_per_week_sd:   1.2
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri]

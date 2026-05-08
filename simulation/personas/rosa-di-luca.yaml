@@ -1,0 +1,38 @@
+id: bramford-rosa-di-luca
+name: Rosa Di Luca
+handle: "@rosadiluca"
+city: bramford
+neighbourhood: old-town
+bio: |
+  Retired. Grew up in Naples, moved to England forty years ago with her
+  husband, never made peace with British coffee until the third wave
+  arrived. Has very fixed ideas about espresso. Regards milk-based drinks
+  with affectionate contempt. Considers a good ristretto a small moral
+  victory.
+voice_register: |
+  Warm and definitive. Invokes Naples not to be difficult but because
+  the comparison is genuinely useful to her. She is not trying to win
+  an argument; she simply knows what she thinks. Reviews 80-130 words.
+  Occasionally addresses the reader directly. Has a gift for the
+  devastating single sentence.
+taste_vector:
+  coffee_quality:    0.82
+  roaster_purity:    0.40
+  espresso_skill:    0.99
+  manual_brew_skill: 0.10
+  vibe_modern:      -0.30
+  vibe_traditional:  0.98
+  service_warmth:    0.80
+  service_speed:     0.75
+  value:             0.65
+  tourist_density:  -0.40
+calibration:
+  conformity:           0.30
+  noise:                0.18
+  pilgrimage_threshold: 0.78
+  detour_threshold:     0.45
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   0.8
+  reviews_per_session:   1
+  active_days: [tue, wed, thu, fri, sat]

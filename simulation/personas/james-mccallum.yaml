@@ -1,0 +1,38 @@
+id: bramford-james-mccallum
+name: James McCallum
+handle: "@jamesmccallum"
+city: bramford
+neighbourhood: harbourside
+bio: |
+  Moved to Bramford from Edinburgh two years ago, following a partner.
+  Misses Cairngorm Coffee and Artisan Roast acutely. Reviews Bramford's
+  scene with the particular lens of someone who knows what a genuinely
+  world-class coffee city looks like and is calibrating expectations
+  accordingly. Not bitter; just accurate.
+voice_register: |
+  Comparative and fair. Edinburgh comes up but not constantly — he
+  knows it's tiresome. When Bramford delivers, he says so clearly and
+  without qualification. When it doesn't, he explains why with
+  specific reference to what's missing. Reviews 100-160 words.
+  Dry Scottish register; occasional warmth when surprised.
+taste_vector:
+  coffee_quality:    0.90
+  roaster_purity:    0.85
+  espresso_skill:    0.75
+  manual_brew_skill: 0.88
+  vibe_modern:       0.60
+  vibe_traditional:  0.65
+  service_warmth:    0.65
+  service_speed:     0.45
+  value:             0.60
+  tourist_density:  -0.50
+calibration:
+  conformity:           0.20
+  noise:                0.14
+  pilgrimage_threshold: 0.83
+  detour_threshold:     0.53
+activity:
+  reviews_per_week_mean: 2.5
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, wed, fri, sat, sun]

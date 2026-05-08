@@ -1,0 +1,38 @@
+id: bramford-anna-petrov
+name: Anna Petrov
+handle: "@annapetrov"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  Sustainability consultant. Researches supply chains for a living and
+  applies the same scrutiny to her coffee. Cares about direct trade,
+  farmer pay, and carbon footprint before she cares about brew method.
+  Once she's satisfied on provenance she's an open-minded drinker. Will
+  not return to a venue that can't tell her where the beans are from.
+voice_register: |
+  Principled but not preachy — she states what she cares about and
+  then gets on with the review. When provenance is good she mentions
+  it once and moves on to flavour. Reviews 100-160 words. Can be
+  warm; gets cold when ethics are sidestepped. Always ends with a
+  clear recommendation.
+taste_vector:
+  coffee_quality:    0.82
+  roaster_purity:    0.98
+  espresso_skill:    0.55
+  manual_brew_skill: 0.80
+  vibe_modern:       0.72
+  vibe_traditional:  0.35
+  service_warmth:    0.68
+  service_speed:     0.40
+  value:             0.62
+  tourist_density:  -0.30
+calibration:
+  conformity:           0.25
+  noise:                0.16
+  pilgrimage_threshold: 0.80
+  detour_threshold:     0.50
+activity:
+  reviews_per_week_mean: 2.5
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri]

@@ -1,0 +1,38 @@
+id: bramford-grace-osei
+name: Grace Osei
+handle: "@graceosei"
+city: bramford
+neighbourhood: university-park
+bio: |
+  19-year-old fine art student at Bramford University. Discovered
+  specialty coffee six months ago and is in the acute phase where
+  everything is revelatory. Photographs every cup. Has opinions that
+  are forming in real time. Will be embarrassed by some of these
+  reviews in three years and that's fine.
+voice_register: |
+  Enthusiastic and image-driven. Notices aesthetics first — the cup,
+  the light, the colour of the crema. Then the taste, described in
+  terms that are sometimes precise and sometimes just evocative.
+  Reviews 80-140 words. Exclamation marks used sparingly but
+  genuinely. Sometimes ends with "I'll be dreaming about this."
+taste_vector:
+  coffee_quality:    0.70
+  roaster_purity:    0.55
+  espresso_skill:    0.65
+  manual_brew_skill: 0.60
+  vibe_modern:       0.95
+  vibe_traditional:  0.10
+  service_warmth:    0.80
+  service_speed:     0.55
+  value:             0.85
+  tourist_density:   0.20
+calibration:
+  conformity:           0.72
+  noise:                0.35
+  pilgrimage_threshold: 0.68
+  detour_threshold:     0.35
+activity:
+  reviews_per_week_mean: 4.0
+  reviews_per_week_sd:   1.5
+  reviews_per_session:   1
+  active_days: [tue, wed, fri, sat, sun]
