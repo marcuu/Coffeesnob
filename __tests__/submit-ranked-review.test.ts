@@ -17,6 +17,7 @@ type State = {
   forceCollisionAttempts: number; // number of times the next insert(s) collide
   insertAttempts: number;
   updateCount: number;
+  duplicateVisitExists: boolean; // pre-flight duplicate-visit check returns a row
 };
 
 const state: State = {
@@ -26,6 +27,7 @@ const state: State = {
   forceCollisionAttempts: 0,
   insertAttempts: 0,
   updateCount: 0,
+  duplicateVisitExists: false,
 };
 
 function resetState() {
@@ -35,6 +37,7 @@ function resetState() {
   state.forceCollisionAttempts = 0;
   state.insertAttempts = 0;
   state.updateCount = 0;
+  state.duplicateVisitExists = false;
 }
 
 function makeReview(
@@ -182,6 +185,13 @@ function makeReviewsBuilder(table: string): any {
       return resolve({ data: [], error: null });
     },
     maybeSingle() {
+      // The pre-flight duplicate-visit check filters on venue_id + reviewer_id
+      // + visited_on. When the test sets duplicateVisitExists, return a stub row.
+      const hasVenueFilter = filters.some((f) => f.col === "venue_id");
+      const hasVisitedOnFilter = filters.some((f) => f.col === "visited_on");
+      if (state.duplicateVisitExists && hasVenueFilter && hasVisitedOnFilter) {
+        return Promise.resolve({ data: { id: "existing-review-id" }, error: null });
+      }
       return Promise.resolve({ data: null, error: null });
     },
     single() {
@@ -396,5 +406,17 @@ describe("submitRankedReview", () => {
     if (result.status === "error") {
       expect(result.code).toBe("rank_collision_after_compact");
     }
+  });
+
+  it("returns duplicate_visit when the user has already reviewed the same venue on the same date", async () => {
+    state.duplicateVisitExists = true;
+    const result = await submitRankedReview(baseInput);
+    expect(result.status).toBe("error");
+    if (result.status === "error") {
+      expect(result.code).toBe("duplicate_visit");
+      expect(result.message).toMatch(/already reviewed/i);
+    }
+    // Pre-flight should block the insert entirely.
+    expect(state.insertAttempts).toBe(0);
   });
 });
