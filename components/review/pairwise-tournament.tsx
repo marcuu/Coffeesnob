@@ -37,16 +37,20 @@ export function PairwiseTournament({
   candidateNames,
   newVenueName,
   onComplete,
+  onBack,
 }: {
   bucket: ReviewBucket;
   candidates: Review[];
   candidateNames: CandidateNames;
   newVenueName: string;
   onComplete: (result: PairwiseResult) => void;
+  onBack?: () => void;
 }) {
   const [state, setState] = useState<TournamentState>(() =>
     startTournament(candidates),
   );
+  // History stack for back-step: each entry is the state before a comparison.
+  const [stateHistory, setStateHistory] = useState<TournamentState[]>([]);
   const [step, setStep] = useState(0);
   const startedAtRef = useRef<number>(Date.now());
   const trackedStartRef = useRef(false);
@@ -56,7 +60,6 @@ export function PairwiseTournament({
     [candidates.length],
   );
 
-  // Fire tournament_started exactly once, on mount.
   useEffect(() => {
     if (!trackedStartRef.current) {
       trackedStartRef.current = true;
@@ -64,8 +67,6 @@ export function PairwiseTournament({
     }
   }, [candidates.length]);
 
-  // Empty bucket: converge immediately. Run as an effect so the parent
-  // doesn't see the component flash a head-to-head it can't render.
   useEffect(() => {
     if (!next) {
       const final = finalRankPosition(state);
@@ -81,23 +82,38 @@ export function PairwiseTournament({
         history: state.history,
       });
     }
-    // We only ever fire once per state change; onComplete is stable enough
-    // for our usage but listed to keep eslint quiet in strict mode.
   }, [next, state, onComplete, bucket]);
 
   if (!next) return null;
 
   const handle = (result: Comparison) => {
-    track({
-      name: "tournament_comparison_made",
-      step_index: step,
-      result,
-    });
+    const button =
+      result === "better"
+        ? "new_venue"
+        : result === "worse"
+          ? "comparison_venue"
+          : "same";
+    track({ name: "tournament_comparison_made", step_index: step, result });
+    track({ name: "tournament_button_tap", button });
+    setStateHistory((h) => [...h, state]);
     setState((s) => recordComparison(s, result));
     setStep((s) => s + 1);
   };
 
+  const handleBack = () => {
+    if (stateHistory.length === 0) {
+      onBack?.();
+      return;
+    }
+    track({ name: "tournament_back_step_used" });
+    const prev = stateHistory[stateHistory.length - 1];
+    setStateHistory((h) => h.slice(0, -1));
+    setState(prev);
+    setStep((s) => s - 1);
+  };
+
   const otherName = candidateNames[next.id] ?? "another venue";
+  const canGoBack = stateHistory.length > 0 || !!onBack;
 
   return (
     <div
@@ -109,8 +125,28 @@ export function PairwiseTournament({
         maxWidth: 520,
       }}
     >
-      <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)" }}>
-        Comparison {step + 1} of ~{totalEstimate} · {bucket}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {canGoBack && (
+          <button
+            type="button"
+            onClick={handleBack}
+            style={{
+              ...MONO,
+              fontSize: 9,
+              color: "hsl(24 5.4% 40%)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              letterSpacing: "0.18em",
+            }}
+          >
+            ← Back
+          </button>
+        )}
+        <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)" }}>
+          Comparison {step + 1} of ~{totalEstimate} · {bucket}
+        </div>
       </div>
 
       <h2
@@ -146,20 +182,46 @@ export function PairwiseTournament({
         </motion.div>
       </AnimatePresence>
 
+      {/* Venue-named buttons: left = new venue (better), middle = same, right = comparison */}
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
           gap: 8,
           marginTop: 4,
         }}
       >
-        <Choice label="Better" onClick={() => handle("better")} primary />
-        <Choice
-          label="About the same"
-          onClick={() => handle("same")}
+        <VenueButton
+          name={newVenueName}
+          onClick={() => handle("better")}
+          variant="primary"
+          testId="tournament-btn-better"
         />
-        <Choice label="Worse" onClick={() => handle("worse")} />
+        <button
+          type="button"
+          data-testid="tournament-btn-same"
+          onClick={() => handle("same")}
+          style={{
+            ...MONO,
+            minHeight: 56,
+            padding: "0 14px",
+            background: "transparent",
+            color: "hsl(24 5.4% 52%)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 2,
+            cursor: "pointer",
+            fontSize: 9,
+            whiteSpace: "nowrap",
+          }}
+        >
+          About the same
+        </button>
+        <VenueButton
+          name={otherName}
+          onClick={() => handle("worse")}
+          variant="ghost"
+          testId="tournament-btn-worse"
+        />
       </div>
     </div>
   );
@@ -195,32 +257,51 @@ function Card({ name, tag }: { name: string; tag: string }) {
   );
 }
 
-function Choice({
-  label,
+// Max chars before truncating the venue name on a button.
+const NAME_TRUNCATE_AT = 28;
+
+function VenueButton({
+  name,
   onClick,
-  primary,
+  variant,
+  testId,
 }: {
-  label: string;
+  name: string;
   onClick: () => void;
-  primary?: boolean;
+  variant: "primary" | "ghost";
+  testId?: string;
 }) {
+  const truncated =
+    name.length > NAME_TRUNCATE_AT
+      ? name.slice(0, NAME_TRUNCATE_AT - 1) + "…"
+      : name;
   return (
     <button
       type="button"
+      data-testid={testId}
       onClick={onClick}
+      title={name.length > NAME_TRUNCATE_AT ? name : undefined}
       style={{
         ...MONO,
-        height: 44,
-        padding: "0 18px",
-        background: primary ? "oklch(0.75 0.11 44)" : "transparent",
-        color: primary ? "hsl(20 14.3% 4%)" : "hsl(60 9.1% 97.8%)",
-        border: primary ? "none" : "1px solid rgba(255,255,255,0.18)",
+        minHeight: 56,
+        padding: "8px 14px",
+        background:
+          variant === "primary" ? "oklch(0.75 0.11 44)" : "transparent",
+        color:
+          variant === "primary"
+            ? "hsl(20 14.3% 4%)"
+            : "hsl(60 9.1% 97.8%)",
+        border:
+          variant === "primary" ? "none" : "1px solid rgba(255,255,255,0.18)",
         borderRadius: 2,
         cursor: "pointer",
-        textAlign: "left",
+        textAlign: "center",
+        wordBreak: "break-word",
+        lineHeight: 1.4,
+        fontSize: 10,
       }}
     >
-      {label}
+      {truncated}
     </button>
   );
 }

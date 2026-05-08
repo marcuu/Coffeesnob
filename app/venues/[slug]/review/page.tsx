@@ -29,7 +29,7 @@ export default async function AddVenueReviewPage({
 
   const { data: venue, error } = await supabase
     .from("venues")
-    .select("id, name")
+    .select("id, name, city, address_line2")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -92,6 +92,8 @@ export default async function AddVenueReviewPage({
         venueId={venue.id}
         slug={slug}
         venueName={venue.name}
+        venueCity={(venue as { city?: string | null }).city ?? undefined}
+        venueNeighbourhood={(venue as { address_line2?: string | null }).address_line2 ?? undefined}
         reviewsByBucket={reviewsByBucket}
         candidateNamesByReviewId={candidateNamesByReviewId}
         handle={handle}
