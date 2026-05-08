@@ -32,6 +32,7 @@ export default async function HomePage() {
     supabase
       .from("venues")
       .select("id,slug,name,city,roasters,brew_methods,has_plant_milk,notes")
+      .neq("city", "bramford")
       .order("name", { ascending: true }),
   ]);
 
