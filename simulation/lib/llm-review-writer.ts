@@ -2,7 +2,7 @@ import type { Persona } from "./persona-loader";
 import type { MappedScores } from "./bucket-mapping";
 
 const GATEWAY_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
-const MODEL = "google/gemini-3-flash";
+const MODEL = "anthropic/claude-haiku-4-5";
 
 export type ReviewWriterInput = {
   persona: Persona;
