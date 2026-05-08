@@ -21,10 +21,15 @@ export type SubmitRankedReviewResult =
 type SupabaseLike = Awaited<ReturnType<typeof createClient>>;
 
 const RANK_BUCKET_UNIQUE = "reviews_reviewer_bucket_rank_unique";
+const VENUE_DATE_UNIQUE = "reviews_venue_id_reviewer_id_visited_on_key";
 
 // Postgres unique-constraint violation code.
 function isUniqueViolation(error: { code?: string; message?: string }): boolean {
   return error.code === "23505" || /duplicate key value/i.test(error.message ?? "");
+}
+
+function isVenueDateConflict(error: { code?: string; message?: string }): boolean {
+  return isUniqueViolation(error) && (error.message ?? "").includes(VENUE_DATE_UNIQUE);
 }
 
 // Replays the comparison history server-side against the current bucket.
@@ -152,6 +157,25 @@ export async function submitRankedReview(
     };
   }
 
+  // Pre-flight: check for an existing review of this venue on this date.
+  // The unique constraint (venue_id, reviewer_id, visited_on) would reject it
+  // anyway, but catching it here gives a clear message before the tournament
+  // result is discarded.
+  const { data: existing } = await supabase
+    .from("reviews")
+    .select("id")
+    .eq("venue_id", parsed.venue_id)
+    .eq("reviewer_id", user.id)
+    .eq("visited_on", parsed.visited_on)
+    .maybeSingle();
+  if (existing) {
+    return {
+      status: "error",
+      code: "duplicate_visit",
+      message: "You've already reviewed this venue for this date. Change the visit date to add another review.",
+    };
+  }
+
   // Re-fetch the current bucket. If the user concurrently mutated their
   // list during the tournament, we'll see the up-to-date state here.
   const { data: bucketReviews, error: fetchError } = await supabase
@@ -178,6 +202,16 @@ export async function submitRankedReview(
   let attempt = await attemptInsert(supabase, user.id, parsed, rankPosition, bucketSizeAfter);
   let listChanged = replay.listChanged;
   let finalRank = rankPosition;
+
+  // Safety net: venue+date conflict that slipped past the pre-flight check
+  // (e.g. a race between two simultaneous submissions).
+  if (!attempt.ok && attempt.isCollision && isVenueDateConflict({ code: attempt.code, message: attempt.message })) {
+    return {
+      status: "error",
+      code: "duplicate_visit",
+      message: "You've already reviewed this venue for this date. Change the visit date to add another review.",
+    };
+  }
 
   // Collision: compact the bucket and retry once.
   if (!attempt.ok && attempt.isCollision && attempt.message.includes(RANK_BUCKET_UNIQUE)) {
