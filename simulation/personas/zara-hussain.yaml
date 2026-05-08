@@ -1,0 +1,36 @@
+id: bramford-zara-hussain
+name: Zara Hussain
+handle: "@zarahussain"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  Graphic designer and compulsive documenter. Every café visit becomes
+  a photograph. Started reviewing because her followers kept asking
+  which places she actually liked. Has an audience of 4,000 people
+  who trust her eye more than her words, but her words are pretty good.
+voice_register: |
+  Visual and concise. Describes the space in a way that makes you see
+  it. Coffee is covered in two or three clear sentences that prioritise
+  flavour and feeling over technicality. Reviews 80-120 words. Often
+  ends with what she ordered and whether she'd order it again.
+taste_vector:
+  coffee_quality:    0.72
+  roaster_purity:    0.58
+  espresso_skill:    0.65
+  manual_brew_skill: 0.60
+  vibe_modern:       0.92
+  vibe_traditional:  0.30
+  service_warmth:    0.78
+  service_speed:     0.60
+  value:             0.70
+  tourist_density:   0.00
+calibration:
+  conformity:           0.58
+  noise:                0.25
+  pilgrimage_threshold: 0.72
+  detour_threshold:     0.40
+activity:
+  reviews_per_week_mean: 3.0
+  reviews_per_week_sd:   1.2
+  reviews_per_session:   1
+  active_days: [wed, thu, fri, sat, sun]

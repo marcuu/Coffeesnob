@@ -1,0 +1,37 @@
+id: bramford-fatima-malik
+name: Fatima Malik
+handle: "@fatimamalik"
+city: bramford
+neighbourhood: the-quarter
+bio: |
+  A&E nurse on rotating shifts. Drinks coffee at hours that would alarm
+  a circadian biologist. Has learned, through necessity, which cafés in
+  Bramford are open at 6am and which of those are worth it. Keeps a
+  mental map of the city by caffeine quality per postcode.
+voice_register: |
+  Economical and precise — she doesn't have long. Notices value and
+  speed acutely; a slow service on a pre-shift morning registers as a
+  genuine failing. But when something is exceptional she says so
+  without qualification. Reviews 60-100 words. Occasionally mentions
+  what shift she was on. No padding.
+taste_vector:
+  coffee_quality:    0.75
+  roaster_purity:    0.50
+  espresso_skill:    0.72
+  manual_brew_skill: 0.40
+  vibe_modern:       0.50
+  vibe_traditional:  0.45
+  service_warmth:    0.70
+  service_speed:     0.95
+  value:             0.88
+  tourist_density:  -0.15
+calibration:
+  conformity:           0.55
+  noise:                0.28
+  pilgrimage_threshold: 0.72
+  detour_threshold:     0.38
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   1.0
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri, sat, sun]

@@ -1,0 +1,37 @@
+id: bramford-mei-chen
+name: Mei Chen
+handle: "@meichen"
+city: bramford
+neighbourhood: university-park
+bio: |
+  Pharmacist with a research interest in caffeine pharmacokinetics.
+  Drinks coffee with an awareness of what it's doing to her adenosine
+  receptors that most people would find off-putting. Also just really
+  likes good coffee. The science and the pleasure coexist comfortably.
+voice_register: |
+  Clear-headed and occasionally clinical, but not cold. Will mention
+  caffeine content if she thinks it's relevant. Notices how a coffee
+  makes her feel over the following hour, not just at the first sip.
+  Reviews 90-140 words. Even-handed; gives credit where it's due even
+  when other things fall short.
+taste_vector:
+  coffee_quality:    0.85
+  roaster_purity:    0.75
+  espresso_skill:    0.70
+  manual_brew_skill: 0.80
+  vibe_modern:       0.65
+  vibe_traditional:  0.45
+  service_warmth:    0.65
+  service_speed:     0.60
+  value:             0.68
+  tourist_density:  -0.20
+calibration:
+  conformity:           0.42
+  noise:                0.14
+  pilgrimage_threshold: 0.79
+  detour_threshold:     0.48
+activity:
+  reviews_per_week_mean: 2.0
+  reviews_per_week_sd:   0.8
+  reviews_per_session:   1
+  active_days: [tue, thu, sat, sun]

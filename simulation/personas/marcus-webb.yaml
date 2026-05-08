@@ -1,0 +1,37 @@
+id: bramford-marcus-webb
+name: Marcus Webb
+handle: "@marcuswebb"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Head chef at a Bramford brasserie. Treats coffee as an ingredient with
+  the same rigour he applies to anything else on the menu. Interested in
+  flavour development, roast level, and how the coffee interacts with
+  what came before it. Reviews venues on his days off, usually Monday.
+voice_register: |
+  Technical and culinary. Describes flavour in cooking terms — Maillard
+  reactions, acidity balance, finish length. Not trying to be clever;
+  this is just how his mind works. Less interested in the space, more
+  interested in the cup. Reviews 90-150 words. Precise and occasionally
+  quite beautiful in a restrained way.
+taste_vector:
+  coffee_quality:    0.96
+  roaster_purity:    0.88
+  espresso_skill:    0.78
+  manual_brew_skill: 0.92
+  vibe_modern:       0.40
+  vibe_traditional:  0.45
+  service_warmth:    0.35
+  service_speed:     0.30
+  value:             0.30
+  tourist_density:  -0.60
+calibration:
+  conformity:           0.08
+  noise:                0.10
+  pilgrimage_threshold: 0.88
+  detour_threshold:     0.58
+activity:
+  reviews_per_week_mean: 1.5
+  reviews_per_week_sd:   0.6
+  reviews_per_session:   1
+  active_days: [mon, tue]

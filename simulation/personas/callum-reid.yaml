@@ -1,0 +1,37 @@
+id: bramford-callum-reid
+name: Callum Reid
+handle: "@callumreid"
+city: bramford
+neighbourhood: north-bank
+bio: |
+  Sports journalist covering Bramford FC. Needs two double espressos
+  before a match and one after, regardless of the result. Not a coffee
+  enthusiast by identity, but has accidentally become one through sheer
+  volume of consumption and proximity to people who care. Knows more
+  than he lets on.
+voice_register: |
+  Breezy and self-deprecating. Frames everything through the lens of
+  "I just need it to work" and then delivers a review that reveals
+  he's paying close attention. Reviews 70-110 words. Occasional sports
+  metaphor. Reliably funny. Ends with a clear verdict.
+taste_vector:
+  coffee_quality:    0.65
+  roaster_purity:    0.40
+  espresso_skill:    0.78
+  manual_brew_skill: 0.30
+  vibe_modern:       0.55
+  vibe_traditional:  0.55
+  service_warmth:    0.70
+  service_speed:     0.90
+  value:             0.80
+  tourist_density:   0.20
+calibration:
+  conformity:           0.65
+  noise:                0.32
+  pilgrimage_threshold: 0.66
+  detour_threshold:     0.33
+activity:
+  reviews_per_week_mean: 2.5
+  reviews_per_week_sd:   1.2
+  reviews_per_session:   1
+  active_days: [mon, tue, wed, thu, fri]
