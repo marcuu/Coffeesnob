@@ -44,6 +44,8 @@ export function ReviewForm({
   venueId,
   slug,
   venueName,
+  venueCity,
+  venueNeighbourhood,
   reviewsByBucket,
   candidateNamesByReviewId,
   handle,
@@ -51,6 +53,8 @@ export function ReviewForm({
   venueId: string;
   slug: string;
   venueName: string;
+  venueCity?: string;
+  venueNeighbourhood?: string;
   reviewsByBucket: Record<ReviewBucket, Review[]>;
   candidateNamesByReviewId: Record<string, string>;
   handle?: string;
@@ -144,6 +148,8 @@ export function ReviewForm({
     );
   }
 
+  const locationLine = [venueNeighbourhood, venueCity].filter(Boolean).join(", ");
+
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <div
@@ -164,6 +170,34 @@ export function ReviewForm({
         <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 42%)" }}>
           {stageLabel(stage)}
         </div>
+      </div>
+
+      {/* Persistent venue context — visible on every step so users always
+          know which venue they're reviewing */}
+      <div
+        style={{
+          padding: "12px 24px",
+          borderBottom: "1px solid rgba(255,255,255,0.04)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: 15,
+            color: "hsl(60 9.1% 92%)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {venueName}
+        </div>
+        {locationLine && (
+          <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 48%)" }}>
+            {locationLine}
+          </div>
+        )}
       </div>
 
       <div
@@ -206,6 +240,7 @@ export function ReviewForm({
             candidateNames={candidateNamesByReviewId}
             newVenueName={venueName}
             onComplete={(result) => handleTournamentComplete(stage.bucket, result)}
+            onBack={() => setStage({ kind: "bucket" })}
           />
         )}
 

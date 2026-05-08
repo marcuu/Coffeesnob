@@ -20,10 +20,20 @@ export type RankingEvent =
       duration_ms: number;
       final_rank: number;
     }
+  | { name: "tournament_back_step_used" }
+  | {
+      name: "tournament_button_tap";
+      button: "new_venue" | "same" | "comparison_venue";
+    }
   | {
       name: "axes_completed";
       coffee: number;
       vibe: number;
+    }
+  | {
+      name: "slider_value_selected";
+      axis: "coffee" | "vibe";
+      final_value: number;
     }
   | {
       name: "review_submitted";

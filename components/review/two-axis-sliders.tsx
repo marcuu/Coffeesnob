@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { track } from "@/lib/analytics";
 
 type AxisKey = "coffee" | "vibe";
 
@@ -16,10 +16,11 @@ const MONO: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
-// 1-5 sliders, no auto-fill default, both required. The parent owns the
-// state and tracks which axes have been touched (a null value = untouched).
-// Callbacks fire only when the user moves the slider, which sets the value
-// to a real 1-5 integer.
+// 1-5 discrete selectors, no auto-fill default, both required. The parent
+// owns the state and tracks which axes have been touched (null = untouched).
+// Using discrete buttons instead of a native range input avoids the iOS Safari
+// "tap midpoint, no change event fires" bug where tapping position 3 on an
+// already-at-3 range input silently does nothing.
 export function TwoAxisSliders({
   coffee,
   vibe,
@@ -54,15 +55,17 @@ function Slider({
   value: number | null;
   onChange: (v: number) => void;
 }) {
-  const id = useId();
   const copy = COPY[axis];
   const touched = value !== null;
-  // Use 3 (the midpoint) as the visual position for an untouched slider so
-  // the thumb has somewhere to render, but show "—" in the readout.
-  const visual = touched ? value : 3;
+
+  const handleSelect = (v: number) => {
+    track({ name: "slider_value_selected", axis, final_value: v });
+    onChange(v);
+  };
+
   return (
     <div data-testid={`two-axis-slider-${axis}`}>
-      <label htmlFor={id} style={{ ...MONO, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 6 }}>
+      <label style={{ ...MONO, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 6 }}>
         {copy.label}
       </label>
       <p
@@ -76,7 +79,7 @@ function Slider({
         {copy.question}
       </p>
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 16 }}>
         <div
           style={{
             fontFamily: "var(--font-mono)",
@@ -92,40 +95,42 @@ function Slider({
         </div>
       </div>
 
-      <input
-        id={id}
-        type="range"
-        min={1}
-        max={5}
-        step={1}
-        value={visual}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={copy.label}
-        aria-valuemin={1}
-        aria-valuemax={5}
-        aria-valuenow={touched ? value : undefined}
-        style={{
-          width: "100%",
-          accentColor: "oklch(0.75 0.11 44)",
-          cursor: "pointer",
-          marginBottom: 6,
-          opacity: touched ? 1 : 0.5,
-        }}
-      />
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          ...MONO,
-          fontSize: 9,
-          color: "hsl(24 5.4% 36%)",
-        }}
+        role="group"
+        aria-label={copy.label}
+        style={{ display: "flex", gap: 8 }}
       >
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-        <span>4</span>
-        <span>5</span>
+        {([1, 2, 3, 4, 5] as const).map((v) => {
+          const selected = value === v;
+          return (
+            <button
+              key={v}
+              type="button"
+              aria-label={`${copy.label} ${v}`}
+              aria-pressed={selected}
+              data-testid={`slider-${axis}-${v}`}
+              onClick={() => handleSelect(v)}
+              style={{
+                flex: 1,
+                height: 48,
+                border: selected
+                  ? "1px solid oklch(0.75 0.11 44)"
+                  : "1px solid rgba(255,255,255,0.15)",
+                borderRadius: 2,
+                background: selected
+                  ? "rgba(241,168,113,0.12)"
+                  : "rgba(255,255,255,0.03)",
+                color: selected ? "oklch(0.75 0.11 44)" : "hsl(24 5.4% 52%)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 16,
+                cursor: "pointer",
+                transition: "background 120ms, border-color 120ms, color 120ms",
+              }}
+            >
+              {v}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
