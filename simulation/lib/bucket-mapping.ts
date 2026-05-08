@@ -58,8 +58,9 @@ function computeSubScore(
     0,
   ) / keys.length;
 
-  // Normalise dot product to [0,1] then anchor to the bucket's floor.
-  const norm = (dot + 1) / 2;
+  // dot is already in [0,1] since all taste/attr values are non-negative.
+  // Using (dot+1)/2 would compress range to [0.5,1] and always produce 4-5.
+  const norm = dot;
 
   // Bucket floors: pilgrimage → min 3, detour → min 2, convenience → min 1.
   const floor = bucket === "pilgrimage" ? 3 : bucket === "detour" ? 2 : 1;
