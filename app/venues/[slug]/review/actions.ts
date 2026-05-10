@@ -153,7 +153,7 @@ export async function submitRankedReview(
       status: "error",
       code: "fictional_venue",
       message:
-        "Bramford venues are part of Coffeesnob's calibration simulation and cannot be reviewed by real users.",
+        "Bramford venues are part of Caffiends' calibration simulation and cannot be reviewed by real users.",
     };
   }
 

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Calibration Reviewers — Coffeesnob",
+  title: "About Calibration Reviewers — Caffiends",
   description:
-    "How and why Coffeesnob uses AI-assisted calibration reviewers in the fictional city of Bramford.",
+    "How and why Caffiends uses AI-assisted calibration reviewers in the fictional city of Bramford.",
 };
 
 export default function CalibrationPage() {
@@ -12,7 +12,7 @@ export default function CalibrationPage() {
       <h1>Calibration Reviewers &amp; the City of Bramford</h1>
 
       <p>
-        Coffeesnob&apos;s leaderboards are powered by a weighted-credibility algorithm
+        Caffiends&apos; leaderboards are powered by a weighted-credibility algorithm
         that learns which reviewers have consistent, discerning taste over time.
         Before we opened to real users, the algorithm had no data to learn from —
         a cold-start problem.
@@ -66,7 +66,7 @@ export default function CalibrationPage() {
       <h2>Why tell us this?</h2>
       <p>
         Because the honest answer is the only answer worth giving.
-        Coffeesnob&apos;s value is trustworthy signal about real coffee. Using hidden
+        Caffiends&apos; value is trustworthy signal about real coffee. Using hidden
         synthetic data to inflate that signal would undermine the whole point.
         Bramford is clearly labelled, clearly fictional, and clearly separate
         from real-city content.

@@ -62,7 +62,7 @@ export async function SiteHeader() {
             color: "var(--color-foreground)",
           }}
         >
-          Caffeinesnobs
+          Caffiends
         </Link>
         <nav className="sh-nav">
           <VenueSearch />

@@ -225,7 +225,7 @@ export default async function VenueDetailPage({
           </div>
           {reviews.some((r) => r.is_synthetic) && (
             <p style={{ fontSize: 13, color: "var(--color-muted-foreground)", marginBottom: 16 }}>
-              Some reviews on this page are from Coffeesnob&apos;s calibration panel.{" "}
+              Some reviews on this page are from Caffiends&apos; calibration panel.{" "}
               <Link href="/about/calibration" style={{ textDecoration: "underline" }}>
                 Learn more →
               </Link>

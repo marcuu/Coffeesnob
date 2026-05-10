@@ -1,4 +1,4 @@
--- Coffeesnob base schema.
+-- Caffiends base schema.
 -- Domain: UK third-wave coffee venues reviewed by allowlisted users on a
 -- multi-axis (coffee / ambience / service / value / overall) scale.
 --

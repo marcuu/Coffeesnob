@@ -25,7 +25,7 @@ type Props = { params: Promise<{ region: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const name = regionDisplayName(region);
-  const title = `${name} Coffee Rankings — Caffeinesnobs`;
+  const title = `${name} Coffee Rankings — Caffiends`;
   const description = `The highest-ranked specialty coffee shops in ${name}, based on weighted reviewer scores.`;
   return {
     title,
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "website",
-      siteName: "Caffeinesnobs",
+      siteName: "Caffiends",
     },
   };
 }

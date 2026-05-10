@@ -14,7 +14,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 const SEED_FILE = join(__dirname, "../venues/bramford-seed.yaml");
-const EMAIL_DOMAIN = "bramford.internal.coffeesnob.app";
+const EMAIL_DOMAIN = "bramford.internal.caffiends.app";
 
 type VenueSpec = {
   id: string;

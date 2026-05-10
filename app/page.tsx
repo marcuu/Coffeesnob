@@ -19,7 +19,7 @@ import { mapDbVenuesToOnboarding } from "./onboarding/venue-mapping";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Caffeinesnobs — UK third-wave coffee, reviewed honestly",
+  title: "Caffiends — UK third-wave coffee, reviewed honestly",
   description:
     "The UK third-wave coffee leaderboard, ranked by weighted reviewer scores. Sign in to personalise the feed for your taste.",
 };
@@ -39,7 +39,7 @@ export default async function HomePage() {
   if (error) {
     return (
       <main className="mx-auto max-w-xl px-6 py-16">
-        <h1 className="text-2xl font-semibold">Caffeinesnobs</h1>
+        <h1 className="text-2xl font-semibold">Caffiends</h1>
         <p className="mt-4 text-sm text-[var(--color-destructive)]">
           Couldn&rsquo;t load venues: {error.message}
         </p>

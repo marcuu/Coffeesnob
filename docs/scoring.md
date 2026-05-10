@@ -1,8 +1,8 @@
-# Weighted scoring for Coffeesnob
+# Weighted scoring for Caffiends
 
 ## Context
 
-Coffeesnob computes venue scores from two review inputs on a 1-5 scale:
+Caffiends computes venue scores from two review inputs on a 1-5 scale:
 **`rating_coffee_5`** (the cup itself) and **`rating_vibe_5`** (everything
 around it). The pipeline scales these to a 1-10 internal representation
 (multiply by 2) so existing aggregation, prior, and confidence machinery

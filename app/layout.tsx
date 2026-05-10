@@ -24,8 +24,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://caffeinesnobs.co.uk"),
-  title: "Caffeinesnobs",
+  metadataBase: new URL("https://caffiends.co.uk"),
+  title: "Caffiends",
   description: "UK third-wave coffee, reviewed honestly.",
 };
 

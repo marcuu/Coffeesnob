@@ -1,11 +1,11 @@
-# Coffeesnob Multiverse — Simulation Design (v1)
+# Caffiends Multiverse — Simulation Design (v1)
 
 Canonical design reference. See `docs/architecture.md` for the file
 structure summary and `docs/scoring.md §11` for pipeline integration.
 
 ## Why this exists
 
-Coffeesnob's weighted-credibility algorithm needs data to work. At zero users
+Caffiends' weighted-credibility algorithm needs data to work. At zero users
 the leaderboards are empty, similarity matching has no population to compare
 against, and reveal screens have no neighbours. The simulation provides a
 populated reviewer ecosystem before real users arrive, acting as both
@@ -123,7 +123,7 @@ Three surfaces:
 
 1. **Reviewer profile badge** — `SyntheticBadge` component on any reviewer
    page where `is_synthetic = true`
-2. **Venue page note** — "Some reviews on this page are from Coffeesnob's
+2. **Venue page note** — "Some reviews on this page are from Caffiends'
    calibration panel." shown when any review has `is_synthetic = true`
 3. **`/about/calibration` page** — full plain-English explanation
 

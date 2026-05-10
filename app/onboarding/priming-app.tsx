@@ -210,7 +210,7 @@ function WelcomeScreen({
           marginBottom: 18,
         }}
       >
-        Coffeesnob ranks UK third-wave coffee using weighted reviewer
+        Caffiends ranks UK third-wave coffee using weighted reviewer
         credibility — the better your taste signal, the more your reviews
         shape the rankings.
       </p>

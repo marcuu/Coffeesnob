@@ -143,7 +143,7 @@ async function handle(request: Request): Promise<NextResponse> {
     }
 
     const appBaseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ?? "https://coffeesnob.example";
+      process.env.NEXT_PUBLIC_APP_URL ?? "https://caffiends.example";
 
     let sent = 0;
     let skipped = 0;

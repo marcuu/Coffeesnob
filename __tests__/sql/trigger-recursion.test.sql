@@ -22,7 +22,7 @@ begin;
 do $$
 declare
   v_reviewer uuid := gen_random_uuid();
-  v_email text := 't_' || replace(v_reviewer::text, '-', '') || '@coffeesnob.test';
+  v_email text := 't_' || replace(v_reviewer::text, '-', '') || '@caffiends.test';
   v_venue_ids uuid[] := array(select gen_random_uuid() from generate_series(1,5));
   v_calls_before bigint;
   v_calls_after bigint;

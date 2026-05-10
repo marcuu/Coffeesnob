@@ -14,7 +14,7 @@ export type OnboardingFollowupInput = {
 export function renderOnboardingFollowup(
   input: OnboardingFollowupInput,
 ): { subject: string; html: string } {
-  const subject = "Your Coffeesnob taste profile is ready";
+  const subject = "Your Caffiends taste profile is ready";
   const personalLine =
     input.topMatchName && input.topMatchSimilarityPct
       ? `<p style="margin: 0 0 16px;">${escapeHtml(input.topMatchName)} rated <strong>${escapeHtml(input.pilgrimageVenueName ?? "a venue you haven't tried")}</strong> a Pilgrimage too — your tastes are about ${input.topMatchSimilarityPct}% aligned.</p>`
@@ -35,7 +35,7 @@ export function renderOnboardingFollowup(
         </h1>
         ${personalLine}
         <p style="margin: 0 0 24px; line-height: 1.6;">
-          Coffeesnob's per-axis credibility scores sharpen every time you log a review.
+          Caffiends' per-axis credibility scores sharpen every time you log a review.
           One more visit and your Coffee IQ moves out of provisional.
         </p>
         <p style="margin: 0;">
@@ -44,7 +44,7 @@ export function renderOnboardingFollowup(
           </a>
         </p>
         <p style="margin: 32px 0 0; font-size: 12px; color: #8a8480;">
-          You're receiving this because you signed up for Coffeesnob and completed onboarding.
+          You're receiving this because you signed up for Caffiends and completed onboarding.
           One-off email; we won't follow up again.
         </p>
       </td>
