@@ -1,4 +1,4 @@
-# AGENTS.md — Coffeesnob
+# AGENTS.md — Caffiends
 
 ## Agent Instructions
 - Keep documentation up to date by updating `README.md`, `AGENTS.md`, and documents in `docs/` to reflect changes made.
@@ -8,7 +8,7 @@
 
 ## Project Overview
 
-Coffeesnob is a UK third-wave coffee review app — a TableLog analogue where
+Caffiends is a UK third-wave coffee review app — a TableLog analogue where
 authenticated, allowlisted users review venues on a multi-axis scale. The
 long-term moat is an algorithm that weights experienced and critical
 reviewers more heavily. See `docs/scoring.md` for the full design of the

@@ -1,4 +1,4 @@
-# Coffeesnob
+# Caffiends
 
 Next.js 15 + Supabase scaffold.
 
@@ -31,9 +31,9 @@ which creates three email/password test users (all password `password123`):
 
 | email                      | display name |
 | -------------------------- | ------------ |
-| alice@coffeesnob.local     | Alice        |
-| bob@coffeesnob.local       | Bob          |
-| carol@coffeesnob.local     | Carol        |
+| alice@caffiends.local      | Alice        |
+| bob@caffiends.local        | Bob          |
+| carol@caffiends.local      | Carol        |
 
 ...along with four London/Leeds venues and a handful of reviews.
 The `/venues` page includes an **All cities / specific city** dropdown filter

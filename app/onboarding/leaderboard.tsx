@@ -121,7 +121,7 @@ export function Leaderboard({
               color: "var(--color-foreground)",
             }}
           >
-            Caffeinesnobs
+            Caffiends
           </Link>
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <VenueSearch />

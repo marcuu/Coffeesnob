@@ -76,9 +76,9 @@ begin
     return;
   end if;
 
-  alice := public.seed_user('alice@coffeesnob.local', 'password123', 'Alice');
-  bob   := public.seed_user('bob@coffeesnob.local',   'password123', 'Bob');
-  carol := public.seed_user('carol@coffeesnob.local', 'password123', 'Carol');
+  alice := public.seed_user('alice@caffiends.local', 'password123', 'Alice');
+  bob   := public.seed_user('bob@caffiends.local',   'password123', 'Bob');
+  carol := public.seed_user('carol@caffiends.local', 'password123', 'Carol');
 
   insert into public.venues
     (slug, name, address_line1, city, postcode, roasters, brew_methods,

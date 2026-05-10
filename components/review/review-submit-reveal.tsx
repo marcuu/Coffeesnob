@@ -57,7 +57,7 @@ export function ReviewSubmitReveal({
         transition={{ duration: 0.4, ease: "easeOut" }}
         // Composition is intentionally OG-card-friendly: aspect ratio close
         // to 1.91:1, the headline reads cleanly cropped to ~1200×630, and
-        // the Coffeesnob brand mark sits at the bottom. The
+        // the Caffiends brand mark sits at the bottom. The
         // share-card-image generation lands in a separate PR; this layout
         // is the source for that downstream work.
         style={{
@@ -167,7 +167,7 @@ export function ReviewSubmitReveal({
               color: "hsl(24 5.4% 50%)",
             }}
           >
-            COFFEESNOB
+            CAFFIENDS
           </span>
           <div style={{ display: "flex", gap: 10 }}>
             <Link

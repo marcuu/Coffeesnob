@@ -15,7 +15,7 @@ import { loadAllPersonas, type Persona } from "../lib/persona-loader";
 type Sb = SupabaseClient<any, any, any>;
 
 const PERSONAS_DIR = join(__dirname, "../personas");
-const EMAIL_DOMAIN = "bramford.internal.coffeesnob.app";
+const EMAIL_DOMAIN = "bramford.internal.caffiends.app";
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

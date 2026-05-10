@@ -1,6 +1,6 @@
 # Ranking — Pilgrimage / Detour / Convenience
 
-Coffeesnob's review input is a **pairwise tournament inside a Michelin-style
+Caffiends' review input is a **pairwise tournament inside a Michelin-style
 bucket**, replacing the old `rating_overall` slider. The reviewer picks one
 of three buckets, then binary-searches the new venue into the existing list
 in that bucket.
