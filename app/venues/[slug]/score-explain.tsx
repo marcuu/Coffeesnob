@@ -99,7 +99,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
               <div style={{ fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{formatPct(recencyProfile.last6Months)}</div>
             </div>
             <div>
-              <div>6–18 mo.</div>
+              <div>6-18 mo.</div>
               <div style={{ fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{formatPct(recencyProfile.sixTo18Months)}</div>
             </div>
             <div>

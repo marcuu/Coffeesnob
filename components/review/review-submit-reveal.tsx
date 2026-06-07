@@ -144,7 +144,8 @@ export function ReviewSubmitReveal({
               lineHeight: 1.6,
             }}
           >
-            Your list changed during ranking — placement may need adjustment.
+            Your list changed while you were ranking, so this placement might
+            need a tweak.
           </p>
         ) : null}
 

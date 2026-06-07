@@ -210,8 +210,8 @@ function WelcomeScreen({
           marginBottom: 18,
         }}
       >
-        Caffiends ranks UK third-wave coffee using weighted reviewer
-        credibility — the better your taste signal, the more your reviews
+        Caffiends ranks UK third-wave coffee by weighted reviewer
+        credibility. The better your taste signal, the more your reviews
         shape the rankings.
       </p>
       <p
@@ -223,9 +223,9 @@ function WelcomeScreen({
           marginBottom: 36,
         }}
       >
-        Let&rsquo;s bootstrap your taste profile. Rank between 1 and{" "}
+        Let&rsquo;s get your taste profile started. Rank anywhere from 1 to{" "}
         {MAX_PRIMING} venues you&rsquo;ve been to. The more you rank, the
-        sharper your profile starts.
+        sharper it starts out.
       </p>
       <PrimaryButton onClick={onStart}>Start →</PrimaryButton>
     </div>
@@ -275,8 +275,8 @@ function PrimingScreen({
         }}
       >
         {rankedCount < MIN_PRIMING_FOR_CONTINUE
-          ? `Keep going for sharper personalisation — at least ${MIN_PRIMING_FOR_CONTINUE} unlocks the reveal.`
-          : `${remaining} more for the sharpest profile, or continue now.`}
+          ? `Keep going for a sharper profile. ${MIN_PRIMING_FOR_CONTINUE} gets you to the reveal.`
+          : `${remaining} more for the sharpest read, or carry on now.`}
       </p>
 
       <div

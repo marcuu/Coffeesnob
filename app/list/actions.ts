@@ -187,7 +187,7 @@ export async function reorderReview(
         return {
           status: "error",
           code: "rank_collision_after_compact",
-          message: "Couldn't reorder — try again",
+          message: "Couldn't reorder, try again.",
         };
       }
       return {

@@ -50,7 +50,7 @@ function formatProof(
   score: number | null,
   displayable: boolean,
 ): string {
-  if (!reviewCount) return "No reviews yet — be the first.";
+  if (!reviewCount) return "No reviews yet. Be the first.";
   const rev = `${reviewCount} review${reviewCount === 1 ? "" : "s"}`;
   if (displayable && score !== null) {
     return `${rev}, weighted score ${score.toFixed(1)}.`;
@@ -60,7 +60,7 @@ function formatProof(
 
 function pitchFromNotes(notes: string | null, name: string): string {
   const trimmed = notes?.trim();
-  if (!trimmed) return `Add ${name} to your list — no blurb yet.`;
+  if (!trimmed) return `Add ${name} to your list. No blurb yet.`;
   if (trimmed.length <= 180) return trimmed;
   return `${trimmed.slice(0, 177).trimEnd()}…`;
 }
