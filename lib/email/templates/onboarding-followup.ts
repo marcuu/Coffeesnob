@@ -17,8 +17,8 @@ export function renderOnboardingFollowup(
   const subject = "Your Caffiends taste profile is ready";
   const personalLine =
     input.topMatchName && input.topMatchSimilarityPct
-      ? `<p style="margin: 0 0 16px;">${escapeHtml(input.topMatchName)} rated <strong>${escapeHtml(input.pilgrimageVenueName ?? "a venue you haven't tried")}</strong> a Pilgrimage too — your tastes are about ${input.topMatchSimilarityPct}% aligned.</p>`
-      : `<p style="margin: 0 0 16px;">Your taste profile is ready and waiting.</p>`;
+      ? `<p style="margin: 0 0 16px;">${escapeHtml(input.topMatchName)} rated <strong>${escapeHtml(input.pilgrimageVenueName ?? "a venue you haven't tried")}</strong> a Pilgrimage too. Your tastes line up about ${input.topMatchSimilarityPct}%.</p>`
+      : `<p style="margin: 0 0 16px;">Your taste profile is ready.</p>`;
   const ctaHref = input.pilgrimageVenueSlug
     ? `${input.appBaseUrl}/venues/${input.pilgrimageVenueSlug}`
     : `${input.appBaseUrl}/list`;

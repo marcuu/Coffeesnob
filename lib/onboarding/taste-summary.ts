@@ -90,7 +90,7 @@ const RULES: Rule[] = [
     key: "vibe_over_coffee",
     apply: (_, s) =>
       s.count >= 3 && s.avgVibe > s.avgCoffee + 0.8
-        ? "The room matters as much as the cup — you reward a good vibe."
+        ? "The room matters as much as the cup. A good vibe earns its keep."
         : null,
   },
   {
@@ -109,21 +109,21 @@ const RULES: Rule[] = [
     key: "chains_anchored_low",
     apply: (_, s) =>
       s.chainCount >= 2 && !s.hasChainsInPilgrimage
-        ? "You're firmly in third-wave territory — chains don't make your map."
+        ? "You're firmly third-wave. Chains don't make your map."
         : null,
   },
   {
     key: "chains_in_pilgrimage",
     apply: (_, s) =>
       s.hasChainsInPilgrimage
-        ? "You don't have a third-wave bias — convenience and quality both count."
+        ? "You're not precious about third-wave: convenience counts as much as quality."
         : null,
   },
   {
     key: "high_bar",
     apply: (_, s) =>
       s.count >= 3 && s.avgCoffee >= 4.4
-        ? "Your bar is high — most cups in your set scored 4 or 5."
+        ? "Your bar is high. Most cups in your set scored 4 or 5."
         : null,
   },
   {
@@ -135,7 +135,7 @@ const RULES: Rule[] = [
       // call it commitment.
       const pilg = s.byBucket.pilgrimage.length;
       if (pilg / s.count > 0.5) {
-        return `You're generous with Pilgrimage — ${pilg} of your ${rs.length} venues earned the badge.`;
+        return `You're generous with Pilgrimage: ${pilg} of your ${rs.length} venues earned the badge.`;
       }
       return null;
     },
@@ -146,10 +146,10 @@ const RULES: Rule[] = [
       if (s.count < 3) return null;
       const pilg = s.byBucket.pilgrimage.length;
       if (pilg === 0) {
-        return "Nothing earned a Pilgrimage yet — you save the top tier for when it really counts.";
+        return "Nothing's earned a Pilgrimage yet. You save the top tier for when it counts.";
       }
       if (pilg / s.count < 0.2) {
-        return `You're selective — only ${pilg} of ${rs.length} earned a Pilgrimage.`;
+        return `You're selective: only ${pilg} of ${rs.length} earned a Pilgrimage.`;
       }
       return null;
     },
@@ -171,7 +171,7 @@ const RULES: Rule[] = [
         rs.map((r) => r.tags?.find((t) => t.startsWith("city:"))).filter(Boolean) as string[],
       );
       if (cities.size >= 3) {
-        return "Your set spans multiple UK cities — you don't restrict yourself to one scene.";
+        return "Your set spans several UK cities. You don't stick to one scene.";
       }
       return null;
     },
@@ -180,7 +180,7 @@ const RULES: Rule[] = [
     key: "thin_profile",
     apply: (_, s) =>
       s.count <= 2
-        ? "Your profile is provisional — rank a few more venues for sharper personalisation."
+        ? "Your profile's still provisional. Rank a few more venues to sharpen it."
         : null,
   },
   {
@@ -190,20 +190,20 @@ const RULES: Rule[] = [
       Math.abs(s.avgCoffee - s.avgVibe) <= 0.4 &&
       s.avgCoffee >= 3 &&
       s.avgCoffee <= 4.2
-        ? "Coffee and vibe weigh evenly for you — neither one carries the whole experience."
+        ? "Coffee and vibe weigh about evenly for you; neither carries the whole visit."
         : null,
   },
   {
     key: "fallback_first",
     apply: (rs, s) =>
       s.count > 0
-        ? `You opened your map with ${rs[0].venueName} — a useful anchor for what comes next.`
+        ? `You opened your map with ${rs[0].venueName}, a decent anchor for the rest.`
         : null,
   },
   {
     key: "fallback_count",
     apply: (rs) =>
-      `You ranked ${rs.length} venue${rs.length === 1 ? "" : "s"} to start — your taste profile begins here.`,
+      `You ranked ${rs.length} venue${rs.length === 1 ? "" : "s"} to start. The profile builds from here.`,
   },
 ];
 

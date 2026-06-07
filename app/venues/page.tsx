@@ -133,7 +133,7 @@ export default async function VenuesPage({
         <p className="text-sm text-[var(--color-muted-foreground)]">
           {selectedRegion
             ? `No venues found in "${regions.find((r) => r.id === selectedRegion)?.name ?? selectedRegion}".`
-            : "No venues yet — add the first."}
+            : "No venues yet. Add the first."}
         </p>
       ) : (
         <ul className="grid gap-4">

@@ -262,7 +262,7 @@ export async function submitRankedReview(
       return {
         status: "error",
         code: "rank_collision_after_compact",
-        message: "Couldn't save — try again",
+        message: "Couldn't save, try again.",
       };
     }
   }

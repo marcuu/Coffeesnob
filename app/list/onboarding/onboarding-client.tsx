@@ -62,8 +62,8 @@ export function OnboardingClient({
             marginBottom: 12,
           }}
         >
-          Have a look — drag to refine within a bucket, or move a venue to a
-          different bucket if it lands wrong. Once you&apos;re happy, hit
+          Have a look. Drag to reorder within a bucket, or move a venue across
+          if it&apos;s landed in the wrong one. When it looks right, hit
           &ldquo;Looks right&rdquo; below.
         </p>
         <p
@@ -73,10 +73,10 @@ export function OnboardingClient({
             lineHeight: 1.7,
           }}
         >
-          We&apos;ve also simplified your old ratings into two scores —{" "}
+          We&apos;ve also folded your old ratings into two scores,{" "}
           <strong style={{ color: "hsl(60 9.1% 90%)" }}>Coffee</strong> and{" "}
-          <strong style={{ color: "hsl(60 9.1% 90%)" }}>Vibe</strong>, both 1-5
-          — mapped automatically from your previous reviews.
+          <strong style={{ color: "hsl(60 9.1% 90%)" }}>Vibe</strong>, both out
+          of 5, worked out from your previous reviews.
         </p>
       </header>
 

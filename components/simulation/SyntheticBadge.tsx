@@ -6,7 +6,7 @@ export function SyntheticBadge() {
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800"
-      title="This reviewer is part of Caffiends' bootstrap calibration panel — AI-assisted, persona-driven, generating reviews for the fictional city of Bramford."
+      title="This reviewer is part of Caffiends' calibration panel: an AI-assisted persona that reviews the fictional city of Bramford."
     >
       <span aria-hidden="true">⚗</span>
       Calibration Reviewer
