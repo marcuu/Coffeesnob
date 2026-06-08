@@ -70,34 +70,34 @@ describe("buildVenueRankingSummary", () => {
       expect(reviewPrompt).toContain("Think this ranking is wrong");
     });
 
-    it("returns High signal for confidence ≥ 0.7", () => {
+    it("returns Well reviewed for confidence ≥ 0.7", () => {
       const summary = buildVenueRankingSummary(
         "a",
         makeScore(8.0, true, 5, 0.75),
         1,
         "UK",
       );
-      expect(summary.signalLabel).toBe("High signal");
+      expect(summary.signalLabel).toBe("Well reviewed");
     });
 
-    it("returns Good signal for confidence in [0.4, 0.7)", () => {
+    it("returns Some reviews for confidence in [0.4, 0.7)", () => {
       const summary = buildVenueRankingSummary(
         "a",
         makeScore(8.0, true, 3, 0.5),
         1,
         "UK",
       );
-      expect(summary.signalLabel).toBe("Good signal");
+      expect(summary.signalLabel).toBe("Some reviews");
     });
 
-    it("returns Low signal for confidence in [0.2, 0.4)", () => {
+    it("returns Few reviews for confidence in [0.2, 0.4)", () => {
       const summary = buildVenueRankingSummary(
         "a",
         makeScore(7.5, true, 2, 0.25),
         1,
         "UK",
       );
-      expect(summary.signalLabel).toBe("Low signal");
+      expect(summary.signalLabel).toBe("Few reviews");
     });
 
     it("rank can be null for a ranked venue with no pre-computed rank", () => {
@@ -140,7 +140,7 @@ describe("buildVenueRankingSummary", () => {
       expect(summary.reviewPrompt).toBe("No reviews yet.");
     });
 
-    it("sets reviewPrompt to 'Needs more trusted reviews...' when reviews > 0 but unranked", () => {
+    it("sets reviewPrompt to 'Needs a few more reviews...' when reviews > 0 but unranked", () => {
       const summary = buildVenueRankingSummary(
         "a",
         makeScore(5.0, false, 3),
@@ -148,18 +148,18 @@ describe("buildVenueRankingSummary", () => {
         "UK",
       );
       expect(summary.reviewPrompt).toBe(
-        "Needs more trusted reviews to enter the rankings.",
+        "Needs a few more reviews to enter the rankings.",
       );
     });
 
-    it("returns Needs signal label for unranked venues", () => {
+    it("returns Needs reviews label for unranked venues", () => {
       const summary = buildVenueRankingSummary(
         "a",
         makeScore(5.0, false, 1, 0.1),
         null,
         "UK",
       );
-      expect(summary.signalLabel).toBe("Needs signal");
+      expect(summary.signalLabel).toBe("Needs reviews");
     });
 
     it("formattedScore is em-dash for unranked", () => {

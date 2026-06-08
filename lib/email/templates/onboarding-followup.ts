@@ -35,8 +35,8 @@ export function renderOnboardingFollowup(
         </h1>
         ${personalLine}
         <p style="margin: 0 0 24px; line-height: 1.6;">
-          Caffiends' per-axis credibility scores sharpen every time you log a review.
-          One more visit and your Coffee IQ moves out of provisional.
+          Your Coffee IQ sharpens every time you log a review.
+          One more visit and it moves out of provisional.
         </p>
         <p style="margin: 0;">
           <a href="${escapeHtml(ctaHref)}" style="display: inline-block; padding: 12px 20px; background: oklch(0.75 0.11 44); color: #1a1716; text-decoration: none; border-radius: 2px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;">

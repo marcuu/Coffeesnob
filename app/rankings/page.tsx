@@ -22,11 +22,11 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Caffiends Rankings — Top UK Specialty Coffee",
   description:
-    "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
+    "The top UK specialty coffee shops, ranked by reviewers who know their coffee.",
   openGraph: {
     title: "Caffiends Rankings — Top UK Specialty Coffee",
     description:
-      "The top UK specialty coffee shops, ranked by weighted reviewer scores.",
+      "The top UK specialty coffee shops, ranked by reviewers who know their coffee.",
     type: "website",
     siteName: "Caffiends",
   },
@@ -229,7 +229,7 @@ export default async function RankingsPage() {
                         <p className="text-[var(--color-muted-foreground)]">
                           {reviewCount === 0
                             ? "No reviews yet."
-                            : "Needs more trusted reviews to enter the rankings."}
+                            : "Needs a few more reviews to enter the rankings."}
                         </p>
                         <Link
                           href={reviewCta}

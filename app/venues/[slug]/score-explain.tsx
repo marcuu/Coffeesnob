@@ -67,14 +67,14 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{totalReviews}</span>
           <span>Reviews (counted)</span>
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{effectiveReviews}</span>
-          <span>Prior pull</span>
+          <span>Pull to average</span>
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{priorPull.toFixed(2)}</span>
         </div>
 
         {topContributors.length > 0 ? (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 8 }}>
-              Top reviewers by weight
+              Reviewers who counted most
             </div>
             <div style={{ display: "grid", gap: 4 }}>
               {topContributors.map((c, i) => (
@@ -110,7 +110,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
         </div>
 
         <p style={{ fontSize: 11, color: "var(--color-muted-foreground)", lineHeight: 1.6 }}>
-          Ratings are weighted by reviewer status, tenure, consistency, recency, and completeness, then blended with a Bayesian prior.
+          Scores lean on reviewers who know their coffee. We count a review for more when the reviewer has a track record, rates consistently, and visited recently, then balance against the average for venues with only a handful of reviews.
         </p>
       </div>
     </details>

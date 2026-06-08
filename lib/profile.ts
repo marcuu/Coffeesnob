@@ -149,7 +149,7 @@ export function computeReputationTier(
     return {
       label: "Trusted contributor",
       description:
-        "Pre-vetted reviewer. Your scores carry full weight in venue rankings.",
+        "You're pre-vetted, so your scores count fully in the rankings.",
       nextStep: null,
     };
   }
@@ -158,7 +158,7 @@ export function computeReputationTier(
     return {
       label: "Established reviewer",
       description:
-        "Your review history gives your scores strong weight in venue rankings.",
+        "You've built up a track record, so your scores count for a lot in the rankings.",
       nextStep: null,
     };
   }
@@ -166,13 +166,13 @@ export function computeReputationTier(
   if (tenureScore >= 0.4 || review_count >= 5) {
     const needed = Math.max(0, 20 - review_count);
     return {
-      label: "Growing signal",
+      label: "Getting established",
       description:
-        "Your scores are gaining weight as your review history builds.",
+        "Your scores count for more as your track record grows.",
       nextStep:
         needed > 0
-          ? `${needed} more review${needed === 1 ? "" : "s"} to reach Established reviewer`
-          : "Keep your streak going to increase your weight",
+          ? `${needed} more review${needed === 1 ? "" : "s"} to become an Established reviewer`
+          : "Keep reviewing and your scores will count for more",
     };
   }
 
@@ -180,11 +180,11 @@ export function computeReputationTier(
   return {
     label: "Building your record",
     description:
-      "Early-stage reviewer. Every review adds to your signal in the ranking system.",
+      "You're just starting out. Every review you write makes your scores count for more.",
     nextStep:
       needed > 0
-        ? `Write ${needed} more review${needed === 1 ? "" : "s"} to start growing your signal`
-        : "Keep reviewing to strengthen your weight",
+        ? `Write ${needed} more review${needed === 1 ? "" : "s"} to start counting for more`
+        : "Keep reviewing and your scores will count for more",
   };
 }
 

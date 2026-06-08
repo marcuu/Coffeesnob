@@ -151,7 +151,7 @@ export function Leaderboard({
           reviewed harshly.
         </h1>
         <p style={SUBHEAD}>
-          Venues ranked by weighted reviewer scores.{" "}
+          Ranked by reviewers who know their coffee.{" "}
           {isLoggedIn ? (
             <Link
               href="/list"

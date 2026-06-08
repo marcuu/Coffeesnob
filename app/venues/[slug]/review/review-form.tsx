@@ -338,7 +338,7 @@ function rankIndexFromPosition(rankPosition: number, bucketReviews: Review[]): n
 function stageLabel(stage: Stage): string {
   switch (stage.kind) {
     case "bucket":
-      return "Step 1 · bucket";
+      return "Step 1 · where it lands";
     case "tournament":
       return "Step 2 · ranking";
     case "axes":

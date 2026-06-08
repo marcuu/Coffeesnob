@@ -210,9 +210,9 @@ function WelcomeScreen({
           marginBottom: 18,
         }}
       >
-        Caffiends ranks UK third-wave coffee by weighted reviewer
-        credibility. The better your taste signal, the more your reviews
-        shape the rankings.
+        Caffiends ranks UK third-wave coffee, and the reviewers who know
+        their coffee count for more. The sharper your taste, the more your
+        reviews shape the rankings.
       </p>
       <p
         style={{
@@ -251,7 +251,7 @@ function PrimingScreen({
   return (
     <div>
       <div style={{ ...MONO, color: TEXT_DIMMER, marginBottom: 12 }}>
-        Step 2 · priming · {rankedCount} of {MAX_PRIMING} ranked
+        Step 2 · ranking · {rankedCount} of {MAX_PRIMING} ranked
       </div>
       <h2
         style={{
@@ -616,7 +616,7 @@ function NextStepsScreen({
           <Hint>Finding your matches…</Hint>
         ) : !minMatches ? (
           <Hint>
-            Rank a few more priming venues to surface similar reviewers.
+            Rank a few more venues and we&rsquo;ll find reviewers like you.
           </Hint>
         ) : matches && matches.matches.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

@@ -22,11 +22,11 @@ function computeSignalLabel(
   confidence: number | undefined,
   isUnranked: boolean,
 ): string {
-  if (isUnranked) return "Needs signal";
-  if (confidence == null) return "Low signal";
-  if (confidence >= 0.7) return "High signal";
-  if (confidence >= 0.4) return "Good signal";
-  return "Low signal";
+  if (isUnranked) return "Needs reviews";
+  if (confidence == null) return "Few reviews";
+  if (confidence >= 0.7) return "Well reviewed";
+  if (confidence >= 0.4) return "Some reviews";
+  return "Few reviews";
 }
 
 /**
@@ -53,7 +53,7 @@ export function buildVenueRankingSummary(
   const reviewPrompt = isUnranked
     ? rawReviewCount === 0
       ? "No reviews yet."
-      : "Needs more trusted reviews to enter the rankings."
+      : "Needs a few more reviews to enter the rankings."
     : "Think this ranking is wrong?";
 
   return {

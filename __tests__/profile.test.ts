@@ -223,21 +223,21 @@ describe("computeReputationTier", () => {
     expect(tier.nextStep).toBeNull();
   });
 
-  it("returns Growing signal when tenure ≥ 0.4 and review count < 20", () => {
+  it("returns Getting established when tenure ≥ 0.4 and review count < 20", () => {
     const tier = computeReputationTier(
       { status: "active", review_count: 10 },
       { tenure_score: 0.5, consistency_score: 0.6 },
     );
-    expect(tier.label).toBe("Growing signal");
+    expect(tier.label).toBe("Getting established");
     expect(tier.nextStep).toContain("10 more reviews");
   });
 
-  it("returns Growing signal when review_count ≥ 5 even with low tenure", () => {
+  it("returns Getting established when review_count ≥ 5 even with low tenure", () => {
     const tier = computeReputationTier(
       { status: "active", review_count: 5 },
       { tenure_score: 0.1, consistency_score: 0.5 },
     );
-    expect(tier.label).toBe("Growing signal");
+    expect(tier.label).toBe("Getting established");
   });
 
   it("returns Building your record for a brand-new reviewer", () => {

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { region } = await params;
   const name = regionDisplayName(region);
   const title = `${name} Coffee Rankings — Caffiends`;
-  const description = `The highest-ranked specialty coffee shops in ${name}, based on weighted reviewer scores.`;
+  const description = `The highest-ranked specialty coffee shops in ${name}, scored by reviewers who know their coffee.`;
   return {
     title,
     description,
@@ -114,8 +114,8 @@ export default async function RegionRankingsPage({ params }: Props) {
             {regionName} Coffee Rankings
           </h1>
           <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-            The highest-ranked specialty coffee shops in {regionName}, based on
-            weighted reviewer scores.
+            The highest-ranked specialty coffee shops in {regionName}, scored by
+            reviewers who know their coffee.
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export default async function RegionRankingsPage({ params }: Props) {
                         <p className="text-[var(--color-muted-foreground)]">
                           {reviewCount === 0
                             ? "No reviews yet."
-                            : "Needs more trusted reviews to enter the rankings."}
+                            : "Needs a few more reviews to enter the rankings."}
                         </p>
                         <Link
                           href={reviewCta}

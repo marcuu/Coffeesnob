@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Caffiends — UK third-wave coffee, reviewed honestly",
   description:
-    "The UK third-wave coffee leaderboard, ranked by weighted reviewer scores. Sign in to personalise the feed for your taste.",
+    "The UK third-wave coffee leaderboard, ranked by reviewers who know their coffee. Sign in to personalise the feed for your taste.",
 };
 
 export default async function HomePage() {
