@@ -128,8 +128,7 @@ export default async function Image({
                 color: "hsl(24, 5.4%, 58%)",
               }}
             >
-              {city}
-              {venue?.postcode ? ` · ${venue.postcode}` : ""}
+              {`${city}${venue?.postcode ? ` · ${venue.postcode}` : ""}`}
             </div>
           ) : null}
         </div>

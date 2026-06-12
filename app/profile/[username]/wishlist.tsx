@@ -54,7 +54,7 @@ export function WishlistSection({
             >
               <Link
                 href={`/venues/${item.slug}`}
-                className="flex flex-col gap-0.5 text-[var(--color-foreground)] no-underline"
+                className="flex flex-col gap-0.5 text-inherit no-underline"
               >
                 <span className="font-serif text-base">{item.name}</span>
                 <span className="text-xs text-[var(--color-muted-foreground)]">

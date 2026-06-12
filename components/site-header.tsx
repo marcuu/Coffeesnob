@@ -26,7 +26,7 @@ export async function SiteHeader() {
 
   let profileHref = "/profile";
   let profileLabel = "Sign in";
-  let recentVenues: RecentVenue[] = [];
+  const recentVenues: RecentVenue[] = [];
   if (user) {
     const [{ data: reviewer }, { data: recentRows }] = await Promise.all([
       supabase
