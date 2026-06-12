@@ -77,6 +77,10 @@ export const rankedReviewCreateSchema = z.object({
   rating_coffee_5: rating5,
   rating_vibe_5: rating5,
   body: z.string().trim().max(5000).optional(),
+  // Quick re-log: id of the user's prior review of the same venue. The new
+  // review stacks as an additional data point, placed adjacent to the prior
+  // one instead of re-running the tournament.
+  relog_of: z.string().uuid().optional(),
 });
 
 export type RankedReviewCreateInput = z.infer<typeof rankedReviewCreateSchema>;

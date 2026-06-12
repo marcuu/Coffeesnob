@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+import { LogSheet, type RecentVenue } from "@/components/log-sheet";
 
 type Props = {
   isLoggedIn: boolean;
   profileHref: string;
+  recentVenues?: RecentVenue[];
 };
 
 type Item = {
@@ -27,8 +31,9 @@ const ICON_PROPS = {
   strokeLinejoin: "round",
 } as const;
 
-export function BottomNav({ isLoggedIn, profileHref }: Props) {
+export function BottomNav({ isLoggedIn, profileHref, recentVenues = [] }: Props) {
   const pathname = usePathname();
+  const [logOpen, setLogOpen] = useState(false);
 
   const items: Item[] = [
     {
@@ -89,19 +94,68 @@ export function BottomNav({ isLoggedIn, profileHref }: Props) {
     },
   ];
 
+  // The capture action sits dead centre, under the thumb.
+  const mid = Math.ceil(items.length / 2);
+  const left = isLoggedIn ? items.slice(0, mid) : items;
+  const right = isLoggedIn ? items.slice(mid) : [];
+
   return (
-    <nav className="bottom-nav" aria-label="Primary">
-      {items.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          className="bottom-nav-item"
-          data-active={item.match(pathname)}
-        >
-          {item.icon}
-          <span>{item.label}</span>
-        </Link>
-      ))}
-    </nav>
+    <>
+      <nav className="bottom-nav" aria-label="Primary">
+        {left.map((item) => (
+          <NavLink key={item.label} item={item} pathname={pathname} />
+        ))}
+        {isLoggedIn ? (
+          <button
+            type="button"
+            className="bottom-nav-item"
+            onClick={() => setLogOpen(true)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--color-accent)",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 26,
+                height: 26,
+                borderRadius: "var(--radius-full)",
+                border: "1.5px solid currentColor",
+                fontSize: 16,
+                lineHeight: 1,
+              }}
+            >
+              +
+            </span>
+            <span>Log</span>
+          </button>
+        ) : null}
+        {right.map((item) => (
+          <NavLink key={item.label} item={item} pathname={pathname} />
+        ))}
+      </nav>
+      {logOpen ? (
+        <LogSheet recentVenues={recentVenues} onClose={() => setLogOpen(false)} />
+      ) : null}
+    </>
+  );
+}
+
+function NavLink({ item, pathname }: { item: Item; pathname: string }) {
+  return (
+    <Link
+      href={item.href}
+      className="bottom-nav-item"
+      data-active={item.match(pathname)}
+    >
+      {item.icon}
+      <span>{item.label}</span>
+    </Link>
   );
 }

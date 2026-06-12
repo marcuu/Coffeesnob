@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+import { ShareButton } from "@/components/share-button";
 import type { ReviewBucket } from "@/lib/types";
 
 const MONO: React.CSSProperties = {
@@ -170,7 +171,16 @@ export function ReviewSubmitReveal({
           >
             CAFFIENDS
           </span>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <ShareButton
+              title={`${venueName} — Caffiends`}
+              text={
+                coffee !== undefined && vibe !== undefined
+                  ? `Just logged ${venueName} on Caffiends — Coffee ${coffee}/5, Vibe ${vibe}/5.`
+                  : `Just logged ${venueName} on Caffiends.`
+              }
+              path={backHref}
+            />
             <Link
               href={backHref}
               style={{

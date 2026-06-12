@@ -27,6 +27,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://caffiends.co.uk"),
   title: "Caffiends",
   description: "UK third-wave coffee, reviewed honestly.",
+  appleWebApp: { capable: true, title: "Caffiends", statusBarStyle: "black-translucent" },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0d0b09",
 };
 
 export default function RootLayout({

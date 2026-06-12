@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 
 import { RankedList, type RankedItem } from "@/components/list/ranked-list";
 import { SiteHeader } from "@/components/site-header";
+import {
+  WishlistSection,
+  type WishlistItem,
+} from "@/app/profile/[username]/wishlist";
 import type { Review, ReviewBucket, Reviewer } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 
@@ -100,6 +104,26 @@ export default async function MyListPage() {
     });
   }
 
+  const { data: wishlistRaw } = await supabase
+    .from("review_wishlist")
+    .select("venue_id, added_at, venue:venues(name, slug, city)")
+    .eq("reviewer_id", user.id)
+    .order("added_at", { ascending: false });
+
+  const wishlistItems: WishlistItem[] = ((wishlistRaw ?? []) as unknown as Array<{
+    venue_id: string;
+    added_at: string;
+    venue: { name: string; slug: string; city: string } | null;
+  }>)
+    .filter((row) => row.venue !== null)
+    .map((row) => ({
+      venueId: row.venue_id,
+      slug: row.venue!.slug,
+      name: row.venue!.name,
+      city: row.venue!.city,
+      addedAt: row.added_at,
+    }));
+
   return (
     <div style={{ minHeight: "100vh", background: "hsl(20 14.3% 4%)" }}>
       <SiteHeader />
@@ -146,6 +170,12 @@ export default async function MyListPage() {
         ) : (
           <RankedList initialByBucket={initialByBucket} />
         )}
+
+        {/* The page forces a dark background; pin the inherited text colour
+            so the shared WishlistSection stays legible in light mode too. */}
+        <div id="wishlist" style={{ color: "hsl(60 9.1% 97.8%)" }}>
+          <WishlistSection items={wishlistItems} isOwnProfile />
+        </div>
       </main>
     </div>
   );

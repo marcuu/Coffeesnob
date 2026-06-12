@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -21,8 +22,35 @@ import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
 import { SyntheticBadge } from "@/components/simulation/SyntheticBadge";
+import { ShareButton } from "@/components/share-button";
+import { WishlistButton } from "@/components/wishlist-button";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: venue } = await supabase
+    .from("venues")
+    .select("name, city, notes")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (!venue) return { title: "Caffiends" };
+
+  const title = `${venue.name}, ${venue.city} — Caffiends`;
+  const description =
+    venue.notes ??
+    `${venue.name} in ${venue.city}: weighted community score, reviews, and UK coffee ranking on Caffiends.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website", siteName: "Caffiends" },
+  };
+}
 
 type ReviewWithReviewer = Review & {
   reviewer: { display_name: string; review_count: number; username: string | null; is_synthetic: boolean } | null;
@@ -108,6 +136,20 @@ export default async function VenueDetailPage({
           r.visited_on === new Date().toISOString().slice(0, 10),
       )
     : false;
+  const hasReviewed = user
+    ? reviews.some((r) => r.reviewer_id === user.id)
+    : false;
+
+  let inWishlist = false;
+  if (user && !hasReviewed) {
+    const { data: wishlistRow } = await supabase
+      .from("review_wishlist")
+      .select("venue_id")
+      .eq("reviewer_id", user.id)
+      .eq("venue_id", venueRow.id)
+      .maybeSingle();
+    inWishlist = !!wishlistRow;
+  }
 
   const MONO_LABEL: React.CSSProperties = {
     fontFamily: "var(--font-mono)",
@@ -119,8 +161,49 @@ export default async function VenueDetailPage({
 
   const IMG_FILTER = "grayscale(10%) brightness(0.78) contrast(1.1) saturate(0.85)";
 
+  // Structured data for search engines — venue + community rating.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    name: venueRow.name,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: [venueRow.address_line1, venueRow.address_line2]
+        .filter(Boolean)
+        .join(", "),
+      addressLocality: venueRow.city,
+      postalCode: venueRow.postcode,
+      addressCountry: venueRow.country ?? "GB",
+    },
+    ...(venueRow.latitude != null && venueRow.longitude != null
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: venueRow.latitude,
+            longitude: venueRow.longitude,
+          },
+        }
+      : {}),
+    ...(displayScore !== null && count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(displayScore.toFixed(1)),
+            bestRating: 10,
+            worstRating: 1,
+            reviewCount: count,
+          },
+        }
+      : {}),
+    ...(venueRow.website ? { url: venueRow.website } : {}),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
 
       {/* Full-bleed hero banner — only shown when the venue has a photo */}
@@ -175,17 +258,41 @@ export default async function VenueDetailPage({
           </div>
         </div>
 
-        {/* Quick action: log a visit without scrolling past every review */}
-        {user && !alreadyReviewedToday ? (
-          <div style={{ marginBottom: 24 }}>
+        {/* Quick actions: log a visit / save for later / share */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+          {user && !alreadyReviewedToday ? (
             <Link
               href={`/venues/${slug}/review`}
               style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-accent)", borderRadius: 2, color: "var(--color-accent)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
             >
               Add review →
             </Link>
-          </div>
-        ) : null}
+          ) : null}
+          {user && !hasReviewed ? (
+            <WishlistButton venueId={venueRow.id} initialInWishlist={inWishlist} />
+          ) : null}
+          <ShareButton
+            title={`${venueRow.name} — Caffiends`}
+            text={
+              displayScore !== null
+                ? `${venueRow.name} scores ${formatRating(displayScore)}/10 on Caffiends.`
+                : `${venueRow.name} on Caffiends.`
+            }
+            path={`/venues/${slug}`}
+          />
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              venueRow.latitude != null && venueRow.longitude != null
+                ? `${venueRow.latitude},${venueRow.longitude}`
+                : `${venueRow.name} ${venueRow.postcode}`,
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-border)", borderRadius: 2, color: "var(--color-muted-foreground)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+          >
+            Open in Maps ↗
+          </a>
+        </div>
 
         {/* Rank metadata */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 24 }}>

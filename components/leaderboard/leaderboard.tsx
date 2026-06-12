@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CityChips } from "@/components/CityChips";
+import { formatDistanceMiles } from "@/lib/geo";
 import { getScoreDisplay } from "@/lib/scoring-display";
 import type { RankedVenue, UnrankedVenue } from "@/lib/rankings";
 
@@ -50,6 +51,10 @@ export type LeaderboardProps = {
   regions: Region[];
   activeRegion: Region | null;
   isLoggedIn?: boolean;
+  /** Names of the signed-in user's wishlist venues within the current scope. */
+  wishlistInScope?: string[];
+  /** Distance-sorted "near me" view: no hero card, distances on rows. */
+  nearMode?: boolean;
 };
 
 const UNRANKED_SAMPLE = 4;
@@ -60,9 +65,14 @@ export function Leaderboard({
   regions,
   activeRegion,
   isLoggedIn = false,
+  wishlistInScope = [],
+  nearMode = false,
 }: LeaderboardProps) {
-  const scopeLabel = activeRegion?.name ?? "the UK";
-  const [top, ...rest] = ranked;
+  const scopeLabel = nearMode ? "your area" : (activeRegion?.name ?? "the UK");
+  // In near mode every venue renders as a row — a hero card would imply
+  // "No. 1" while the list is ordered by distance.
+  const top = nearMode ? undefined : ranked[0];
+  const rest = nearMode ? ranked : ranked.slice(1);
 
   return (
     <main
@@ -74,7 +84,9 @@ export function Leaderboard({
       }}
     >
       <span style={KICKER}>
-        {activeRegion ? `${activeRegion.name} coffee` : "UK coffee"} leaderboard
+        {nearMode
+          ? "Coffee near you"
+          : `${activeRegion ? `${activeRegion.name} coffee` : "UK coffee"} leaderboard`}
       </span>
       <h1 style={HERO}>
         The best coffee,
@@ -110,8 +122,49 @@ export function Leaderboard({
       </p>
 
       <div style={{ marginTop: 36 }}>
-        <CityChips regions={regions} activeRegion={activeRegion?.id ?? null} />
+        <CityChips
+          regions={regions}
+          activeRegion={activeRegion?.id ?? null}
+          nearActive={nearMode}
+        />
       </div>
+
+      {wishlistInScope.length > 0 ? (
+        <Link
+          href="/list#wishlist"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginTop: 16,
+            padding: "12px 16px",
+            border: "1px solid var(--color-accent)",
+            borderRadius: 2,
+            background: "var(--color-accent-soft)",
+            textDecoration: "none",
+            fontSize: 13,
+            color: "var(--color-foreground)",
+            lineHeight: 1.5,
+          }}
+        >
+          <span aria-hidden="true" style={{ color: "var(--color-accent)" }}>
+            ◆
+          </span>
+          <span>
+            {wishlistInScope.length === 1 ? (
+              <>
+                <strong>{wishlistInScope[0]}</strong> from your wishlist is in{" "}
+                {scopeLabel}.
+              </>
+            ) : (
+              <>
+                {wishlistInScope.length} venues from your wishlist are in{" "}
+                {scopeLabel}, including <strong>{wishlistInScope[0]}</strong>.
+              </>
+            )}
+          </span>
+        </Link>
+      ) : null}
 
       {ranked.length === 0 ? (
         <p style={{ ...SUBHEAD, marginTop: 40 }}>
@@ -257,8 +310,12 @@ function HeroCard({
 }
 
 function RankedRow({ item }: { item: RankedVenue }) {
-  const { venue: v, rank, reviewCount, score } = item;
+  const { venue: v, rank, reviewCount, score, distanceMi } = item;
   const display = getScoreDisplay(score, true);
+  const distanceLabel =
+    distanceMi !== undefined && Number.isFinite(distanceMi)
+      ? ` · ${formatDistanceMiles(distanceMi)}`
+      : "";
 
   return (
     <Link href={`/venues/${v.slug}`} className="lb-row">
@@ -299,7 +356,8 @@ function RankedRow({ item }: { item: RankedVenue }) {
             color: "var(--color-muted-foreground)",
           }}
         >
-          {v.city} · {reviewCount} review{reviewCount === 1 ? "" : "s"}
+          {v.city}
+          {distanceLabel} · {reviewCount} review{reviewCount === 1 ? "" : "s"}
         </span>
       </span>
       <span
@@ -348,7 +406,7 @@ function BeFirstModule({
           gap: 8,
         }}
       >
-        {sample.map(({ venue: v }) => (
+        {sample.map(({ venue: v, distanceMi }) => (
           <li key={v.id}>
             <Link
               href={`/venues/${v.slug}`}
@@ -380,6 +438,9 @@ function BeFirstModule({
                   }}
                 >
                   {v.city}
+                  {distanceMi !== undefined && Number.isFinite(distanceMi)
+                    ? ` · ${formatDistanceMiles(distanceMi)}`
+                    : ""}
                 </span>
               </span>
               <span

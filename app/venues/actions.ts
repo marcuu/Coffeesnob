@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { geocodePostcode } from "@/lib/geo";
 import { createClient } from "@/utils/supabase/server";
 import {
   formNumber,
@@ -82,9 +83,16 @@ export async function createVenue(
     };
   }
 
+  // Best-effort geocode from the postcode when coordinates weren't supplied;
+  // powers "Near me" sorting. Failure is fine — coords stay null.
+  let coords: { latitude: number; longitude: number } | null = null;
+  if (parsed.data.latitude == null || parsed.data.longitude == null) {
+    coords = await geocodePostcode(parsed.data.postcode);
+  }
+
   const { data: inserted, error } = await supabase
     .from("venues")
-    .insert({ ...parsed.data, created_by: user.id })
+    .insert({ ...parsed.data, ...(coords ?? {}), created_by: user.id })
     .select("slug")
     .single();
 

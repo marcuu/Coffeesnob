@@ -12,6 +12,7 @@ import { CITY_COOKIE } from "@/components/CityChips";
 import { Leaderboard } from "@/components/leaderboard/leaderboard";
 import { SiteHeader } from "@/components/site-header";
 import { getVenueOverallScores } from "@/lib/aggregation";
+import { distanceMiles, parseLatLng } from "@/lib/geo";
 import { buildRankings } from "@/lib/rankings";
 import { buildRegionFilterOptions } from "@/lib/venues";
 import type { Venue } from "@/lib/types";
@@ -35,13 +36,11 @@ export const metadata: Metadata = {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ city?: string }>;
+  searchParams: Promise<{ city?: string; near?: string }>;
 }) {
-  const [{ city: cityParam }, cookieStore, supabase] = await Promise.all([
-    searchParams,
-    cookies(),
-    createClient(),
-  ]);
+  const [{ city: cityParam, near: nearParam }, cookieStore, supabase] =
+    await Promise.all([searchParams, cookies(), createClient()]);
+  const near = parseLatLng(nearParam);
 
   const [{ data: { user } }, { data, error }] = await Promise.all([
     supabase.auth.getUser(),
@@ -69,9 +68,11 @@ export default async function HomePage({
   const venues = (data ?? []) as Venue[];
   const regions = buildRegionFilterOptions(venues.map((v) => v.city));
 
-  // Explicit ?city= wins; otherwise fall back to the remembered cookie.
-  // Unknown ids (or "all") resolve to the UK-wide view.
-  const requested = cityParam ?? cookieStore.get(CITY_COOKIE)?.value ?? "";
+  // "Near me" overrides region filtering; otherwise explicit ?city= wins,
+  // then the remembered cookie. Unknown ids resolve to the UK-wide view.
+  const requested = near
+    ? ""
+    : (cityParam ?? cookieStore.get(CITY_COOKIE)?.value ?? "");
   const activeRegion = regions.find((r) => r.id === requested) ?? null;
 
   const scopedVenues = activeRegion
@@ -86,7 +87,38 @@ export default async function HomePage({
         )
       : new Map();
 
-  const { ranked, unranked } = buildRankings(scopedVenues, weightedScores);
+  let { ranked, unranked } = buildRankings(scopedVenues, weightedScores);
+
+  if (near) {
+    const dist = (v: Venue) =>
+      v.latitude != null && v.longitude != null
+        ? distanceMiles(near.lat, near.lng, v.latitude, v.longitude)
+        : Number.POSITIVE_INFINITY;
+    ranked = ranked
+      .map((r) => ({ ...r, distanceMi: dist(r.venue) }))
+      .sort((a, b) => a.distanceMi! - b.distanceMi!);
+    unranked = unranked
+      .map((u) => ({ ...u, distanceMi: dist(u.venue) }))
+      .sort((a, b) => a.distanceMi! - b.distanceMi!);
+  }
+
+  // Retention nudge: surface wishlist venues that fall inside the current
+  // scope ("2 venues from your wishlist are in Leeds").
+  let wishlistInScope: string[] = [];
+  if (user) {
+    const { data: wishlistRows } = await supabase
+      .from("review_wishlist")
+      .select("venue_id")
+      .eq("reviewer_id", user.id);
+    const wishlistIds = new Set(
+      ((wishlistRows ?? []) as Array<{ venue_id: string }>).map(
+        (r) => r.venue_id,
+      ),
+    );
+    wishlistInScope = scopedVenues
+      .filter((v) => wishlistIds.has(v.id))
+      .map((v) => v.name);
+  }
 
   return (
     <>
@@ -99,6 +131,8 @@ export default async function HomePage({
           activeRegion ? { id: activeRegion.id, name: activeRegion.name } : null
         }
         isLoggedIn={!!user}
+        wishlistInScope={wishlistInScope}
+        nearMode={!!near}
       />
     </>
   );

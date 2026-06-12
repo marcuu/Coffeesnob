@@ -79,6 +79,17 @@ export default async function AddVenueReviewPage({
     reviewsByBucket[k].sort((a, b) => a.rank_position - b.rank_position);
   }
 
+  // Latest prior review of this venue, if any — enables the quick re-log
+  // path (skip bucket + tournament, stack a fresh review next to it).
+  const priorReview =
+    reviews
+      .filter((r) => r.venue_id === venue.id)
+      .sort((a, b) =>
+        `${b.visited_on}\t${b.created_at}`.localeCompare(
+          `${a.visited_on}\t${a.created_at}`,
+        ),
+      )[0] ?? null;
+
   return (
     <div
       style={{
@@ -97,6 +108,17 @@ export default async function AddVenueReviewPage({
         reviewsByBucket={reviewsByBucket}
         candidateNamesByReviewId={candidateNamesByReviewId}
         handle={handle}
+        priorReview={
+          priorReview
+            ? {
+                id: priorReview.id,
+                bucket: priorReview.bucket,
+                rating_coffee_5: priorReview.rating_coffee_5,
+                rating_vibe_5: priorReview.rating_vibe_5,
+                visited_on: priorReview.visited_on,
+              }
+            : null
+        }
       />
     </div>
   );

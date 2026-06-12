@@ -33,7 +33,17 @@ export function WishlistSection({
       </h2>
       {visible.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          Nothing on the wishlist yet.
+          {isOwnProfile ? (
+            <>
+              Nothing on the wishlist yet. Tap &ldquo;Want to try&rdquo; on any{" "}
+              <Link href="/venues" className="underline underline-offset-2">
+                venue
+              </Link>{" "}
+              to save it here.
+            </>
+          ) : (
+            "Nothing on the wishlist yet."
+          )}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -44,7 +54,7 @@ export function WishlistSection({
             >
               <Link
                 href={`/venues/${item.slug}`}
-                className="flex flex-col gap-0.5 text-[var(--color-foreground)] no-underline"
+                className="flex flex-col gap-0.5 text-inherit no-underline"
               >
                 <span className="font-serif text-base">{item.name}</span>
                 <span className="text-xs text-[var(--color-muted-foreground)]">
@@ -63,7 +73,7 @@ export function WishlistSection({
                       }
                     })
                   }
-                  className="text-xs uppercase tracking-widest text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] disabled:opacity-50"
+                  className="-my-2 py-3 pl-4 text-xs uppercase tracking-widest text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] disabled:opacity-50"
                 >
                   Remove
                 </button>
