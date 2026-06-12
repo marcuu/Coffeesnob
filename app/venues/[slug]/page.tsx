@@ -280,6 +280,18 @@ export default async function VenueDetailPage({
             }
             path={`/venues/${slug}`}
           />
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              venueRow.latitude != null && venueRow.longitude != null
+                ? `${venueRow.latitude},${venueRow.longitude}`
+                : `${venueRow.name} ${venueRow.postcode}`,
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-border)", borderRadius: 2, color: "var(--color-muted-foreground)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+          >
+            Open in Maps ↗
+          </a>
         </div>
 
         {/* Rank metadata */}

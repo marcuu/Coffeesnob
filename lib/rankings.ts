@@ -6,11 +6,15 @@ export type RankedVenue = {
   rank: number;
   score: number;
   reviewCount: number;
+  /** Miles from the visitor, set only in "near me" mode. */
+  distanceMi?: number;
 };
 
 export type UnrankedVenue = {
   venue: Venue;
   reviewCount: number;
+  /** Miles from the visitor, set only in "near me" mode. */
+  distanceMi?: number;
 };
 
 export type RankingResult = {

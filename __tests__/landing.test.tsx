@@ -9,6 +9,7 @@ import type { Venue } from "@/lib/types";
 vi.mock("next/navigation", () => ({
   permanentRedirect: vi.fn(),
   usePathname: () => "/",
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 function makeVenue(overrides: Partial<Venue>): Venue {
