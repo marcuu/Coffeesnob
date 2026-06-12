@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BottomNav } from "@/components/bottom-nav";
+import type { RecentVenue } from "@/components/log-sheet";
 import { VenueSearch } from "@/components/VenueSearch";
 import { createClient } from "@/utils/supabase/server";
 
@@ -25,14 +26,34 @@ export async function SiteHeader() {
 
   let profileHref = "/profile";
   let profileLabel = "Sign in";
+  let recentVenues: RecentVenue[] = [];
   if (user) {
-    const { data: reviewer } = await supabase
-      .from("reviewers")
-      .select("username, display_name")
-      .eq("id", user.id)
-      .maybeSingle();
+    const [{ data: reviewer }, { data: recentRows }] = await Promise.all([
+      supabase
+        .from("reviewers")
+        .select("username, display_name")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("reviews")
+        .select("created_at, venue:venues(slug, name, city)")
+        .eq("reviewer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(12),
+    ]);
     if (reviewer?.username) profileHref = `/profile/${reviewer.username}`;
     profileLabel = reviewer?.display_name ?? reviewer?.username ?? "Profile";
+
+    // Most recent distinct venues, for the Log sheet's one-tap shortcuts.
+    const seen = new Set<string>();
+    for (const row of (recentRows ?? []) as unknown as Array<{
+      venue: RecentVenue | null;
+    }>) {
+      if (!row.venue || seen.has(row.venue.slug)) continue;
+      seen.add(row.venue.slug);
+      recentVenues.push(row.venue);
+      if (recentVenues.length >= 4) break;
+    }
   }
 
   return (
@@ -95,7 +116,11 @@ export async function SiteHeader() {
           </nav>
         </div>
       </header>
-      <BottomNav isLoggedIn={!!user} profileHref={profileHref} />
+      <BottomNav
+        isLoggedIn={!!user}
+        profileHref={profileHref}
+        recentVenues={recentVenues}
+      />
     </>
   );
 }
