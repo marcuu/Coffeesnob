@@ -54,7 +54,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
           boxShadow: "0 16px 48px -12px rgba(0,0,0,0.5)",
         }}
       >
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 16 }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 16 }}>
           How this is calculated
         </div>
 
@@ -73,7 +73,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
 
         {topContributors.length > 0 ? (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 8 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 8 }}>
               Top reviewers by weight
             </div>
             <div style={{ display: "grid", gap: 4 }}>
@@ -90,7 +90,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
         ) : null}
 
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 8 }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 8 }}>
             Recency
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, fontSize: 11, color: "var(--color-muted-foreground)" }}>

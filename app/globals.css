@@ -74,6 +74,146 @@ body {
   color-scheme: dark light;
 }
 
+/* Visible keyboard focus everywhere; mouse/touch clicks stay clean */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ── Mobile bottom tab bar ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  background: color-mix(in oklab, var(--color-background) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+/* Reserve space so fixed bottom nav never covers page content on mobile */
+@media (max-width: 767px) {
+  body:has(.bottom-nav) {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 56px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-muted-foreground);
+}
+.bottom-nav-item[data-active="true"] {
+  color: var(--color-accent);
+}
+.bottom-nav-item:active {
+  background: var(--color-muted);
+}
+
+/* ── City filter chips (leaderboard) ── */
+.city-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Let chips bleed to the viewport edge on mobile without clipping */
+  margin: 0 calc(-1 * clamp(16px, 4vw, 36px));
+  padding: 4px clamp(16px, 4vw, 36px);
+}
+.city-chips::-webkit-scrollbar {
+  display: none;
+}
+.city-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-muted-foreground);
+  white-space: nowrap;
+  transition: border-color 160ms, color 160ms, background 160ms;
+}
+.city-chip:hover,
+.city-chip:active {
+  border-color: var(--color-foreground);
+  color: var(--color-foreground);
+}
+.city-chip[data-active="true"] {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ── Leaderboard list rows ── */
+.lb-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  /* Grid items default to min-width:auto; without this a long venue name
+     blows the track wider than the viewport on mobile. */
+  min-width: 0;
+  padding: 18px clamp(14px, 3vw, 28px);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 160ms, background 160ms;
+}
+.lb-row:hover {
+  border-color: var(--color-foreground);
+}
+.lb-row:active {
+  background: var(--color-muted);
+}
+
+/* ── Venue detail: name + score header stacks on mobile ── */
+.venue-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+}
+@media (min-width: 640px) {
+  .venue-head {
+    gap: 40px;
+  }
+}
+
+/* ── Search dropdown rows: touch-visible states without JS hover hacks ── */
+.search-result:hover,
+.search-result:active {
+  background: var(--color-muted) !important;
+}
+
 /* Rankings hero card — stacks on mobile, grid on sm+ */
 .rankings-hero {
   display: flex;

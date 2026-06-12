@@ -132,7 +132,7 @@ export function PairwiseTournament({
             onClick={handleBack}
             style={{
               ...MONO,
-              fontSize: 9,
+              fontSize: 11,
               color: "hsl(24 5.4% 40%)",
               background: "none",
               border: "none",
@@ -144,7 +144,7 @@ export function PairwiseTournament({
             ← Back
           </button>
         )}
-        <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)" }}>
+        <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)" }}>
           Comparison {step + 1} of ~{totalEstimate} · {bucket}
         </div>
       </div>
@@ -210,7 +210,7 @@ export function PairwiseTournament({
             border: "1px solid rgba(255,255,255,0.12)",
             borderRadius: 2,
             cursor: "pointer",
-            fontSize: 9,
+            fontSize: 11,
             whiteSpace: "nowrap",
           }}
         >

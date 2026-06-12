@@ -111,8 +111,8 @@ export default async function VenueDetailPage({
 
   const MONO_LABEL: React.CSSProperties = {
     fontFamily: "var(--font-mono)",
-    fontSize: 9,
-    letterSpacing: "0.22em",
+    fontSize: 11,
+    letterSpacing: "0.18em",
     textTransform: "uppercase",
     color: "var(--color-muted-foreground)",
   };
@@ -125,7 +125,7 @@ export default async function VenueDetailPage({
 
       {/* Full-bleed hero banner — only shown when the venue has a photo */}
       {venueRow.photo_url && (
-        <div style={{ width: "100%", height: 380, overflow: "hidden", position: "relative" }}>
+        <div style={{ width: "100%", height: "clamp(220px, 50vw, 380px)", overflow: "hidden", position: "relative" }}>
           <img
             src={venueRow.photo_url}
             alt={venueRow.name}
@@ -135,16 +135,16 @@ export default async function VenueDetailPage({
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 180, background: "linear-gradient(to bottom, transparent, rgba(8,5,3,0.82))" }} />
           {/* Page-background fade at the very bottom to blend into content */}
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: "linear-gradient(to bottom, transparent, var(--color-background))" }} />
-          <div style={{ position: "absolute", bottom: 32, left: "clamp(16px,4vw,36px)", fontFamily: "var(--font-serif)", fontSize: "clamp(24px,3vw,38px)", fontWeight: 400, letterSpacing: "-0.02em", color: "hsl(60 9.1% 97%)" }}>
+          <div style={{ position: "absolute", bottom: 24, left: "clamp(16px,4vw,36px)", right: "clamp(16px,4vw,36px)", fontFamily: "var(--font-serif)", fontSize: "clamp(26px,6vw,38px)", fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.1, color: "hsl(60 9.1% 97%)" }}>
             {venueRow.name}
           </div>
         </div>
       )}
 
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: venueRow.photo_url ? "32px clamp(16px,4vw,36px) 120px" : "clamp(24px,5vw,40px) clamp(16px,4vw,36px) 120px" }}>
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: venueRow.photo_url ? "24px clamp(16px,4vw,36px) clamp(64px,10vw,120px)" : "clamp(24px,5vw,40px) clamp(16px,4vw,36px) clamp(64px,10vw,120px)" }}>
 
         {/* Venue name + score + ⓘ */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "start", marginBottom: 24, marginTop: venueRow.photo_url ? 32 : 0 }}>
+        <div className="venue-head" style={{ marginBottom: 24, marginTop: venueRow.photo_url ? 16 : 0 }}>
           <div>
             {/* Only show the title block here when there's no hero banner */}
             {!venueRow.photo_url && (
@@ -161,8 +161,8 @@ export default async function VenueDetailPage({
               {venueRow.city} {venueRow.postcode}
             </div>
           </div>
-          <div style={{ textAlign: "right", paddingTop: 24 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 56, fontWeight: 400, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-accent)" }}>
+          <div style={{ textAlign: "right", paddingTop: venueRow.photo_url ? 0 : 24 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(40px, 9vw, 56px)", fontWeight: 400, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-accent)" }}>
               {formatRating(displayScore)}
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, marginTop: 4 }}>
@@ -174,6 +174,18 @@ export default async function VenueDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Quick action: log a visit without scrolling past every review */}
+        {user && !alreadyReviewedToday ? (
+          <div style={{ marginBottom: 24 }}>
+            <Link
+              href={`/venues/${slug}/review`}
+              style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-accent)", borderRadius: 2, color: "var(--color-accent)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+            >
+              Add review →
+            </Link>
+          </div>
+        ) : null}
 
         {/* Rank metadata */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 24 }}>
@@ -258,7 +270,7 @@ export default async function VenueDetailPage({
                       {r.rating_overall}/10
                     </span>
                   </div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 14 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-muted-foreground)", marginBottom: 14 }}>
                     Visited {r.visited_on}
                     {r.reviewer ? ` · ${r.reviewer.review_count} review${r.reviewer.review_count === 1 ? "" : "s"}` : ""}
                   </div>
@@ -268,7 +280,7 @@ export default async function VenueDetailPage({
                       ["Coffee", r.rating_coffee_5],
                       ["Vibe", r.rating_vibe_5],
                     ].map(([label, val]) => (
-                      <span key={label as string} style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-muted-foreground)" }}>
+                      <span key={label as string} style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-muted-foreground)" }}>
                         {label} <strong style={{ color: "var(--color-foreground)", fontWeight: 600 }}>{val}/5</strong>
                       </span>
                     ))}
@@ -279,7 +291,7 @@ export default async function VenueDetailPage({
                       <input type="hidden" name="slug" value={slug} />
                       <button
                         type="submit"
-                        style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--color-destructive)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                        style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--color-destructive)", background: "none", border: "none", cursor: "pointer", padding: "12px 0", minHeight: 44 }}
                       >
                         Delete
                       </button>
@@ -295,7 +307,7 @@ export default async function VenueDetailPage({
         {user ? (
           <Link
             href={`/venues/${slug}/review`}
-            style={{ display: "inline-flex", alignItems: "center", gap: 12, height: 42, padding: "0 24px", background: "hsl(20 14.3% 6%)", color: "hsl(60 9.1% 97.8%)", border: "none", borderRadius: 2, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 12, minHeight: 48, padding: "0 28px", background: "hsl(20 14.3% 6%)", color: "hsl(60 9.1% 97.8%)", border: "1px solid var(--color-border)", borderRadius: 2, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", cursor: "pointer", textDecoration: "none" }}
           >
             Add review →
           </Link>

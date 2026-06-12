@@ -5,7 +5,7 @@ import type {
 
 const MONO: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 11,
   letterSpacing: "0.18em",
   textTransform: "uppercase",
 };
@@ -88,7 +88,8 @@ export function BucketDistribution({
             fontSize: 11,
           }}
         >
-          Avg pilgrimage: ☕ {avgCoffee.toFixed(1)} · 🪑 {avgVibe.toFixed(1)}
+          Avg pilgrimage: Coffee {avgCoffee.toFixed(1)}/5 · Vibe{" "}
+          {avgVibe.toFixed(1)}/5
         </div>
       ) : null}
       <p

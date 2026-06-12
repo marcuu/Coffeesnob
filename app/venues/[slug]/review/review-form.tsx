@@ -167,7 +167,7 @@ export function ReviewForm({
         >
           ← {venueName}
         </Link>
-        <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 42%)" }}>
+        <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 42%)" }}>
           {stageLabel(stage)}
         </div>
       </div>
@@ -194,7 +194,7 @@ export function ReviewForm({
           {venueName}
         </div>
         {locationLine && (
-          <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 48%)" }}>
+          <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 48%)" }}>
             {locationLine}
           </div>
         )}
@@ -212,7 +212,7 @@ export function ReviewForm({
         {stage.kind === "bucket" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 480 }}>
             <div>
-              <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 12 }}>
+              <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", marginBottom: 12 }}>
                 Where does it land?
               </div>
               <h2
@@ -246,7 +246,7 @@ export function ReviewForm({
 
         {stage.kind === "axes" && (
           <div style={{ width: "100%", maxWidth: 480 }}>
-            <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
+            <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
               Score it
             </div>
             <h2
@@ -371,7 +371,7 @@ function NotesStep({
 }) {
   return (
     <div style={{ width: "100%", maxWidth: 480 }}>
-      <div style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
+      <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", marginBottom: 14 }}>
         Notes
       </div>
       <h2
@@ -391,7 +391,7 @@ function NotesStep({
       <div style={{ marginBottom: 16 }}>
         <label
           htmlFor="visited_on"
-          style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
+          style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
         >
           Visited on
         </label>
@@ -419,7 +419,7 @@ function NotesStep({
       <div style={{ marginBottom: 24 }}>
         <label
           htmlFor="body"
-          style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
+          style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", display: "block", marginBottom: 8 }}
         >
           Review (optional, max 5000 characters)
         </label>

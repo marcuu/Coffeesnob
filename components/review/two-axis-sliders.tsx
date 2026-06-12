@@ -11,7 +11,7 @@ const COPY: Record<AxisKey, { label: string; question: string }> = {
 
 const MONO: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
-  fontSize: 9,
+  fontSize: 11,
   letterSpacing: "0.18em",
   textTransform: "uppercase",
 };

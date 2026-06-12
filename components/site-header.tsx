@@ -1,17 +1,20 @@
 import Link from "next/link";
 
+import { BottomNav } from "@/components/bottom-nav";
 import { VenueSearch } from "@/components/VenueSearch";
 import { createClient } from "@/utils/supabase/server";
 
 const NAV_LINK: React.CSSProperties = {
   fontFamily: "var(--font-mono)",
-  fontSize: 10,
+  fontSize: 11,
   fontWeight: 400,
-  letterSpacing: "0.18em",
+  letterSpacing: "0.14em",
   textTransform: "uppercase",
   color: "var(--color-muted-foreground)",
   textDecoration: "none",
   transition: "color 160ms",
+  // Generous vertical padding keeps the tap area ≥44px inside the slim bar.
+  padding: "14px 2px",
 };
 
 export async function SiteHeader() {
@@ -33,55 +36,66 @@ export async function SiteHeader() {
   }
 
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-        background:
-          "color-mix(in oklab, var(--color-background) 90%, transparent)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--color-border)",
-      }}
-    >
-      <style>{`
-        .sh-inner { max-width: 920px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-        @media (min-width: 640px) { .sh-inner { padding: 16px 36px; } }
-        .sh-nav { display: flex; align-items: center; gap: 16px; }
-        @media (min-width: 640px) { .sh-nav { gap: 28px; } }
-      `}</style>
-      <div className="sh-inner">
-        <Link
-          href="/"
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: 18,
-            fontWeight: 400,
-            letterSpacing: "-0.01em",
-            textDecoration: "none",
-            color: "var(--color-foreground)",
-          }}
-        >
-          Caffiends
-        </Link>
-        <nav className="sh-nav">
-          <VenueSearch />
-          <Link href="/rankings" style={NAV_LINK}>
-            Rankings
-          </Link>
-          {user ? (
-            <Link href="/list" style={NAV_LINK}>
-              Your list
-            </Link>
-          ) : null}
+    <>
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background:
+            "color-mix(in oklab, var(--color-background) 90%, transparent)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
+        <style>{`
+          .sh-inner { max-width: 920px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; min-height: 56px; }
+          @media (min-width: 640px) { .sh-inner { padding: 8px 36px; } }
+          .sh-nav { display: flex; align-items: center; gap: 16px; }
+          @media (min-width: 640px) { .sh-nav { gap: 28px; } }
+          /* On mobile these links live in the bottom tab bar instead */
+          .sh-link { display: none; }
+          @media (min-width: 768px) { .sh-link { display: inline-block; } }
+        `}</style>
+        <div className="sh-inner">
           <Link
-            href={user ? profileHref : "/login"}
-            style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
+            href="/"
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: 18,
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              textDecoration: "none",
+              color: "var(--color-foreground)",
+              padding: "10px 0",
+            }}
           >
-            {profileLabel}
+            Caffiends
           </Link>
-        </nav>
-      </div>
-    </header>
+          <nav className="sh-nav">
+            <VenueSearch />
+            <Link href="/rankings" className="sh-link" style={NAV_LINK}>
+              Rankings
+            </Link>
+            <Link href="/venues" className="sh-link" style={NAV_LINK}>
+              Venues
+            </Link>
+            {user ? (
+              <Link href="/list" className="sh-link" style={NAV_LINK}>
+                Your list
+              </Link>
+            ) : null}
+            <Link
+              href={user ? profileHref : "/login"}
+              className="sh-link"
+              style={{ ...NAV_LINK, color: "var(--color-foreground)" }}
+            >
+              {profileLabel}
+            </Link>
+          </nav>
+        </div>
+      </header>
+      <BottomNav isLoggedIn={!!user} profileHref={profileHref} />
+    </>
   );
 }
