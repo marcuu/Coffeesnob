@@ -28,6 +28,7 @@ function today(): string {
 }
 
 type Stage =
+  | { kind: "relog" }
   | { kind: "bucket" }
   | { kind: "tournament"; bucket: ReviewBucket }
   | { kind: "axes"; bucket: ReviewBucket; tournament: PairwiseResult }
@@ -40,6 +41,20 @@ type Stage =
       list_changed?: boolean;
     };
 
+export type PriorReview = {
+  id: string;
+  bucket: ReviewBucket;
+  rating_coffee_5: number;
+  rating_vibe_5: number;
+  visited_on: string;
+};
+
+const BUCKET_NAME: Record<ReviewBucket, string> = {
+  pilgrimage: "Pilgrimage",
+  detour: "Detour",
+  convenience: "Convenience",
+};
+
 export function ReviewForm({
   venueId,
   slug,
@@ -49,6 +64,7 @@ export function ReviewForm({
   reviewsByBucket,
   candidateNamesByReviewId,
   handle,
+  priorReview = null,
 }: {
   venueId: string;
   slug: string;
@@ -58,14 +74,18 @@ export function ReviewForm({
   reviewsByBucket: Record<ReviewBucket, Review[]>;
   candidateNamesByReviewId: Record<string, string>;
   handle?: string;
+  priorReview?: PriorReview | null;
 }) {
-  const [stage, setStage] = useState<Stage>({ kind: "bucket" });
+  const [stage, setStage] = useState<Stage>(
+    priorReview ? { kind: "relog" } : { kind: "bucket" },
+  );
   // No defaults: spec requires user to explicitly choose both axes before
   // they can submit. null = untouched.
   const [coffee, setCoffee] = useState<number | null>(null);
   const [vibe, setVibe] = useState<number | null>(null);
   const [body, setBody] = useState("");
   const [visitedOn, setVisitedOn] = useState(today());
+  const [relogOf, setRelogOf] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -112,6 +132,7 @@ export function ReviewForm({
           rating_coffee_5: coffee,
           rating_vibe_5: vibe,
           body,
+          ...(relogOf ? { relog_of: relogOf } : {}),
         },
         { slug },
       );
@@ -209,6 +230,68 @@ export function ReviewForm({
           padding: "28px 24px",
         }}
       >
+        {stage.kind === "relog" && priorReview && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 480 }}>
+            <div>
+              <div style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 40%)", marginBottom: 12 }}>
+                Logged before
+              </div>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "clamp(24px,4vw,36px)",
+                  fontWeight: 400,
+                  color: "hsl(60 9.1% 97.8%)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                  marginBottom: 14,
+                }}
+              >
+                Back at {venueName}?
+              </h2>
+              <p style={{ fontSize: 14, color: "hsl(24 5.4% 52%)", lineHeight: 1.7 }}>
+                Last time you scored it Coffee{" "}
+                <strong style={{ color: "hsl(60 9.1% 92%)" }}>
+                  {priorReview.rating_coffee_5}/5
+                </strong>
+                , Vibe{" "}
+                <strong style={{ color: "hsl(60 9.1% 92%)" }}>
+                  {priorReview.rating_vibe_5}/5
+                </strong>{" "}
+                as a {BUCKET_NAME[priorReview.bucket]}. A quick re-log keeps
+                that placement and counts this visit as a fresh review.
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <NavButton
+                onClick={() => {
+                  track({ name: "relog_quick", bucket: priorReview.bucket });
+                  setCoffee(priorReview.rating_coffee_5);
+                  setVibe(priorReview.rating_vibe_5);
+                  setRelogOf(priorReview.id);
+                  setStage({
+                    kind: "axes",
+                    bucket: priorReview.bucket,
+                    tournament: { rankPosition: 0, history: [] },
+                  });
+                }}
+              >
+                Quick re-log →
+              </NavButton>
+              <NavButton
+                variant="ghost"
+                onClick={() => {
+                  track({ name: "relog_full_flow", bucket: priorReview.bucket });
+                  setRelogOf(null);
+                  setStage({ kind: "bucket" });
+                }}
+              >
+                My take has changed — start fresh
+              </NavButton>
+            </div>
+          </div>
+        )}
+
         {stage.kind === "bucket" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 480 }}>
             <div>
@@ -279,6 +362,10 @@ export function ReviewForm({
               <NavButton
                 variant="ghost"
                 onClick={() => {
+                  if (relogOf) {
+                    setStage({ kind: "relog" });
+                    return;
+                  }
                   const hasCandidates =
                     (reviewsByBucket[stage.bucket] ?? []).length > 0;
                   setStage(
@@ -337,6 +424,8 @@ function rankIndexFromPosition(rankPosition: number, bucketReviews: Review[]): n
 
 function stageLabel(stage: Stage): string {
   switch (stage.kind) {
+    case "relog":
+      return "Logged before";
     case "bucket":
       return "Step 1 · bucket";
     case "tournament":

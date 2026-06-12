@@ -10,6 +10,7 @@ import {
   recordComparison,
   startTournament,
 } from "@/lib/ranking/binary-tournament";
+import { relogPlacement } from "@/lib/ranking/relog";
 import type { Review } from "@/lib/types";
 import { rankedReviewCreateSchema } from "@/lib/validators";
 import { createClient } from "@/utils/supabase/server";
@@ -190,17 +191,19 @@ export async function submitRankedReview(
     return { status: "error", code: "fetch_failed", message: fetchError.message };
   }
 
-  const replay = replayHistory(
-    (bucketReviews ?? []) as Review[],
-    parsed.history,
-  );
+  // Quick re-log: anchor next to the user's prior review of this venue
+  // instead of replaying a tournament. Falls back to end-of-bucket if the
+  // prior review has since moved bucket or been deleted.
+  const placement = parsed.relog_of
+    ? relogPlacement((bucketReviews ?? []) as Review[], parsed.relog_of, parsed.venue_id)
+    : replayHistory((bucketReviews ?? []) as Review[], parsed.history);
   // Server replay is authoritative — overrides the client's rankPosition.
-  const rankPosition = replay.rankPosition;
+  const rankPosition = placement.rankPosition;
   const bucketSizeAfter = (bucketReviews?.length ?? 0) + 1;
 
   // First insert attempt.
   let attempt = await attemptInsert(supabase, user.id, parsed, rankPosition, bucketSizeAfter);
-  let listChanged = replay.listChanged;
+  let listChanged = placement.listChanged;
   let finalRank = rankPosition;
 
   // Safety net: venue+date conflict that slipped past the pre-flight check
@@ -245,10 +248,9 @@ export async function submitRankedReview(
       .eq("reviewer_id", user.id)
       .eq("bucket", parsed.bucket)
       .order("rank_position", { ascending: true });
-    const replay2 = replayHistory(
-      (refreshed ?? []) as Review[],
-      parsed.history,
-    );
+    const replay2 = parsed.relog_of
+      ? relogPlacement((refreshed ?? []) as Review[], parsed.relog_of, parsed.venue_id)
+      : replayHistory((refreshed ?? []) as Review[], parsed.history);
     if (replay2.listChanged) listChanged = true;
     finalRank = replay2.rankPosition;
     attempt = await attemptInsert(supabase, user.id, parsed, finalRank, bucketSizeAfter);

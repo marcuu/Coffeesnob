@@ -48,7 +48,9 @@ export type RankingEvent =
       name: "rank_collision_after_compact";
       bucket: ReviewBucket;
       reviewer_id: string;
-    };
+    }
+  | { name: "relog_quick"; bucket: ReviewBucket }
+  | { name: "relog_full_flow"; bucket: ReviewBucket };
 
 export function track(event: RankingEvent): void {
   if (typeof window === "undefined") {
