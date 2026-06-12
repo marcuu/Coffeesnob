@@ -88,6 +88,24 @@ export default async function HomePage({
 
   const { ranked, unranked } = buildRankings(scopedVenues, weightedScores);
 
+  // Retention nudge: surface wishlist venues that fall inside the current
+  // scope ("2 venues from your wishlist are in Leeds").
+  let wishlistInScope: string[] = [];
+  if (user) {
+    const { data: wishlistRows } = await supabase
+      .from("review_wishlist")
+      .select("venue_id")
+      .eq("reviewer_id", user.id);
+    const wishlistIds = new Set(
+      ((wishlistRows ?? []) as Array<{ venue_id: string }>).map(
+        (r) => r.venue_id,
+      ),
+    );
+    wishlistInScope = scopedVenues
+      .filter((v) => wishlistIds.has(v.id))
+      .map((v) => v.name);
+  }
+
   return (
     <>
       <SiteHeader />
@@ -99,6 +117,7 @@ export default async function HomePage({
           activeRegion ? { id: activeRegion.id, name: activeRegion.name } : null
         }
         isLoggedIn={!!user}
+        wishlistInScope={wishlistInScope}
       />
     </>
   );

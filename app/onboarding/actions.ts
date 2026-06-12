@@ -49,6 +49,7 @@ export async function addToWishlist(venueId: string): Promise<ActionResult> {
   }
 
   revalidatePath("/profile");
+  revalidatePath("/list");
   return { status: "ok" };
 }
 
@@ -69,6 +70,7 @@ export async function removeFromWishlist(
 
   if (error) return { status: "error", message: error.message };
   revalidatePath("/profile");
+  revalidatePath("/list");
   return { status: "ok" };
 }
 

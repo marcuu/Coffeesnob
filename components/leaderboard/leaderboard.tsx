@@ -50,6 +50,8 @@ export type LeaderboardProps = {
   regions: Region[];
   activeRegion: Region | null;
   isLoggedIn?: boolean;
+  /** Names of the signed-in user's wishlist venues within the current scope. */
+  wishlistInScope?: string[];
 };
 
 const UNRANKED_SAMPLE = 4;
@@ -60,6 +62,7 @@ export function Leaderboard({
   regions,
   activeRegion,
   isLoggedIn = false,
+  wishlistInScope = [],
 }: LeaderboardProps) {
   const scopeLabel = activeRegion?.name ?? "the UK";
   const [top, ...rest] = ranked;
@@ -112,6 +115,43 @@ export function Leaderboard({
       <div style={{ marginTop: 36 }}>
         <CityChips regions={regions} activeRegion={activeRegion?.id ?? null} />
       </div>
+
+      {wishlistInScope.length > 0 ? (
+        <Link
+          href="/list#wishlist"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginTop: 16,
+            padding: "12px 16px",
+            border: "1px solid var(--color-accent)",
+            borderRadius: 2,
+            background: "var(--color-accent-soft)",
+            textDecoration: "none",
+            fontSize: 13,
+            color: "var(--color-foreground)",
+            lineHeight: 1.5,
+          }}
+        >
+          <span aria-hidden="true" style={{ color: "var(--color-accent)" }}>
+            ◆
+          </span>
+          <span>
+            {wishlistInScope.length === 1 ? (
+              <>
+                <strong>{wishlistInScope[0]}</strong> from your wishlist is in{" "}
+                {scopeLabel}.
+              </>
+            ) : (
+              <>
+                {wishlistInScope.length} venues from your wishlist are in{" "}
+                {scopeLabel}, including <strong>{wishlistInScope[0]}</strong>.
+              </>
+            )}
+          </span>
+        </Link>
+      ) : null}
 
       {ranked.length === 0 ? (
         <p style={{ ...SUBHEAD, marginTop: 40 }}>

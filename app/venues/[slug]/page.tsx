@@ -21,6 +21,7 @@ import { regionDisplayName, regionIdFromCityName } from "@/lib/regions";
 import { deleteReview } from "./actions";
 import { ScoreExplain } from "./score-explain";
 import { SyntheticBadge } from "@/components/simulation/SyntheticBadge";
+import { WishlistButton } from "@/components/wishlist-button";
 
 export const dynamic = "force-dynamic";
 
@@ -108,6 +109,20 @@ export default async function VenueDetailPage({
           r.visited_on === new Date().toISOString().slice(0, 10),
       )
     : false;
+  const hasReviewed = user
+    ? reviews.some((r) => r.reviewer_id === user.id)
+    : false;
+
+  let inWishlist = false;
+  if (user && !hasReviewed) {
+    const { data: wishlistRow } = await supabase
+      .from("review_wishlist")
+      .select("venue_id")
+      .eq("reviewer_id", user.id)
+      .eq("venue_id", venueRow.id)
+      .maybeSingle();
+    inWishlist = !!wishlistRow;
+  }
 
   const MONO_LABEL: React.CSSProperties = {
     fontFamily: "var(--font-mono)",
@@ -175,15 +190,20 @@ export default async function VenueDetailPage({
           </div>
         </div>
 
-        {/* Quick action: log a visit without scrolling past every review */}
-        {user && !alreadyReviewedToday ? (
-          <div style={{ marginBottom: 24 }}>
-            <Link
-              href={`/venues/${slug}/review`}
-              style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-accent)", borderRadius: 2, color: "var(--color-accent)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
-            >
-              Add review →
-            </Link>
+        {/* Quick actions: log a visit / save for later without scrolling */}
+        {user ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+            {!alreadyReviewedToday ? (
+              <Link
+                href={`/venues/${slug}/review`}
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-accent)", borderRadius: 2, color: "var(--color-accent)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+              >
+                Add review →
+              </Link>
+            ) : null}
+            {!hasReviewed ? (
+              <WishlistButton venueId={venueRow.id} initialInWishlist={inWishlist} />
+            ) : null}
           </div>
         ) : null}
 

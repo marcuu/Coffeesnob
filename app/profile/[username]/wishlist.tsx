@@ -33,7 +33,17 @@ export function WishlistSection({
       </h2>
       {visible.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          Nothing on the wishlist yet.
+          {isOwnProfile ? (
+            <>
+              Nothing on the wishlist yet. Tap &ldquo;Want to try&rdquo; on any{" "}
+              <Link href="/venues" className="underline underline-offset-2">
+                venue
+              </Link>{" "}
+              to save it here.
+            </>
+          ) : (
+            "Nothing on the wishlist yet."
+          )}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -63,7 +73,7 @@ export function WishlistSection({
                       }
                     })
                   }
-                  className="text-xs uppercase tracking-widest text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] disabled:opacity-50"
+                  className="-my-2 py-3 pl-4 text-xs uppercase tracking-widest text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] disabled:opacity-50"
                 >
                   Remove
                 </button>
