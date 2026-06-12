@@ -164,7 +164,7 @@ export function ReviewSubmitReveal({
           <span
             style={{
               ...MONO,
-              fontSize: 9,
+              fontSize: 11,
               color: "hsl(24 5.4% 50%)",
             }}
           >

@@ -26,9 +26,10 @@ function RatingPill({ value, label }: { value: number; label: string }) {
 
 type Props = {
   reviews: ActivityReview[];
+  totalCount?: number;
 };
 
-export function ActivityFeed({ reviews }: Props) {
+export function ActivityFeed({ reviews, totalCount }: Props) {
   if (reviews.length === 0) {
     return (
       <section style={{ marginBottom: 36 }}>
@@ -167,6 +168,18 @@ export function ActivityFeed({ reviews }: Props) {
           </li>
         ))}
       </ul>
+      {totalCount !== undefined && totalCount > reviews.length ? (
+        <p
+          style={{
+            marginTop: 12,
+            fontSize: 12,
+            fontFamily: "var(--font-mono)",
+            color: "var(--color-muted-foreground)",
+          }}
+        >
+          Showing the latest {reviews.length} of {totalCount} reviews.
+        </p>
+      ) : null}
     </section>
   );
 }

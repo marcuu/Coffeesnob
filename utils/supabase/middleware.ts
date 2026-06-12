@@ -38,10 +38,20 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   const { pathname } = request.nextUrl;
+  // Browsing is public (leaderboard, venue directory, venue pages); anything
+  // that writes — reviewing, adding venues, lists, profiles — stays gated.
+  const isPublicVenuePath =
+    pathname.startsWith("/venues") &&
+    pathname !== "/venues/new" &&
+    !pathname.endsWith("/review");
   const isPublic =
     pathname === "/" ||
     pathname === "/login" ||
     pathname.startsWith("/auth/callback") ||
+    pathname === "/rankings" ||
+    pathname.startsWith("/rankings/") ||
+    pathname === "/about/calibration" ||
+    isPublicVenuePath ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico";
 

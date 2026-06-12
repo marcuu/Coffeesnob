@@ -1,108 +1,155 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { Leaderboard } from "@/app/onboarding/leaderboard";
-import type { OnboardingVenue } from "@/app/onboarding/data";
+import { Leaderboard } from "@/components/leaderboard/leaderboard";
+import type { RankedVenue, UnrankedVenue } from "@/lib/rankings";
+import type { Venue } from "@/lib/types";
 
 // next/navigation is not available in jsdom; mock it so the module resolves.
-vi.mock("next/navigation", () => ({ permanentRedirect: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  permanentRedirect: vi.fn(),
+  usePathname: () => "/",
+}));
 
-const venue1: OnboardingVenue = {
-  slug: "prufrock-coffee",
-  name: "Prufrock",
-  city: "London",
-  area: "london",
-  roaster: "Square Mile",
-  axes: { fruit: 0.9, floral: 0.5 },
-  drinks: ["filter", "espresso"],
-  score: 8.5,
-  reviews: 42,
-  pitch: "Filter bar on Leather Lane.",
-  proof: "42 reviews, weighted score 8.5.",
-};
+function makeVenue(overrides: Partial<Venue>): Venue {
+  return {
+    id: "v-1",
+    slug: "prufrock-coffee",
+    name: "Prufrock",
+    address_line1: "23-25 Leather Ln",
+    address_line2: null,
+    city: "London",
+    postcode: "EC1N 7TE",
+    country: "GB",
+    latitude: null,
+    longitude: null,
+    website: null,
+    instagram: null,
+    roasters: [],
+    brew_methods: [],
+    has_decaf: null,
+    has_plant_milk: true,
+    notes: null,
+    photo_url: null,
+    created_by: "user-1",
+    created_at: "2026-01-01T00:00:00Z",
+    updated_at: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
 
-const venue2: OnboardingVenue = {
-  slug: "north-star-leeds",
-  name: "North Star",
-  city: "Leeds",
-  area: "leeds",
-  roaster: "North Star",
-  axes: { choc: 0.8, nutty: 0.7 },
-  drinks: ["milky", "espresso"],
-  score: 7.9,
-  reviews: 31,
-  pitch: "Best cortado in Leeds.",
-  proof: "31 reviews, weighted score 7.9.",
-};
+const ranked: RankedVenue[] = [
+  {
+    venue: makeVenue({ id: "v-1", slug: "prufrock-coffee", name: "Prufrock" }),
+    rank: 1,
+    score: 8.5,
+    reviewCount: 42,
+  },
+  {
+    venue: makeVenue({
+      id: "v-2",
+      slug: "north-star-leeds",
+      name: "North Star",
+      city: "Leeds",
+    }),
+    rank: 2,
+    score: 7.9,
+    reviewCount: 31,
+  },
+];
 
-describe("Leaderboard (logged-out landing page)", () => {
+const unranked: UnrankedVenue[] = [
+  {
+    venue: makeVenue({
+      id: "v-3",
+      slug: "kaffeine",
+      name: "Kaffeine",
+    }),
+    reviewCount: 0,
+  },
+];
+
+const regions = [
+  { id: "london", name: "London" },
+  { id: "leeds", name: "Leeds" },
+];
+
+function renderLeaderboard(
+  props: Partial<React.ComponentProps<typeof Leaderboard>> = {},
+) {
+  return render(
+    <Leaderboard
+      ranked={ranked}
+      unranked={unranked}
+      regions={regions}
+      activeRegion={null}
+      {...props}
+    />,
+  );
+}
+
+describe("Leaderboard (canonical home page)", () => {
   it("renders the top venue and subsequent venues", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
+    renderLeaderboard();
     expect(screen.getByText("Prufrock")).toBeInTheDocument();
     expect(screen.getByText("North Star")).toBeInTheDocument();
   });
 
-  it("does not render a sidebar", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
-    expect(screen.queryByText("Tune your feed")).not.toBeInTheDocument();
-    expect(screen.queryByText("Three quick things.")).not.toBeInTheDocument();
-  });
-
-  it("does not render the aha reveal modal", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
-    expect(screen.queryByText(/go here first/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/based on what you told us/i)).not.toBeInTheDocument();
-  });
-
-  it("does not render the Tune feed button", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
-    expect(screen.queryByText(/tune feed/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/edit taste/i)).not.toBeInTheDocument();
-  });
-
-  it("does not render the floating personalisation nudge", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
-    expect(
-      screen.queryByText(/want better matches/i),
-    ).not.toBeInTheDocument();
-  });
-
-  it("renders the 'Sign in to personalise' CTA", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
-    expect(
-      screen.getByRole("link", { name: /sign in to personalise/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("'Sign in to personalise' links to /login", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
+  it("renders the 'Sign in to personalise' CTA linking to /login when logged out", () => {
+    renderLeaderboard();
     const link = screen.getByRole("link", { name: /sign in to personalise/i });
     expect(link).toHaveAttribute("href", "/login");
   });
 
-  it("renders the 'Browse venues' link", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
+  it("renders a 'Go to your list' link instead when logged in", () => {
+    renderLeaderboard({ isLoggedIn: true });
     expect(
-      screen.getByRole("link", { name: /browse venues/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("renders leaderboard framing copy, not onboarding framing", () => {
-    render(<Leaderboard venues={[venue1, venue2]} />);
+      screen.getByRole("link", { name: /go to your list/i }),
+    ).toHaveAttribute("href", "/list");
     expect(
-      screen.getByText(/third-wave coffee, reviewed honestly/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/your shortlist/i),
+      screen.queryByRole("link", { name: /sign in to personalise/i }),
     ).not.toBeInTheDocument();
   });
 
-  it("shows the empty-state with a sign-in link when there are no venues", () => {
-    render(<Leaderboard venues={[]} />);
-    expect(screen.getByText(/no venues yet/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /sign in/i })).toHaveAttribute(
+  it("renders city filter chips including All UK", () => {
+    renderLeaderboard();
+    expect(screen.getByRole("link", { name: "All UK" })).toHaveAttribute(
       "href",
-      "/login",
+      "/",
     );
+    expect(screen.getByRole("link", { name: "London" })).toHaveAttribute(
+      "href",
+      "/?city=london",
+    );
+  });
+
+  it("scopes copy to the active region", () => {
+    renderLeaderboard({ activeRegion: { id: "leeds", name: "Leeds" } });
+    expect(screen.getByText(/No\. 1 in Leeds/i)).toBeInTheDocument();
+  });
+
+  it("renders the not-yet-ranked module with a browse venues link", () => {
+    renderLeaderboard();
+    expect(screen.getByText("Kaffeine")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /browse all venues/i }),
+    ).toHaveAttribute("href", "/venues");
+  });
+
+  it("preserves the region filter on the browse venues link", () => {
+    renderLeaderboard({ activeRegion: { id: "london", name: "London" } });
+    expect(
+      screen.getByRole("link", { name: /browse all venues/i }),
+    ).toHaveAttribute("href", "/venues?region=london");
+  });
+
+  it("shows an empty state when nothing is ranked", () => {
+    renderLeaderboard({ ranked: [] });
+    expect(screen.getByText(/no ranked venues/i)).toBeInTheDocument();
+  });
+
+  it("omits the not-yet-ranked module when every venue is ranked", () => {
+    renderLeaderboard({ unranked: [] });
+    expect(screen.queryByText(/not yet ranked/i)).not.toBeInTheDocument();
   });
 });

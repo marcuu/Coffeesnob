@@ -24,12 +24,16 @@ export const dynamic = "force-dynamic";
 export default async function VenuesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ region?: string; sort?: string }>;
+  searchParams: Promise<{ region?: string; sort?: string; q?: string }>;
 }) {
-  const { region, sort } = await searchParams;
+  const { region, sort, q } = await searchParams;
   const regionFilter = region?.trim() ?? "";
+  const search = q?.trim() ?? "";
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Full list of distinct cities for deriving regions, independent of the filter.
   const { data: cityRows } = await supabase
@@ -49,6 +53,9 @@ export default async function VenuesPage({
     .order("created_at", { ascending: false });
   if (selectedRegionData) {
     query = query.in("city", selectedRegionData.cities);
+  }
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
   }
   const { data, error } = await query;
 
@@ -79,24 +86,39 @@ export default async function VenuesPage({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-10">
-      <div className="mb-6 flex items-center justify-between">
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Venues</h1>
           <p className="text-sm text-[var(--color-muted-foreground)]">
             UK third-wave coffee spots rated by the community.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/venues/new">Add venue</Link>
-        </Button>
+        {user ? (
+          <Button asChild>
+            <Link href="/venues/new">Add venue</Link>
+          </Button>
+        ) : null}
       </div>
 
       <form
         action="/venues"
         method="get"
-        className="mb-6 flex flex-wrap items-end gap-3"
+        className="mb-6 grid gap-3 sm:flex sm:flex-wrap sm:items-end"
       >
+        <div className="grid flex-1 gap-1.5">
+          <label htmlFor="q" className="text-xs font-medium">
+            Search by name
+          </label>
+          <input
+            id="q"
+            name="q"
+            type="search"
+            defaultValue={search}
+            placeholder="e.g. Prufrock"
+            className="flex h-11 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)]"
+          />
+        </div>
         <div className="grid flex-1 gap-1.5">
           <label htmlFor="region" className="text-xs font-medium">
             Filter by region
@@ -105,7 +127,7 @@ export default async function VenuesPage({
             id="region"
             name="region"
             defaultValue={selectedRegion}
-            className="flex h-10 w-full rounded-md border border-[var(--color-input)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)] ring-offset-background dark:[color-scheme:dark]"
+            className="flex h-11 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-foreground)] ring-offset-background dark:[color-scheme:dark]"
           >
             <option value="">All regions</option>
             {regions.map((r) => (
@@ -119,21 +141,25 @@ export default async function VenuesPage({
             ))}
           </select>
         </div>
-        <Button type="submit" variant="outline">
-          Apply
-        </Button>
-        {selectedRegion ? (
-          <Button asChild variant="ghost">
-            <Link href="/venues">Clear</Link>
+        <div className="flex gap-3">
+          <Button type="submit" variant="outline" className="h-11 flex-1 sm:flex-none">
+            Apply
           </Button>
-        ) : null}
+          {selectedRegion || search ? (
+            <Button asChild variant="ghost" className="h-11">
+              <Link href="/venues">Clear</Link>
+            </Button>
+          ) : null}
+        </div>
       </form>
 
       {sortedVenues.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          {selectedRegion
-            ? `No venues found in "${regions.find((r) => r.id === selectedRegion)?.name ?? selectedRegion}".`
-            : "No venues yet. Add the first."}
+          {search
+            ? `No venues match "${search}".`
+            : selectedRegion
+              ? `No venues found in "${regions.find((r) => r.id === selectedRegion)?.name ?? selectedRegion}".`
+              : "No venues yet. Add the first."}
         </p>
       ) : (
         <ul className="grid gap-4">
@@ -143,9 +169,9 @@ export default async function VenuesPage({
             const summary = buildVenueRankingSummary(v.id, ws, rank, scopeLabel);
 
             return (
-              <li key={v.id}>
+              <li key={v.id} className="min-w-0">
                 <Link href={`/venues/${v.slug}`} className="block">
-                  <Card className="transition-colors hover:bg-[var(--color-muted)]">
+                  <Card className="transition-colors hover:bg-[var(--color-muted)] active:bg-[var(--color-muted)]">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">

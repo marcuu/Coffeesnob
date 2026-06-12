@@ -318,7 +318,7 @@ function PrimingScreen({
               <div
                 style={{
                   ...MONO,
-                  fontSize: 9,
+                  fontSize: 11,
                   color: r ? ACCENT : TEXT_DIMMER,
                 }}
               >
@@ -427,7 +427,7 @@ function RevealScreen({
               <div style={{ fontFamily: "var(--font-serif)", fontSize: 17 }}>
                 {venue!.name}
               </div>
-              <div style={{ ...MONO, fontSize: 9, color: TEXT_DIMMER }}>
+              <div style={{ ...MONO, fontSize: 11, color: TEXT_DIMMER }}>
                 {r.bucket.toUpperCase()} · COFFEE {r.ratingCoffee5}/5 · VIBE{" "}
                 {r.ratingVibe5}/5
               </div>
@@ -544,7 +544,7 @@ export function ProvisionalBadge() {
     <span
       style={{
         ...MONO,
-        fontSize: 9,
+        fontSize: 11,
         padding: "2px 6px",
         borderRadius: 2,
         background: "rgba(241, 168, 113, 0.12)",
@@ -637,7 +637,7 @@ function NextStepsScreen({
                   <div style={{ fontFamily: "var(--font-serif)", fontSize: 16 }}>
                     {m.displayName}
                   </div>
-                  <div style={{ ...MONO, fontSize: 9, color: TEXT_DIMMER }}>
+                  <div style={{ ...MONO, fontSize: 11, color: TEXT_DIMMER }}>
                     {Math.round(m.similarity * 100)}% taste match
                   </div>
                 </div>
@@ -783,7 +783,7 @@ function TryNextCard({
             {name}
           </div>
         </Link>
-        <div style={{ ...MONO, fontSize: 9, color: TEXT_DIMMER }}>
+        <div style={{ ...MONO, fontSize: 11, color: TEXT_DIMMER }}>
           {city} · {matchCount} of your matches Pilgrimage&rsquo;d this
         </div>
       </div>

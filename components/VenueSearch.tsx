@@ -82,13 +82,13 @@ export function VenueSearch() {
         style={{
           display: "flex",
           alignItems: "center",
-          height: 34,
+          height: 44,
           border: expanded ? "1px solid var(--color-border)" : "none",
           borderRadius: "var(--radius)",
           background: expanded ? "var(--color-background)" : "transparent",
           overflow: "hidden",
           transition: "width 200ms ease, border-color 200ms ease, background 200ms ease",
-          width: expanded ? 180 : 34,
+          width: expanded ? "min(220px, 56vw)" : 44,
         }}
       >
         <button
@@ -100,8 +100,8 @@ export function VenueSearch() {
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            width: 34,
-            height: 34,
+            width: 44,
+            height: 44,
             background: "none",
             border: "none",
             padding: 0,
@@ -145,7 +145,7 @@ export function VenueSearch() {
             border: "none",
             outline: "none",
             background: "transparent",
-            fontSize: 13,
+            fontSize: 16,
             color: "var(--color-foreground)",
             fontFamily: "var(--font-sans)",
             opacity: expanded ? 1 : 0,
@@ -164,7 +164,7 @@ export function VenueSearch() {
               alignItems: "center",
               background: "none",
               border: "none",
-              padding: "0 8px 0 0",
+              padding: "12px 10px 12px 4px",
               cursor: "pointer",
               color: "var(--color-muted-foreground)",
               flexShrink: 0,
@@ -185,7 +185,7 @@ export function VenueSearch() {
             position: "absolute",
             top: "calc(100% + 6px)",
             right: 0,
-            width: 260,
+            width: "min(280px, calc(100vw - 32px))",
             background: "var(--color-background)",
             border: "1px solid var(--color-border)",
             borderRadius: "var(--radius-lg)",
@@ -220,25 +220,20 @@ export function VenueSearch() {
                 key={v.id}
                 href={`/venues/${v.slug}`}
                 onClick={collapse}
+                className="search-result"
                 style={{
                   display: "flex",
                   alignItems: "baseline",
                   justifyContent: "space-between",
                   gap: 12,
-                  padding: "10px 14px",
+                  padding: "14px",
                   textDecoration: "none",
                   color: "var(--color-foreground)",
-                  fontSize: 13,
+                  fontSize: 14,
                   fontFamily: "var(--font-sans)",
                   borderTop: i > 0 ? "1px solid var(--color-border)" : "none",
                   background: "transparent",
                   transition: "background 100ms",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "var(--color-muted)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
                 }}
               >
                 <span style={{ fontWeight: 500, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

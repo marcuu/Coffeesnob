@@ -266,7 +266,7 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
           transition: "color 160ms",
         }}
       />
-      <span style={{ ...MONO, fontSize: 9, color: "hsl(24 5.4% 50%)", minWidth: 28 }}>
+      <span style={{ ...MONO, fontSize: 11, color: "hsl(24 5.4% 50%)", minWidth: 28 }}>
         #{rank}
       </span>
       <Link
@@ -285,7 +285,7 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
       <span
         style={{
           ...MONO,
-          fontSize: 9,
+          fontSize: 11,
           color: "hsl(24 5.4% 56%)",
         }}
         aria-label={`Coffee ${item.rating_coffee_5} out of 5`}
@@ -295,7 +295,7 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
       <span
         style={{
           ...MONO,
-          fontSize: 9,
+          fontSize: 11,
           color: "hsl(24 5.4% 56%)",
         }}
         aria-label={`Vibe ${item.rating_vibe_5} out of 5`}
