@@ -183,12 +183,30 @@ export function Leaderboard({
       )}
 
       {unranked.length > 0 ? (
-        <BeFirstModule
-          unranked={unranked}
-          scopeLabel={scopeLabel}
-          activeRegion={activeRegion}
-        />
+        <BeFirstModule unranked={unranked} scopeLabel={scopeLabel} />
       ) : null}
+
+      {/* Always-present path into the full directory — the only other place
+          to reach it on mobile now that Venues isn't a nav tab. */}
+      <p style={{ marginTop: unranked.length > 0 ? 28 : 48 }}>
+        <Link
+          href={
+            activeRegion
+              ? `/venues?region=${encodeURIComponent(activeRegion.id)}`
+              : "/venues"
+          }
+          style={{
+            ...MONO_LABEL,
+            color: "var(--color-foreground)",
+            textDecoration: "underline",
+            textUnderlineOffset: 4,
+            display: "inline-block",
+            padding: "8px 0",
+          }}
+        >
+          Browse all venues →
+        </Link>
+      </p>
     </main>
   );
 }
@@ -380,16 +398,11 @@ function RankedRow({ item }: { item: RankedVenue }) {
 function BeFirstModule({
   unranked,
   scopeLabel,
-  activeRegion,
 }: {
   unranked: UnrankedVenue[];
   scopeLabel: string;
-  activeRegion: Region | null;
 }) {
   const sample = unranked.slice(0, UNRANKED_SAMPLE);
-  const browseHref = activeRegion
-    ? `/venues?region=${encodeURIComponent(activeRegion.id)}`
-    : "/venues";
 
   return (
     <section aria-label="Venues awaiting review" style={{ marginTop: 56 }}>
@@ -459,21 +472,6 @@ function BeFirstModule({
           </li>
         ))}
       </ul>
-      <p style={{ marginTop: 20 }}>
-        <Link
-          href={browseHref}
-          style={{
-            ...MONO_LABEL,
-            color: "var(--color-foreground)",
-            textDecoration: "underline",
-            textUnderlineOffset: 4,
-            display: "inline-block",
-            padding: "8px 0",
-          }}
-        >
-          Browse all venues →
-        </Link>
-      </p>
     </section>
   );
 }
