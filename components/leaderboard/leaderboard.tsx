@@ -12,14 +12,14 @@ const KICKER: React.CSSProperties = {
   letterSpacing: "0.22em",
   textTransform: "uppercase",
   color: "var(--color-muted-foreground)",
-  marginBottom: 20,
+  marginBottom: 14,
   display: "block",
 };
 
 const HERO: React.CSSProperties = {
   margin: 0,
   fontFamily: "var(--font-serif)",
-  fontSize: "clamp(34px, 7vw, 56px)",
+  fontSize: "clamp(32px, 6vw, 50px)",
   fontWeight: 400,
   lineHeight: 1.05,
   letterSpacing: "-0.025em",
@@ -27,11 +27,11 @@ const HERO: React.CSSProperties = {
 };
 
 const SUBHEAD: React.CSSProperties = {
-  margin: "14px 0 0",
+  margin: "12px 0 0",
   fontSize: 15,
   color: "var(--color-muted-foreground)",
   maxWidth: 480,
-  lineHeight: 1.65,
+  lineHeight: 1.6,
   textWrap: "pretty",
 };
 
@@ -80,7 +80,7 @@ export function Leaderboard({
         maxWidth: 920,
         margin: "0 auto",
         padding:
-          "clamp(36px, 7vw, 64px) clamp(16px, 4vw, 36px) clamp(64px, 10vw, 140px)",
+          "clamp(28px, 5vw, 48px) clamp(16px, 4vw, 36px) clamp(64px, 10vw, 140px)",
       }}
     >
       <span style={KICKER}>
@@ -121,7 +121,7 @@ export function Leaderboard({
         the feed.
       </p>
 
-      <div style={{ marginTop: 36 }}>
+      <div style={{ marginTop: 28 }}>
         <CityChips
           regions={regions}
           activeRegion={activeRegion?.id ?? null}
@@ -129,7 +129,9 @@ export function Leaderboard({
         />
       </div>
 
-      {wishlistInScope.length > 0 ? (
+      {/* The nudge only earns its place when the view is scoped — "in the UK"
+          is noise, "in Leeds" is a reason to act. */}
+      {wishlistInScope.length > 0 && (nearMode || activeRegion) ? (
         <Link
           href="/list#wishlist"
           style={{

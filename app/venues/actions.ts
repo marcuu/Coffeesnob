@@ -6,10 +6,10 @@ import { redirect } from "next/navigation";
 import { geocodePostcode } from "@/lib/geo";
 import { createClient } from "@/utils/supabase/server";
 import {
-  formNumber,
   formString,
   parseCsv,
-  venueCreateSchema,
+  venueQuickCreateSchema,
+  venueUpdateSchema,
 } from "@/lib/validators";
 
 export type VenueFormState =
@@ -24,6 +24,29 @@ export type VenueFormState =
 
 const initial: VenueFormState = { status: "idle" };
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function fieldErrorsFrom(issues: Array<{ path: PropertyKey[]; message: string }>) {
+  const fieldErrors: Record<string, string> = {};
+  for (const issue of issues) {
+    const path = issue.path.join(".") || "form";
+    if (!fieldErrors[path]) fieldErrors[path] = issue.message;
+  }
+  return fieldErrors;
+}
+
+// Creation is three fields: name, city, postcode. The slug is derived from
+// the name (with a numeric suffix on collision), coordinates are geocoded
+// from the postcode, and everything else is added later from the venue page.
 export async function createVenue(
   _prev: VenueFormState = initial,
   formData: FormData,
@@ -36,28 +59,86 @@ export async function createVenue(
     return { status: "error", message: "Not authenticated" };
   }
 
-  const stringFields = [
-    "slug", "name", "address_line1", "address_line2",
-    "city", "postcode", "website", "roasters", "brew_methods", "notes",
-  ] as const;
+  const savedValues: Record<string, string> = {
+    name: String(formData.get("name") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    postcode: String(formData.get("postcode") ?? ""),
+  };
 
-  const savedValues: Record<string, string> = {};
-  for (const key of stringFields) {
-    savedValues[key] = String(formData.get(key) ?? "");
-  }
-  savedValues.has_decaf = formData.get("has_decaf") === "on" ? "on" : "";
-  savedValues.has_plant_milk = formData.get("has_plant_milk") === "on" ? "on" : "";
-
-  const raw = {
-    slug: formString(formData.get("slug")),
+  const parsed = venueQuickCreateSchema.safeParse({
     name: formString(formData.get("name")),
-    address_line1: formString(formData.get("address_line1")),
-    address_line2: formString(formData.get("address_line2")),
     city: formString(formData.get("city")),
     postcode: formString(formData.get("postcode")),
-    country: formString(formData.get("country")) ?? "GB",
-    latitude: formNumber(formData.get("latitude")) ?? null,
-    longitude: formNumber(formData.get("longitude")) ?? null,
+  });
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? "Invalid input",
+      fieldErrors: fieldErrorsFrom(parsed.error.issues),
+      values: savedValues,
+      _key: Date.now(),
+    };
+  }
+
+  const baseSlug = slugify(parsed.data.name) || "venue";
+  const coords = await geocodePostcode(parsed.data.postcode);
+
+  // Try the natural slug, then numbered variants on collision.
+  let createdSlug: string | null = null;
+  let lastError = "";
+  for (let i = 0; i < 5 && !createdSlug; i++) {
+    const slug = i === 0 ? baseSlug : `${baseSlug}-${i + 1}`;
+    const { data: inserted, error } = await supabase
+      .from("venues")
+      .insert({
+        ...parsed.data,
+        slug,
+        address_line1: "",
+        ...(coords ?? {}),
+        created_by: user.id,
+      })
+      .select("slug")
+      .single();
+    if (!error) {
+      createdSlug = inserted.slug;
+      break;
+    }
+    lastError = error.message;
+    const slugCollision =
+      error.code === "23505" && /slug/i.test(error.message ?? "");
+    if (!slugCollision) {
+      return { status: "error", message: error.message, values: savedValues };
+    }
+  }
+  if (!createdSlug) {
+    return { status: "error", message: lastError, values: savedValues };
+  }
+
+  revalidatePath("/venues");
+  redirect(`/venues/${createdSlug}`);
+}
+
+// Post-creation details, editable by the venue's creator (RLS enforces
+// created_by; the eq() below is belt-and-braces).
+export async function updateVenueDetails(
+  _prev: VenueFormState = initial,
+  formData: FormData,
+): Promise<VenueFormState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { status: "error", message: "Not authenticated" };
+  }
+
+  const slug = formString(formData.get("slug"));
+  if (!slug) return { status: "error", message: "Missing venue" };
+
+  const raw = {
+    // Blank inputs are omitted (no change) rather than written as empty.
+    address_line1: formString(formData.get("address_line1")),
+    address_line2: formString(formData.get("address_line2")),
     website: formString(formData.get("website")),
     instagram: formString(formData.get("instagram")),
     roasters: parseCsv(formData.get("roasters")),
@@ -67,41 +148,29 @@ export async function createVenue(
     notes: formString(formData.get("notes")),
   };
 
-  const parsed = venueCreateSchema.safeParse(raw);
+  const parsed = venueUpdateSchema
+    .omit({ slug: true, name: true, city: true, postcode: true, country: true, latitude: true, longitude: true })
+    .safeParse(raw);
   if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const path = issue.path.join(".") || "form";
-      if (!fieldErrors[path]) fieldErrors[path] = issue.message;
-    }
     return {
       status: "error",
       message: parsed.error.issues[0]?.message ?? "Invalid input",
-      fieldErrors,
-      values: savedValues,
+      fieldErrors: fieldErrorsFrom(parsed.error.issues),
       _key: Date.now(),
     };
   }
 
-  // Best-effort geocode from the postcode when coordinates weren't supplied;
-  // powers "Near me" sorting. Failure is fine — coords stay null.
-  let coords: { latitude: number; longitude: number } | null = null;
-  if (parsed.data.latitude == null || parsed.data.longitude == null) {
-    coords = await geocodePostcode(parsed.data.postcode);
-  }
-
-  const { data: inserted, error } = await supabase
+  const { error } = await supabase
     .from("venues")
-    .insert({ ...parsed.data, ...(coords ?? {}), created_by: user.id })
-    .select("slug")
-    .single();
-
+    .update(parsed.data)
+    .eq("slug", slug)
+    .eq("created_by", user.id);
   if (error) {
     return { status: "error", message: error.message };
   }
 
-  revalidatePath("/venues");
-  redirect(`/venues/${inserted.slug}`);
+  revalidatePath(`/venues/${slug}`);
+  redirect(`/venues/${slug}`);
 }
 
 export async function deleteVenue(formData: FormData) {

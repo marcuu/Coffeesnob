@@ -43,7 +43,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicVenuePath =
     pathname.startsWith("/venues") &&
     pathname !== "/venues/new" &&
-    !pathname.endsWith("/review");
+    !pathname.endsWith("/review") &&
+    !pathname.endsWith("/edit");
   const isPublic =
     pathname === "/" ||
     pathname === "/login" ||

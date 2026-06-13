@@ -16,8 +16,7 @@ export default function NewVenuePage() {
           Add a venue
         </h1>
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          Any allowlisted reviewer can add a venue. You can edit or delete
-          venues you created later.
+          Three fields. Details can come later.
         </p>
       </div>
 

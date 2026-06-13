@@ -223,33 +223,32 @@ describe("computeReputationTier", () => {
     expect(tier.nextStep).toBeNull();
   });
 
-  it("returns Growing signal when tenure ≥ 0.4 and review count < 20", () => {
+  it("returns Growing trust when tenure ≥ 0.4 and review count < 20", () => {
     const tier = computeReputationTier(
       { status: "active", review_count: 10 },
       { tenure_score: 0.5, consistency_score: 0.6 },
     );
-    expect(tier.label).toBe("Growing signal");
-    expect(tier.nextStep).toContain("10 more reviews");
+    expect(tier.label).toBe("Growing trust");
+    expect(tier.nextStep).toContain("10 more to reach Established reviewer");
   });
 
-  it("returns Growing signal when review_count ≥ 5 even with low tenure", () => {
+  it("returns Growing trust when review_count ≥ 5 even with low tenure", () => {
     const tier = computeReputationTier(
       { status: "active", review_count: 5 },
       { tenure_score: 0.1, consistency_score: 0.5 },
     );
-    expect(tier.label).toBe("Growing signal");
+    expect(tier.label).toBe("Growing trust");
   });
 
-  it("returns Building your record for a brand-new reviewer", () => {
+  it("returns Just getting started for a brand-new reviewer", () => {
     const tier = computeReputationTier({ status: "active", review_count: 0 }, null);
-    expect(tier.label).toBe("Building your record");
-    expect(tier.nextStep).toContain("5 more reviews");
+    expect(tier.label).toBe("Just getting started");
+    expect(tier.nextStep).toContain("5 more");
   });
 
-  it("formats next step with singular 'review' when exactly 1 needed", () => {
+  it("counts down the reviews still needed in the next step", () => {
     const tier = computeReputationTier({ status: "active", review_count: 4 }, null);
-    expect(tier.nextStep).toContain("1 more review");
-    expect(tier.nextStep).not.toContain("reviews");
+    expect(tier.nextStep).toContain("1 more");
   });
 
   it("returns no nextStep when Established and not beaned", () => {

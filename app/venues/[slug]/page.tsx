@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
 import { RankingBadge } from "@/components/ranking/RankingBadge";
-import { ScoreBandBadge } from "@/components/ranking/ScoreBandBadge";
-import { SignalBadge } from "@/components/ranking/SignalBadge";
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
 import { formatRating } from "@/lib/venues";
@@ -239,9 +237,14 @@ export default async function VenueDetailPage({
               </>
             )}
             <div style={{ marginTop: venueRow.photo_url ? 0 : 10, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.08em", color: "var(--color-muted-foreground)" }}>
-              {venueRow.address_line1}
-              {venueRow.address_line2 ? `, ${venueRow.address_line2}` : ""} ·{" "}
-              {venueRow.city} {venueRow.postcode}
+              {[
+                [venueRow.address_line1, venueRow.address_line2]
+                  .filter(Boolean)
+                  .join(", "),
+                `${venueRow.city} ${venueRow.postcode}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </div>
           </div>
           <div style={{ textAlign: "right", paddingTop: venueRow.photo_url ? 0 : 24 }}>
@@ -258,18 +261,18 @@ export default async function VenueDetailPage({
           </div>
         </div>
 
-        {/* Quick actions: log a visit / save for later / share */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+        {/* One primary action; everything else is a quiet icon. */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: 24 }}>
           {user && !alreadyReviewedToday ? (
             <Link
               href={`/venues/${slug}/review`}
-              style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-accent)", borderRadius: 2, color: "var(--color-accent)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none" }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 28px", background: "var(--color-accent)", color: "hsl(20 14.3% 4%)", borderRadius: 2, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", textDecoration: "none", fontWeight: 500 }}
             >
               Add review →
             </Link>
           ) : null}
           {user && !hasReviewed ? (
-            <WishlistButton venueId={venueRow.id} initialInWishlist={inWishlist} />
+            <WishlistButton venueId={venueRow.id} initialInWishlist={inWishlist} compact />
           ) : null}
           <ShareButton
             title={`${venueRow.name} — Caffiends`}
@@ -279,6 +282,7 @@ export default async function VenueDetailPage({
                 : `${venueRow.name} on Caffiends.`
             }
             path={`/venues/${slug}`}
+            compact
           />
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -288,27 +292,25 @@ export default async function VenueDetailPage({
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, minHeight: 44, padding: "0 20px", border: "1px solid var(--color-border)", borderRadius: 2, color: "var(--color-muted-foreground)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", textDecoration: "none" }}
+            aria-label="Open in Maps"
+            title="Open in Maps"
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 44, minHeight: 44, border: "1px solid var(--color-border)", borderRadius: 2, color: "var(--color-muted-foreground)", textDecoration: "none" }}
           >
-            Open in Maps ↗
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
           </a>
         </div>
 
-        {/* Rank metadata */}
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 24 }}>
-          {rankingSummary.isUnranked ? (
-            <>
-              <span style={{ ...MONO_LABEL, letterSpacing: "0.14em" }}>Unranked</span>
-              <SignalBadge label={rankingSummary.signalLabel} />
-            </>
+        {/* One rank statement. The ⓘ next to the score explains the rest. */}
+        <div style={{ marginBottom: 24 }}>
+          {!rankingSummary.isUnranked && rankingSummary.rank !== null ? (
+            <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} />
           ) : (
-            <>
-              {rankingSummary.rank !== null ? (
-                <RankingBadge rank={rankingSummary.rank} scopeLabel={rankingSummary.scopeLabel} />
-              ) : null}
-              <ScoreBandBadge label={rankingSummary.scoreLabel} tone={rankingSummary.scoreTone} />
-              <SignalBadge label={rankingSummary.signalLabel} />
-            </>
+            <span style={{ ...MONO_LABEL, letterSpacing: "0.14em" }}>
+              Not yet ranked · {count} review{count === 1 ? "" : "s"}
+            </span>
           )}
         </div>
 
@@ -333,6 +335,18 @@ export default async function VenueDetailPage({
           <p style={{ fontSize: 14, lineHeight: 1.75, color: "var(--color-muted-foreground)", maxWidth: 580, marginBottom: 24, whiteSpace: "pre-line" }}>
             {venueRow.notes}
           </p>
+        ) : null}
+
+        {/* Quiet edit affordance for the venue's creator. */}
+        {user?.id === venueRow.created_by ? (
+          <div style={{ marginBottom: 24 }}>
+            <Link
+              href={`/venues/${slug}/edit`}
+              style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--color-muted-foreground)", textDecoration: "underline", textUnderlineOffset: 3 }}
+            >
+              Add details
+            </Link>
+          </div>
         ) : null}
 
         <div style={{ height: 1, background: "var(--color-border)", marginBottom: 40 }} />

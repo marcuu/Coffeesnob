@@ -9,7 +9,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
-import { VenueRankingMeta } from "@/components/ranking/VenueRankingMeta";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
 import {
@@ -190,8 +189,13 @@ export default async function VenuesPage({
                           </div>
                         </div>
                       </div>
-                      {/* No reviewHref: card is already wrapped in <Link> */}
-                      <VenueRankingMeta summary={summary} />
+                      <div className="mt-2 text-xs text-[var(--color-muted-foreground)]">
+                        {summary.isUnranked
+                          ? "Not yet ranked"
+                          : summary.rank !== null
+                            ? `#${summary.rank} in ${summary.scopeLabel}`
+                            : null}
+                      </div>
                     </CardHeader>
                     {v.roasters.length || v.brew_methods.length ? (
                       <CardContent className="flex flex-wrap gap-2 text-xs text-[var(--color-muted-foreground)]">

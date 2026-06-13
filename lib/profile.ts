@@ -148,8 +148,7 @@ export function computeReputationTier(
   if (status === "beaned") {
     return {
       label: "Trusted contributor",
-      description:
-        "Pre-vetted reviewer. Your scores carry full weight in venue rankings.",
+      description: "Your reviews count in full.",
       nextStep: null,
     };
   }
@@ -157,8 +156,7 @@ export function computeReputationTier(
   if (tenureScore >= 0.8 && review_count >= 20) {
     return {
       label: "Established reviewer",
-      description:
-        "Your review history gives your scores strong weight in venue rankings.",
+      description: "A strong track record. Your reviews carry real weight.",
       nextStep: null,
     };
   }
@@ -166,25 +164,23 @@ export function computeReputationTier(
   if (tenureScore >= 0.4 || review_count >= 5) {
     const needed = Math.max(0, 20 - review_count);
     return {
-      label: "Growing signal",
-      description:
-        "Your scores are gaining weight as your review history builds.",
+      label: "Growing trust",
+      description: "Your reviews count for more with every visit you log.",
       nextStep:
         needed > 0
-          ? `${needed} more review${needed === 1 ? "" : "s"} to reach Established reviewer`
-          : "Keep your streak going to increase your weight",
+          ? `${needed} more to reach Established reviewer`
+          : "Keep your streak going.",
     };
   }
 
   const needed = Math.max(0, 5 - review_count);
   return {
-    label: "Building your record",
-    description:
-      "Early-stage reviewer. Every review adds to your signal in the ranking system.",
+    label: "Just getting started",
+    description: "Every review you write builds your standing.",
     nextStep:
       needed > 0
-        ? `Write ${needed} more review${needed === 1 ? "" : "s"} to start growing your signal`
-        : "Keep reviewing to strengthen your weight",
+        ? `Write ${needed} more to find your feet`
+        : "Keep reviewing.",
   };
 }
 
