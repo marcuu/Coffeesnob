@@ -39,7 +39,10 @@ export function BottomNav({ isLoggedIn, profileHref, recentVenues = [] }: Props)
     {
       href: "/",
       label: "Rankings",
-      match: (p) => p === "/" || p.startsWith("/rankings"),
+      // The directory (/venues) is the same "discovery" area, so the
+      // Rankings tab stays lit when browsing it.
+      match: (p) =>
+        p === "/" || p.startsWith("/rankings") || p.startsWith("/venues"),
       icon: (
         <svg {...ICON_PROPS} aria-hidden="true">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -48,19 +51,6 @@ export function BottomNav({ isLoggedIn, profileHref, recentVenues = [] }: Props)
           <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
           <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
           <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-        </svg>
-      ),
-    },
-    {
-      href: "/venues",
-      label: "Venues",
-      match: (p) => p.startsWith("/venues"),
-      icon: (
-        <svg {...ICON_PROPS} aria-hidden="true">
-          <path d="M10 2v2" />
-          <path d="M14 2v2" />
-          <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
-          <path d="M6 2v2" />
         </svg>
       ),
     },
