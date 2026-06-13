@@ -48,7 +48,7 @@ export function BucketDistribution({
   return (
     <section style={{ marginBottom: 32 }}>
       <div style={{ ...MONO, color: "var(--color-muted-foreground)", marginBottom: 10 }}>
-        Bucket distribution
+        How you rate
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
         {sequence.map(({ key, label }) => (
@@ -88,7 +88,7 @@ export function BucketDistribution({
             fontSize: 11,
           }}
         >
-          Avg pilgrimage: Coffee {avgCoffee.toFixed(1)}/5 · Vibe{" "}
+          Your pilgrimages average Coffee {avgCoffee.toFixed(1)}/5 · Vibe{" "}
           {avgVibe.toFixed(1)}/5
         </div>
       ) : null}

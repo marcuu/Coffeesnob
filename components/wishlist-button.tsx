@@ -21,9 +21,12 @@ const MONO: React.CSSProperties = {
 export function WishlistButton({
   venueId,
   initialInWishlist,
+  compact = false,
 }: {
   venueId: string;
   initialInWishlist: boolean;
+  /** Icon-only square for quiet action rows. */
+  compact?: boolean;
 }) {
   const [inWishlist, setInWishlist] = useState(initialInWishlist);
   const [, startTransition] = useTransition();
@@ -44,13 +47,16 @@ export function WishlistButton({
       type="button"
       onClick={toggle}
       aria-pressed={inWishlist}
+      aria-label={inWishlist ? "Remove from wishlist" : "Want to try"}
+      title={inWishlist ? "On your wishlist" : "Want to try"}
       style={{
         ...MONO,
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: 10,
         minHeight: 44,
-        padding: "0 20px",
+        ...(compact ? { width: 44, padding: 0 } : { padding: "0 20px" }),
         background: inWishlist ? "var(--color-accent-soft)" : "transparent",
         border: `1px solid ${
           inWishlist ? "var(--color-accent)" : "var(--color-border)"
@@ -64,7 +70,7 @@ export function WishlistButton({
       }}
     >
       <BookmarkIcon filled={inWishlist} />
-      {inWishlist ? "On your wishlist" : "Want to try"}
+      {compact ? null : inWishlist ? "On your wishlist" : "Want to try"}
     </button>
   );
 }

@@ -31,21 +31,8 @@
   --font-mono:  var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Light mode: only applied when the user's system prefers light */
-@media (prefers-color-scheme: light) {
-  @theme {
-    --color-background:         hsl(0 0% 100%);
-    --color-foreground:         hsl(20 14.3% 4.1%);
-    --color-muted:              hsl(60 4.8% 95.9%);
-    --color-muted-foreground:   hsl(25 5.3% 44.7%);
-    --color-border:             hsl(20 5.9% 90%);
-    --color-primary:            hsl(24 9.8% 10%);
-    --color-primary-foreground: hsl(60 9.1% 97.8%);
-    --color-accent:             oklch(0.52 0.11 44);
-    --color-accent-soft:        oklch(0.96 0.02 44);
-    --color-accent-ring:        oklch(0.52 0.11 44 / 0.18);
-  }
-}
+/* Dark is the product's one designed appearance. A light theme returns only
+   when it's designed deliberately, not inherited from a media query. */
 
 @keyframes onboardingFadeIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -71,7 +58,7 @@ html,
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  color-scheme: dark light;
+  color-scheme: dark;
 }
 
 /* Visible keyboard focus everywhere; mouse/touch clicks stay clean */

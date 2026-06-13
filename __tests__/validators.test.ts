@@ -3,8 +3,35 @@ import { describe, expect, it } from "vitest";
 import {
   rankedReviewCreateSchema,
   venueCreateSchema,
+  venueQuickCreateSchema,
   parseCsv,
 } from "@/lib/validators";
+
+describe("venueQuickCreateSchema", () => {
+  it("accepts the three creation fields", () => {
+    const parsed = venueQuickCreateSchema.parse({
+      name: "Prufrock Coffee",
+      city: "London",
+      postcode: "EC1N 7TE",
+    });
+    expect(parsed.name).toBe("Prufrock Coffee");
+  });
+
+  it("requires name, city and postcode", () => {
+    expect(venueQuickCreateSchema.safeParse({ name: "", city: "London", postcode: "EC1N 7TE" }).success).toBe(false);
+    expect(venueQuickCreateSchema.safeParse({ name: "X", city: "", postcode: "EC1N 7TE" }).success).toBe(false);
+    expect(venueQuickCreateSchema.safeParse({ name: "X", city: "London", postcode: "" }).success).toBe(false);
+  });
+
+  it("does not require a slug — it is derived server-side", () => {
+    const result = venueQuickCreateSchema.safeParse({
+      name: "Prufrock Coffee",
+      city: "London",
+      postcode: "EC1N 7TE",
+    });
+    expect(result.success).toBe(true);
+  });
+});
 
 describe("venueCreateSchema", () => {
   const base = {

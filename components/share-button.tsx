@@ -17,10 +17,13 @@ export function ShareButton({
   title,
   text,
   path,
+  compact = false,
 }: {
   title: string;
   text?: string;
   path: string;
+  /** Icon-only square for quiet action rows. */
+  compact?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -47,17 +50,23 @@ export function ShareButton({
     <button
       type="button"
       onClick={share}
+      aria-label={copied ? "Link copied" : "Share"}
+      title={copied ? "Link copied" : "Share"}
       style={{
         ...MONO,
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: 10,
         minHeight: 44,
-        padding: "0 20px",
+        ...(compact ? { width: 44, padding: 0 } : { padding: "0 20px" }),
         background: "transparent",
-        border: "1px solid var(--color-border)",
+        border: `1px solid ${copied && compact ? "var(--color-accent)" : "var(--color-border)"}`,
         borderRadius: 2,
-        color: "var(--color-muted-foreground)",
+        color:
+          copied && compact
+            ? "var(--color-accent)"
+            : "var(--color-muted-foreground)",
         cursor: "pointer",
         transition: "color 160ms, border-color 160ms",
       }}
@@ -77,7 +86,7 @@ export function ShareButton({
         <path d="m16 6-4-4-4 4" />
         <path d="M12 2v13" />
       </svg>
-      {copied ? "Link copied" : "Share"}
+      {compact ? null : copied ? "Link copied" : "Share"}
     </button>
   );
 }

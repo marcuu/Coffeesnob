@@ -171,9 +171,7 @@ export default async function MyListPage() {
           <RankedList initialByBucket={initialByBucket} />
         )}
 
-        {/* The page forces a dark background; pin the inherited text colour
-            so the shared WishlistSection stays legible in light mode too. */}
-        <div id="wishlist" style={{ color: "hsl(60 9.1% 97.8%)" }}>
+        <div id="wishlist">
           <WishlistSection items={wishlistItems} isOwnProfile />
         </div>
       </main>

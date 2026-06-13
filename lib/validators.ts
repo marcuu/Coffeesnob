@@ -53,6 +53,15 @@ export const venueCreateSchema = z.object({
 
 export type VenueCreateInput = z.infer<typeof venueCreateSchema>;
 
+// Creation asks for three things; everything else is added later from the
+// venue page. Slug and coordinates are derived server-side.
+export const venueQuickCreateSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120),
+  city: z.string().trim().min(1, "City is required").max(80),
+  postcode: z.string().trim().min(2, "Postcode is required").max(10),
+});
+export type VenueQuickCreateInput = z.infer<typeof venueQuickCreateSchema>;
+
 export const venueUpdateSchema = venueCreateSchema.partial();
 export type VenueUpdateInput = z.infer<typeof venueUpdateSchema>;
 
