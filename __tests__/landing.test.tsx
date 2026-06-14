@@ -45,6 +45,7 @@ const ranked: RankedVenue[] = [
     rank: 1,
     score: 8.5,
     reviewCount: 42,
+    maturity: "settled",
   },
   {
     venue: makeVenue({
@@ -56,6 +57,7 @@ const ranked: RankedVenue[] = [
     rank: 2,
     score: 7.9,
     reviewCount: 31,
+    maturity: "provisional",
   },
 ];
 

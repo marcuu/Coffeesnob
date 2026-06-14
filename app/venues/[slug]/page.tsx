@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { RankingBadge } from "@/components/ranking/RankingBadge";
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
-import { formatRating } from "@/lib/venues";
+import { getScoreDisplay } from "@/lib/scoring-display";
 import {
   explainVenueScore,
   getVenueOverallScores,
@@ -114,6 +114,14 @@ export default async function VenueDetailPage({
     ? (weightedScores.axes.vibe?.score ?? null)
     : null;
 
+  // The venue's overall settledness governs how precisely every score on the
+  // page may be shown — Coffee/Vibe inherit the same authority as the headline
+  // (PRD Workstream B). A provisional venue never renders a decimal.
+  const maturity = weightedScores?.maturity ?? "forming";
+  const overallDisplay = getScoreDisplay(displayScore, maturity);
+  const coffeeDisplay = getScoreDisplay(coffeeScore, maturity);
+  const vibeDisplay = getScoreDisplay(vibeScore, maturity);
+
   const explain =
     weightedScores?.displayable
       ? await explainVenueScore(supabase, venueRow.id, "overall")
@@ -182,11 +190,17 @@ export default async function VenueDetailPage({
           },
         }
       : {}),
+    // Only claim a precise rating once the score is settled; a provisional
+    // venue advertises a rounded whole number so search engines aren't fed a
+    // decimal the evidence can't support.
     ...(displayScore !== null && count > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: Number(displayScore.toFixed(1)),
+            ratingValue:
+              maturity === "settled"
+                ? Number(displayScore.toFixed(1))
+                : Math.round(displayScore),
             bestRating: 10,
             worstRating: 1,
             reviewCount: count,
@@ -248,15 +262,20 @@ export default async function VenueDetailPage({
             </div>
           </div>
           <div style={{ textAlign: "right", paddingTop: venueRow.photo_url ? 0 : 24 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(40px, 9vw, 56px)", fontWeight: 400, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-accent)" }}>
-              {formatRating(displayScore)}
+            <div className="score-value" data-maturity={maturity} style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(40px, 9vw, 56px)", fontWeight: 400, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--color-accent)" }}>
+              {overallDisplay.formattedScore}
             </div>
+            {maturity === "provisional" ? (
+              <div style={{ ...MONO_LABEL, letterSpacing: "0.18em", marginTop: 8 }}>
+                Provisional · still settling
+              </div>
+            ) : null}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, marginTop: 4 }}>
               {explain ? <ScoreExplain data={explain} /> : null}
             </div>
             <div style={{ ...MONO_LABEL, letterSpacing: "0.14em", marginTop: 10, textAlign: "right" }}>
-              <div>Coffee {formatRating(coffeeScore)}</div>
-              <div style={{ marginTop: 4 }}>Vibe {formatRating(vibeScore)}</div>
+              <div>Coffee {coffeeDisplay.formattedScore}</div>
+              <div style={{ marginTop: 4 }}>Vibe {vibeDisplay.formattedScore}</div>
             </div>
           </div>
         </div>
@@ -278,7 +297,7 @@ export default async function VenueDetailPage({
             title={`${venueRow.name} — Caffiends`}
             text={
               displayScore !== null
-                ? `${venueRow.name} scores ${formatRating(displayScore)}/10 on Caffiends.`
+                ? `${venueRow.name} scores ${overallDisplay.formattedScore}/10 on Caffiends.`
                 : `${venueRow.name} on Caffiends.`
             }
             path={`/venues/${slug}`}

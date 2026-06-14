@@ -88,9 +88,9 @@ describe("sortVenuesForListing", () => {
       makeVenue({ id: "c", name: "C", created_at: "2026-04-01T00:00:00.000Z" }),
     ];
     const scores = new Map<string, OverallScoreSummary>([
-      ["a", { score: 7.1, confidence: 0.9, rawReviewCount: 4, displayable: true }],
-      ["b", { score: 9.2, confidence: 0.8, rawReviewCount: 5, displayable: true }],
-      ["c", { score: 9.9, confidence: 0.1, rawReviewCount: 1, displayable: false }],
+      ["a", { score: 7.1, confidence: 0.9, rawReviewCount: 4, displayable: true, maturity: "settled" }],
+      ["b", { score: 9.2, confidence: 0.8, rawReviewCount: 5, displayable: true, maturity: "settled" }],
+      ["c", { score: 9.9, confidence: 0.1, rawReviewCount: 1, displayable: false, maturity: "forming" }],
     ]);
 
     expect(sortVenuesForListing(venues, scores).map((venue) => venue.id)).toEqual(
@@ -104,8 +104,8 @@ describe("sortVenuesForListing", () => {
       makeVenue({ id: "b", name: "B" }),
     ];
     const scores = new Map<string, OverallScoreSummary>([
-      ["a", { score: 7.1, confidence: 0.9, rawReviewCount: 4, displayable: true }],
-      ["b", { score: 9.2, confidence: 0.8, rawReviewCount: 5, displayable: true }],
+      ["a", { score: 7.1, confidence: 0.9, rawReviewCount: 4, displayable: true, maturity: "settled" }],
+      ["b", { score: 9.2, confidence: 0.8, rawReviewCount: 5, displayable: true, maturity: "settled" }],
     ]);
 
     expect(

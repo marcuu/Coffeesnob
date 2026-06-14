@@ -6,13 +6,20 @@ import {
   buildVenueRankingSummary,
   computeRank,
 } from "@/lib/ranking-context";
+import { deriveMaturity } from "@/lib/scoring-display";
 
 const makeScore = (
   score: number,
   displayable: boolean,
   rawReviewCount = 5,
   confidence = 0.8,
-): OverallScoreSummary => ({ score, confidence, rawReviewCount, displayable });
+): OverallScoreSummary => ({
+  score,
+  confidence,
+  rawReviewCount,
+  displayable,
+  maturity: deriveMaturity({ displayable, confidence }),
+});
 
 describe("buildVenueRankingSummary", () => {
   describe("ranked venues", () => {

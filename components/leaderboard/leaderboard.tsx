@@ -94,31 +94,20 @@ export function Leaderboard({
         reviewed harshly.
       </h1>
       <p style={SUBHEAD}>
-        Venues ranked by weighted reviewer scores.{" "}
-        {isLoggedIn ? (
-          <Link
-            href="/list"
-            style={{
-              color: "var(--color-foreground)",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-            }}
-          >
-            Go to your list
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            style={{
-              color: "var(--color-foreground)",
-              textDecoration: "underline",
-              textUnderlineOffset: 3,
-            }}
-          >
-            Sign in to personalise
-          </Link>
-        )}{" "}
-        the feed.
+        The community&rsquo;s estimate, converged from weighted reviewer
+        scores — not any one person&rsquo;s favourites.
+      </p>
+      <p style={{ ...SUBHEAD, marginTop: 8, fontSize: 14 }}>
+        <Link
+          href={isLoggedIn ? "/list" : "/login"}
+          style={{
+            color: "var(--color-foreground)",
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+          }}
+        >
+          {isLoggedIn ? "Go to your list" : "Sign in to personalise"} →
+        </Link>
       </p>
 
       <div style={{ marginTop: 28 }}>
@@ -218,8 +207,8 @@ function HeroCard({
   item: RankedVenue;
   scopeLabel: string;
 }) {
-  const { venue: v, reviewCount, score } = item;
-  const display = getScoreDisplay(score, true);
+  const { venue: v, reviewCount, score, maturity } = item;
+  const display = getScoreDisplay(score, maturity);
 
   return (
     <Link
@@ -302,6 +291,8 @@ function HeroCard({
             }}
           >
             <span
+              className="score-value"
+              data-maturity={display.maturity}
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: "clamp(40px, 9vw, 52px)",
@@ -323,6 +314,20 @@ function HeroCard({
               /10
             </span>
           </div>
+          {display.maturity === "provisional" ? (
+            <div
+              style={{
+                marginTop: 8,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "hsl(24 5.4% 50%)",
+              }}
+            >
+              Provisional · still settling
+            </div>
+          ) : null}
         </div>
       </div>
     </Link>
@@ -330,8 +335,8 @@ function HeroCard({
 }
 
 function RankedRow({ item }: { item: RankedVenue }) {
-  const { venue: v, rank, reviewCount, score, distanceMi } = item;
-  const display = getScoreDisplay(score, true);
+  const { venue: v, rank, reviewCount, score, maturity, distanceMi } = item;
+  const display = getScoreDisplay(score, maturity);
   const distanceLabel =
     distanceMi !== undefined && Number.isFinite(distanceMi)
       ? ` · ${formatDistanceMiles(distanceMi)}`
@@ -381,6 +386,9 @@ function RankedRow({ item }: { item: RankedVenue }) {
         </span>
       </span>
       <span
+        className="score-value"
+        data-maturity={display.maturity}
+        title={display.approximate ? "Provisional — still settling" : undefined}
         style={{
           flexShrink: 0,
           fontFamily: "var(--font-mono)",

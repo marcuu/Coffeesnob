@@ -177,6 +177,7 @@ describe("onboarding/venue-mapping", () => {
           confidence: 0.5,
           rawReviewCount: 12,
           displayable: true,
+          maturity: "provisional",
         },
       ],
     ]);

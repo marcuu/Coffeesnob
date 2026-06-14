@@ -1,9 +1,17 @@
 /**
- * Pure helper for rendering venue scores in the UI.
+ * Pure helpers for rendering venue scores in the UI.
  *
- * Isolated from the scoring pipeline so display format (10-point vs 5-point)
- * can be changed here without touching aggregation or ranking logic.
+ * Isolated from the scoring pipeline so display format can be changed here
+ * without touching aggregation or ranking logic. This is the *portrayal*
+ * layer: it decides how settled a score is and therefore how precisely — and
+ * with how much typographic authority — it may be shown.
+ *
+ * The headline rule (PRD Workstream B): "You cannot render a decimal you
+ * haven't earned." Precision is a claim about certainty, so display precision
+ * scales with the venue's maturity.
  */
+
+import { SCORING_CONSTANTS } from "@/lib/scoring/weights";
 
 export type ScoreDisplayTone =
   | "exceptional"
@@ -14,87 +22,115 @@ export type ScoreDisplayTone =
   | "ranked"
   | "unranked";
 
+/**
+ * How settled a venue's score is. Derived from the existing confidence /
+ * displayable signals — never recomputed in components (PRD A3).
+ *
+ *  - `forming`     — not yet displayable; not enough trusted reviews.
+ *  - `provisional` — displayable, but confidence < SETTLED_CONFIDENCE_THRESHOLD.
+ *                    The default surface at cohort scale. Shown coarsely.
+ *  - `settled`     — confidence ≥ SETTLED_CONFIDENCE_THRESHOLD. Full precision.
+ */
+export type VenueMaturity = "forming" | "provisional" | "settled";
+
+/** Typographic authority a score may claim, mirroring its maturity. */
+export type ScoreEmphasis = "full" | "muted" | "none";
+
 export type ScoreDisplay = {
+  /** Score text to render: "8.4" (settled), "≈7" (provisional), or "—". */
   formattedScore: string;
+  /** True when the score is a coarse approximation (provisional). */
+  approximate: boolean;
+  maturity: VenueMaturity;
   label: string;
   description: string;
   tone: ScoreDisplayTone;
+  /** Whether a number should be shown at all. False only for `forming`. */
   displayable: boolean;
-};
-
-const UNRANKED: ScoreDisplay = {
-  formattedScore: "—",
-  label: "Unranked",
-  description: "Insufficient signal to rank",
-  tone: "unranked",
-  displayable: false,
+  emphasis: ScoreEmphasis;
 };
 
 /**
- * Returns display metadata for a venue score.
+ * The single source of truth mapping a venue aggregate to a maturity state
+ * (PRD A2). `displayable` is the forming→provisional boundary (today's
+ * "not enough trusted reviews" gate); SETTLED_CONFIDENCE_THRESHOLD is the
+ * provisional→settled boundary.
+ */
+export function deriveMaturity(input: {
+  displayable: boolean;
+  confidence: number | null | undefined;
+}): VenueMaturity {
+  if (!input.displayable) return "forming";
+  const confidence = input.confidence ?? 0;
+  return confidence >= SCORING_CONSTANTS.SETTLED_CONFIDENCE_THRESHOLD
+    ? "settled"
+    : "provisional";
+}
+
+const FORMING: ScoreDisplay = {
+  formattedScore: "—",
+  approximate: false,
+  maturity: "forming",
+  label: "Forming",
+  description: "Not enough trusted reviews yet.",
+  tone: "unranked",
+  displayable: false,
+  emphasis: "none",
+};
+
+function toneFor(score: number): { tone: ScoreDisplayTone; label: string; description: string } {
+  if (score >= 9.0)
+    return { tone: "exceptional", label: "Exceptional", description: "Among the very best in the UK" };
+  if (score >= 8.5)
+    return { tone: "outstanding", label: "Outstanding", description: "Truly excellent coffee" };
+  if (score >= 8.0)
+    return { tone: "excellent", label: "Excellent", description: "Highly recommended" };
+  if (score >= 7.5)
+    return { tone: "strong", label: "Strong", description: "Well above average" };
+  if (score >= 7.0)
+    return { tone: "good", label: "Good", description: "Above average" };
+  return { tone: "ranked", label: "Ranked", description: "In the rankings" };
+}
+
+/**
+ * Returns display metadata for a venue score, governed by its maturity.
  *
- * Pass `displayable: false` (or null score) for venues that haven't yet
- * accumulated enough trusted reviews to enter the rankings.
+ * Precision scales with confidence:
+ *  - `forming`     → no number; a "not enough reviews" label.
+ *  - `provisional` → coarse whole number, prefixed "≈" (e.g. "≈7"). Never a
+ *                    decimal — a decimal would claim precision the evidence
+ *                    can't support. (Provisional display form, PRD §13.3.)
+ *  - `settled`     → full precision, one decimal (e.g. "8.4").
  */
 export function getScoreDisplay(
   score: number | null | undefined,
-  displayable: boolean,
+  maturity: VenueMaturity,
 ): ScoreDisplay {
-  if (!displayable || score == null) return UNRANKED;
+  if (maturity === "forming" || score == null) return FORMING;
 
-  const formattedScore = score.toFixed(1);
+  const { tone, label, description } = toneFor(score);
 
-  if (score >= 9.0) {
+  if (maturity === "provisional") {
     return {
-      formattedScore,
-      label: "Exceptional",
-      description: "Among the very best in the UK",
-      tone: "exceptional",
+      formattedScore: `≈${Math.round(score)}`,
+      approximate: true,
+      maturity: "provisional",
+      label,
+      description,
+      tone,
       displayable: true,
-    };
-  }
-  if (score >= 8.5) {
-    return {
-      formattedScore,
-      label: "Outstanding",
-      description: "Truly excellent coffee",
-      tone: "outstanding",
-      displayable: true,
-    };
-  }
-  if (score >= 8.0) {
-    return {
-      formattedScore,
-      label: "Excellent",
-      description: "Highly recommended",
-      tone: "excellent",
-      displayable: true,
-    };
-  }
-  if (score >= 7.5) {
-    return {
-      formattedScore,
-      label: "Strong",
-      description: "Well above average",
-      tone: "strong",
-      displayable: true,
-    };
-  }
-  if (score >= 7.0) {
-    return {
-      formattedScore,
-      label: "Good",
-      description: "Above average",
-      tone: "good",
-      displayable: true,
+      emphasis: "muted",
     };
   }
 
   return {
-    formattedScore,
-    label: "Ranked",
-    description: "In the rankings",
-    tone: "ranked",
+    formattedScore: score.toFixed(1),
+    approximate: false,
+    maturity: "settled",
+    label,
+    description,
+    tone,
     displayable: true,
+    emphasis: "full",
   };
 }
