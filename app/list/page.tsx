@@ -141,10 +141,12 @@ export default async function MyListPage() {
               marginBottom: 4,
             }}
           >
-            Where every venue stands
+            Where every venue stands — for you
           </h1>
-          <p style={{ fontSize: 14, color: "hsl(24 5.4% 60%)" }}>
-            Drag to reorder within a bucket, or across to change bucket.
+          <p style={{ fontSize: 14, color: "hsl(24 5.4% 60%)", maxWidth: 460, lineHeight: 1.6 }}>
+            Your personal ranking: how you&rsquo;d send a friend. This is your
+            input, not the community score — drag to reorder within a bucket, or
+            across to change bucket.
           </p>
         </div>
 

@@ -10,7 +10,13 @@ export type VenueAxisAggregate = {
   rawCount: number;
 };
 
-const MIN_EFFECTIVE_WEIGHT = 0.01;
+// Floor below which a review carries too little weight to be worth counting.
+// Re-derived for the geometric-mean weighting (PRD Workstream D4): because the
+// geometric mean lifts and compresses per-review weights toward 1, a near-zero
+// floor stopped doing useful work, so this sits at 0.05 — a review must clear
+// ~5% effective weight to enter the posterior. Kept in lockstep with the
+// matching floor in lib/aggregation.ts (the score explainer).
+const MIN_EFFECTIVE_WEIGHT = 0.05;
 
 export function aggregateVenueAxis(
   reviews: WeightedReview[],

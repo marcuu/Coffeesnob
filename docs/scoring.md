@@ -134,7 +134,8 @@ export const SCORING_CONSTANTS = {
   TENURE_MONTHS_SATURATION: 12,
   TENURE_COUNT_SATURATION: 50,
   PRIOR_SCORE_BY_AXIS: { overall: 6.0, coffee: 6.0, vibe: 6.0 },
-  PRIOR_STRENGTH: 5.0,
+  PRIOR_STRENGTH: 3.0,                 // how much evidence to leave `forming`
+  SETTLED_CONFIDENCE_THRESHOLD: 0.75,  // confidence for full precision/authority
 };
 
 export function computeReviewWeight(
@@ -161,17 +162,39 @@ export function computeReviewerConsistency(
 ): number;
 ```
 
-`computeReviewWeight` formula:
+`computeReviewWeight` formula (PRD Workstream D — quality only, co-equal):
 
 ```
 daysSinceVisit = (now - visitedOn) / 86400000
-recency = Math.exp(-daysSinceVisit / RECENCY_HALF_LIFE_DAYS)
+recency = min(1, Math.exp(-daysSinceVisit / RECENCY_HALF_LIFE_DAYS))
 base = Math.min(reviewer.axisWeights[axis] / 3.0, 1.0)
 filledAxes = count of keys in review.scores with defined values
 completeness = filledAxes >= COMPLETENESS_FULL_THRESHOLD ? 1.0 : COMPLETENESS_PARTIAL_MULTIPLIER
-weight = base * reviewer.tenureScore * reviewer.consistencyScore * recency * completeness
+
+# Equal-weight geometric mean of the QUALITY factors. Each factor has
+# identical elasticity (1/m), so no single factor can dominate.
+factors = [base, recency, completeness]
+if reviewer.status != 'beaned':           # seed anchors bypass these
+    factors += [reviewer.tenureScore, reviewer.consistencyScore]
+weight = geometricMean(factors)           # 0 if any factor is 0
 return clamp(weight, 0, 1)
 ```
+
+This replaced the previous raw product. Two consequences worth noting:
+
+- **No single factor dominates.** A stale or partial review is dampened but no
+  longer driven to ~0 by one factor alone (the geometric mean lifts and
+  compresses the factor range upward).
+- **Quality only — quantity lives elsewhere.** There is deliberately no
+  platform-population or global reviewer-count term here. "One review matters
+  more when a venue has few, less when many" is a property of the aggregation
+  prior (`influence ≈ wᵢ / (Σw + k)`), keyed to *per-venue* evidence — not of
+  per-review weight. Adding a global count here would suppress sparse-but-legit
+  venues and swamp the co-equal quality factors.
+
+Because the geometric mean raises per-review weights, the effective-weight
+floor `MIN_EFFECTIVE_WEIGHT` in `aggregation.ts` was re-derived from `0.01` to
+`0.05` (a review must clear ~5% effective weight to enter the posterior).
 
 `computeReviewerAxisWeight` formula:
 
@@ -477,3 +500,84 @@ If a migration makes old synthetic reviews invalid (e.g., an axis is renamed),
 truncate all rows where `is_synthetic = true` in `reviews`, `review_weights`,
 and `venue_axis_scores` for Bramford venues, then re-run
 `npm run simulation:bootstrap`.
+
+## Section 12: Maturity & portrayal (confidence-aware display)
+
+The score is computed exactly as above; this layer governs how *settled* it is
+and therefore how it may be shown (PRD "Confidence-Aware Quality Portrayal &
+Weighting Separation", Workstreams A–C).
+
+### Maturity state
+
+`lib/scoring-display.ts → deriveMaturity({ displayable, confidence })` is the
+single source of truth (no component recomputes it):
+
+| State         | Condition                                           |
+|---------------|-----------------------------------------------------|
+| `forming`     | not `displayable` (not enough trusted reviews yet)  |
+| `provisional` | `displayable` and `confidence < SETTLED_CONFIDENCE_THRESHOLD` |
+| `settled`     | `confidence ≥ SETTLED_CONFIDENCE_THRESHOLD`         |
+
+`maturity` is attached to `OverallScoreSummary`, `VenueScores`, `RankedVenue`,
+and `VenueScoreExplanation`, so leaderboard, venue page, and profile all read
+one value. At cohort scale most venues sit in `forming`/`provisional` — that is
+the default surface, by design.
+
+### Display precision scales with confidence
+
+`getScoreDisplay(score, maturity)` (you cannot render a decimal you haven't
+earned):
+
+- `forming` → no number; "Not enough trusted reviews yet."
+- `provisional` → coarse whole number, prefixed `≈` (e.g. `≈7`). **Never a
+  decimal.** (Provisional display form chosen per PRD §13.3.)
+- `settled` → one decimal (e.g. `8.4`).
+
+Typographic authority mirrors maturity via `.score-value[data-maturity=…]` in
+`app/globals.css` (provisional reads lighter; settled at full weight) — tones
+stay on the existing semantic tokens.
+
+### Input vs output legibility
+
+The leaderboard is framed as the community's converged estimate; "Your List" is
+framed as personal input (a ranking, not a verdict). Personal-input numbers use
+a quieter typographic role than the community-output score so the two layers
+are never conflated.
+
+## Section 13: The responsiveness ↔ stability dial (Marcus-tunable)
+
+| Constant                       | Default | Controls                                              |
+|--------------------------------|---------|------------------------------------------------------|
+| `PRIOR_STRENGTH` (k)           | `3.0`   | Evidence needed to leave `forming`; higher = stabler |
+| `SETTLED_CONFIDENCE_THRESHOLD` | `0.75`  | Confidence for full precision + full authority       |
+| `RECENCY_HALF_LIFE_DAYS`       | `540`   | Recency vs convergence balance                       |
+
+Lower thresholds/`k` = early reviews count harder (responsive, swingable);
+higher = demands more evidence (stable, slower). Ship with defaults.
+
+## Section 14: Seed trusted palates (Option A)
+
+At launch the model can't yet identify good palates, so a hand-picked seed set
+is crowned `beaned` (the anchor tier) so their reviews anchor scores from day
+one. Mechanism: `lib/scoring/seed-palates.ts` (an auditable registry — each
+entry records *why*) applied via `npm run scoring:seed-palates`. The selection
+**rule** is Marcus's values call (see `docs/seed-palates.md`); the code ships the
+mechanism only. Seed status is transitional — measured credibility (Section 15)
+should take over as data accrues.
+
+## Section 15: Instrumentation to validate principle 1 (Workstream F — planned)
+
+Principle 1 ("credible palates exist and are identifiable") is the riskiest
+assumption and has no ground truth for subjective taste, so it must be
+falsifiable cheaply with the cohort:
+
+- **Predictive validity:** when a venue transitions `provisional → settled`,
+  log per early reviewer the gap between their original score and the settled
+  score; aggregate into a per-reviewer calibration metric.
+- **Inter-rater agreement:** periodically compare agreement among trusted
+  reviewers against a random-pair baseline.
+
+Storage is internal analytics, service-role only (no new authenticated
+surface); a simple admin view suffices. This is deferred to a follow-up: it
+needs new tables + a service-role report, which should land as its own migration
+and admin surface rather than riding this portrayal/weighting change.

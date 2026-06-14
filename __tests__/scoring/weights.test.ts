@@ -190,32 +190,48 @@ describe("computeReviewerAxisWeight", () => {
 });
 
 describe("computeReviewWeight", () => {
+  // Per-review weight is the equal-weight geometric mean of its quality
+  // factors. For a non-beaned reviewer there are five: {base, recency,
+  // completeness, tenure, consistency}. A maxed reviewer (all factors = 1)
+  // still scores 1; otherwise each factor contributes with elasticity 1/m.
+  const M_ACTIVE = 5;
+
   it("returns 1.0 for a maxed-out reviewer reviewing today with all axes filled", () => {
     const r = fullReviewer();
     const rev = fullReview();
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(1, 5);
   });
 
-  it("halves at ~375 days (applies exponential decay, not half-life)", () => {
-    // With HALF_LIFE_DAYS=540, days where exp(-d/540)=0.5 is d = 540*ln2 ≈ 374.3.
+  it("folds recency in as a co-equal factor (geometric mean, not a product)", () => {
+    // recency = 0.5 at d = 540·ln2; with five equal factors the weight is the
+    // fifth root, NOT 0.5 — no single factor can drag the result on its own.
     const r = fullReviewer();
     const rev = fullReview({ visitedOn: daysAgo(540 * Math.LN2) });
-    expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(0.5, 3);
-  });
-
-  it("decays to ~0.368 after one half-life-days constant", () => {
-    const r = fullReviewer();
-    const rev = fullReview({ visitedOn: daysAgo(540) });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
-      Math.exp(-1),
+      Math.pow(0.5, 1 / M_ACTIVE),
       5,
     );
   });
 
-  it("is nearly zero for 10-year-old reviews", () => {
+  it("dampens an old review without zeroing it (recency is co-equal)", () => {
+    // recency = e^-1 after one half-life constant → weight = (e^-1)^(1/5).
+    const r = fullReviewer();
+    const rev = fullReview({ visitedOn: daysAgo(540) });
+    expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
+      Math.exp(-1 / M_ACTIVE),
+      5,
+    );
+  });
+
+  it("keeps a meaningful (not vanishing) weight for a 10-year-old review", () => {
+    // The geometric mean compresses range: a single stale factor can't drive
+    // the weight to ~0 the way the old raw product did.
     const r = fullReviewer();
     const rev = fullReview({ visitedOn: daysAgo(3650) });
-    expect(computeReviewWeight(r, rev, "overall", NOW)).toBeLessThan(0.002);
+    const w = computeReviewWeight(r, rev, "overall", NOW);
+    expect(w).toBeCloseTo(Math.pow(Math.exp(-3650 / 540), 1 / M_ACTIVE), 5);
+    expect(w).toBeGreaterThan(0.2);
+    expect(w).toBeLessThan(1);
   });
 
   it("caps base at 1.0 when axisWeight > 3", () => {
@@ -239,15 +255,16 @@ describe("computeReviewWeight", () => {
       },
     });
     const rev = fullReview();
+    // A zero factor collapses the geometric mean to zero.
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBe(0);
     expect(computeReviewWeight(r, rev, "coffee", NOW)).toBeCloseTo(1, 5);
   });
 
-  it("applies completeness penalty when fewer than 3 axes are scored", () => {
+  it("applies completeness as a co-equal factor when fewer than 3 axes are scored", () => {
     const r = fullReviewer();
     const rev = fullReview({ scores: { overall: 8, coffee: 7 } });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
-      SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER,
+      Math.pow(SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER, 1 / M_ACTIVE),
       5,
     );
   });
@@ -258,16 +275,20 @@ describe("computeReviewWeight", () => {
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(1, 5);
   });
 
-  it("multiplies tenure and consistency into the result", () => {
+  it("folds tenure and consistency in as co-equal factors", () => {
     const r = fullReviewer({ tenureScore: 0.5, consistencyScore: 0.5 });
     const rev = fullReview();
-    expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(0.25, 5);
+    // (1·1·1·0.5·0.5)^(1/5) = 0.25^(1/5).
+    expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
+      Math.pow(0.25, 1 / M_ACTIVE),
+      5,
+    );
   });
 
   it("handles a future visit date (recency > 1) by clamping to 1", () => {
     const r = fullReviewer();
     const rev = fullReview({ visitedOn: new Date(NOW.getTime() + 540 * MS_PER_DAY) });
-    // recency = e^1 ≈ 2.72, other factors = 1 → clamped to 1
+    // recency clamped to 1, other factors = 1 → 1.
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBe(1);
   });
 
@@ -281,9 +302,72 @@ describe("computeReviewWeight", () => {
       },
     });
     expect(computeReviewWeight(r, rev, "overall", NOW)).toBeCloseTo(
-      SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER,
+      Math.pow(SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER, 1 / M_ACTIVE),
       5,
     );
+  });
+
+  it("lets no single quality factor dominate (equal elasticity)", () => {
+    // Halving any one factor multiplies the weight by the SAME amount,
+    // 0.5^(1/m). This is the defining property of the equal-weight geometric
+    // mean and is what makes "the factors matter equally" true by construction.
+    const expected = Math.pow(0.5, 1 / M_ACTIVE);
+
+    // base → axisWeight 1.5 gives base = 0.5
+    const halfBase = computeReviewWeight(
+      fullReviewer({ axisWeights: { overall: 1.5, coffee: 3, vibe: 3 } }),
+      fullReview(),
+      "overall",
+      NOW,
+    );
+    // recency → 0.5 at d = 540·ln2
+    const halfRecency = computeReviewWeight(
+      fullReviewer(),
+      fullReview({ visitedOn: daysAgo(540 * Math.LN2) }),
+      "overall",
+      NOW,
+    );
+    const halfTenure = computeReviewWeight(
+      fullReviewer({ tenureScore: 0.5 }),
+      fullReview(),
+      "overall",
+      NOW,
+    );
+    const halfConsistency = computeReviewWeight(
+      fullReviewer({ consistencyScore: 0.5 }),
+      fullReview(),
+      "overall",
+      NOW,
+    );
+
+    for (const w of [halfBase, halfRecency, halfTenure, halfConsistency]) {
+      expect(w).toBeCloseTo(expected, 5);
+    }
+  });
+
+  it("preserves seed anchoring: a beaned reviewer's first review still counts", () => {
+    // A brand-new account with no tenure and poor consistency would be zeroed
+    // if it were 'active' (a zero factor collapses the mean), but a 'beaned'
+    // seed bypasses those factors so its single review can anchor a venue.
+    const newAccount = {
+      tenureScore: 0,
+      consistencyScore: 0,
+      createdAt: NOW,
+      reviewCount: 1,
+    };
+    const beaned = fullReviewer({ status: "beaned", ...newAccount });
+    const active = fullReviewer({ status: "active", ...newAccount });
+    const rev = fullReview();
+
+    expect(computeReviewWeight(beaned, rev, "overall", NOW)).toBeCloseTo(1, 5);
+    expect(computeReviewWeight(active, rev, "overall", NOW)).toBe(0);
+  });
+
+  it("takes no platform-population or global-count input", () => {
+    // Quantity lives at the aggregation prior, never in per-review weight
+    // (PRD Workstream D2). The signature is exactly (reviewer, review, axis,
+    // now) — there is deliberately no count/population parameter to feed.
+    expect(computeReviewWeight.length).toBe(4);
   });
 });
 

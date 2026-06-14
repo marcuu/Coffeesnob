@@ -302,7 +302,11 @@ function SortableRow({ item, rank }: { item: RankedItem; rank: number }) {
       >
         🪑 {item.rating_vibe_5}
       </span>
+      {/* Personal-input number — your own call, not the community estimate.
+          Kept in a quieter role than the leaderboard's output score so the eye
+          never conflates the two layers (PRD Workstream C3). */}
       <span
+        aria-label={`Your overall rating ${item.rating_overall} out of 10`}
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: 14,

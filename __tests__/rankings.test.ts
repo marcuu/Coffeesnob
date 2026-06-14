@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { OverallScoreSummary } from "@/lib/aggregation";
 import { buildRankings } from "@/lib/rankings";
+import { deriveMaturity } from "@/lib/scoring-display";
 import type { Venue } from "@/lib/types";
 
 const makeVenue = (overrides: Partial<Venue>): Venue => ({
@@ -33,12 +34,16 @@ const makeScore = (
   score: number,
   displayable: boolean,
   rawReviewCount = 5,
-): OverallScoreSummary => ({
-  score,
-  confidence: displayable ? 0.9 : 0.1,
-  rawReviewCount,
-  displayable,
-});
+): OverallScoreSummary => {
+  const confidence = displayable ? 0.9 : 0.1;
+  return {
+    score,
+    confidence,
+    rawReviewCount,
+    displayable,
+    maturity: deriveMaturity({ displayable, confidence }),
+  };
+};
 
 describe("buildRankings", () => {
   it("splits displayable venues into ranked and non-displayable into unranked", () => {

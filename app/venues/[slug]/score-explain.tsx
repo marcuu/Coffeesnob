@@ -4,10 +4,18 @@ function formatPct(n: number): string {
   return `${Math.round(n * 100)}%`;
 }
 
+const MATURITY_LABEL: Record<VenueScoreExplanation["maturity"], string> = {
+  forming: "Forming",
+  provisional: "Provisional",
+  settled: "Settled",
+};
+
 export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
   const {
     displayedScore,
     confidence,
+    maturity,
+    effectiveWeight,
     totalReviews,
     effectiveReviews,
     topContributors,
@@ -59,10 +67,14 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "4px 24px", fontSize: 12, color: "var(--color-muted-foreground)", marginBottom: 16 }}>
-          <span>Displayed score</span>
+          <span>Maturity</span>
+          <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{MATURITY_LABEL[maturity]}</span>
+          <span>Underlying score</span>
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{displayedScore.toFixed(1)}</span>
           <span>Confidence</span>
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{confidence.toFixed(2)}</span>
+          <span>Effective weight</span>
+          <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{effectiveWeight.toFixed(2)}</span>
           <span>Reviews (total)</span>
           <span style={{ textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--color-foreground)", fontWeight: 600 }}>{totalReviews}</span>
           <span>Reviews (counted)</span>
@@ -110,7 +122,7 @@ export function ScoreExplain({ data }: { data: VenueScoreExplanation }) {
         </div>
 
         <p style={{ fontSize: 11, color: "var(--color-muted-foreground)", lineHeight: 1.6 }}>
-          Ratings are weighted by reviewer status, tenure, consistency, recency, and completeness, then blended with a Bayesian prior.
+          Each review&apos;s weight is the equal-weight blend of reviewer credibility, recency, and completeness (plus tenure and consistency for non-seed reviewers); venue scores blend those with a Bayesian prior. A <strong>provisional</strong> score is shown as a whole number until enough trusted evidence settles it to one decimal.
         </p>
       </div>
     </details>

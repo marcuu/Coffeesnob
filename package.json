@@ -15,6 +15,7 @@
     "db:reset": "supabase db reset",
     "geo:backfill": "tsx scripts/geocode-venues.ts",
     "scoring:run": "tsx scripts/scoring-run.ts",
+    "scoring:seed-palates": "tsx scripts/apply-seed-palates.ts",
     "scoring:backfill": "tsx scripts/scoring-backfill.ts",
     "scoring:simulate": "tsx scripts/simulate.ts",
     "simulation:seed-personas": "tsx simulation/scripts/seed-personas.ts",

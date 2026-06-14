@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { deriveCoffeeScore, deriveVibeScore } from "@/lib/review-scoring";
+import { deriveMaturity, type VenueMaturity } from "@/lib/scoring-display";
 import { AXES, SCORING_CONSTANTS, type Axis } from "@/lib/scoring/weights";
 
 export type AxisScore = {
@@ -12,6 +13,8 @@ export type AxisScore = {
 export type VenueScores = {
   axes: Partial<Record<Axis, AxisScore>>;
   displayable: boolean;
+  /** Settledness of the venue's overall score; governs display precision. */
+  maturity: VenueMaturity;
 };
 
 const DISPLAY_CONFIDENCE_THRESHOLD = 0.2;
@@ -40,11 +43,16 @@ export async function getVenueScores(
   }
 
   const overall = axes.overall;
+  const displayable = overall
+    ? overall.confidence > DISPLAY_CONFIDENCE_THRESHOLD
+    : false;
   return {
     axes,
-    displayable: overall
-      ? overall.confidence > DISPLAY_CONFIDENCE_THRESHOLD
-      : false,
+    displayable,
+    maturity: deriveMaturity({
+      displayable,
+      confidence: overall?.confidence,
+    }),
   };
 }
 
@@ -53,6 +61,8 @@ export type OverallScoreSummary = {
   confidence: number;
   rawReviewCount: number;
   displayable: boolean;
+  /** Settledness of this score; governs display precision (PRD A3). */
+  maturity: VenueMaturity;
 };
 
 export async function getVenueOverallScores(
@@ -72,11 +82,13 @@ export async function getVenueOverallScores(
   const result = new Map<string, OverallScoreSummary>();
   for (const row of data ?? []) {
     const confidence = Number(row.confidence);
+    const displayable = confidence > DISPLAY_CONFIDENCE_THRESHOLD;
     result.set(row.venue_id, {
       score: Number(row.score),
       confidence,
       rawReviewCount: row.raw_review_count,
-      displayable: confidence > DISPLAY_CONFIDENCE_THRESHOLD,
+      displayable,
+      maturity: deriveMaturity({ displayable, confidence }),
     });
   }
   return result;
@@ -85,6 +97,9 @@ export async function getVenueOverallScores(
 export type VenueScoreExplanation = {
   displayedScore: number;
   confidence: number;
+  maturity: VenueMaturity;
+  /** Sum of effective review weights (effectiveN) feeding the posterior. */
+  effectiveWeight: number;
   totalReviews: number;
   effectiveReviews: number;
   topContributors: Array<{
@@ -220,9 +235,12 @@ export async function explainVenueScore(
     priorPull = Math.abs(weightedMean - posterior);
   }
 
+  const confidence = Number(scoreRow.confidence);
   return {
     displayedScore: posterior,
-    confidence: Number(scoreRow.confidence),
+    confidence,
+    maturity: deriveMaturity({ displayable: true, confidence }),
+    effectiveWeight: totalEffectiveWeight,
     totalReviews: reviews.length,
     effectiveReviews: effective.length,
     topContributors,

@@ -46,7 +46,18 @@ export const SCORING_CONSTANTS = {
     coffee: 6.0,
     vibe: 6.0,
   } as Record<Axis, number>,
+  // ── The responsiveness ↔ stability dial (Marcus-tunable, see docs/scoring.md
+  //    Section 11). Lower values let early reviews count harder (responsive,
+  //    swingable); higher values demand more evidence (stable, slower). ──
+  //
+  // PRIOR_STRENGTH (k) governs how much weighted evidence a venue needs to
+  // leave `forming` and how hard the prior pulls. It is the *quantity* knob and
+  // lives only here, at the aggregation prior — never in per-review weight.
   PRIOR_STRENGTH: 3.0,
+  // Confidence at which a venue earns full display precision (one decimal) and
+  // full typographic authority. Below it, a displayable venue is `provisional`
+  // and shown coarsely. See lib/scoring-display.ts → deriveMaturity.
+  SETTLED_CONFIDENCE_THRESHOLD: 0.75,
 };
 
 const MS_PER_DAY = 86_400_000;
@@ -59,6 +70,33 @@ function clamp(x: number, lo: number, hi: number): number {
   return x;
 }
 
+// Equal-weight geometric mean of factors each already normalised to [0, 1].
+// Every factor has identical elasticity (∂ln(weight)/∂ln(fᵢ) = 1/m), so no
+// single factor can dominate — that property is the whole point of using a
+// geometric mean here instead of a raw product (see docs/scoring.md §2 / PRD
+// Workstream D). A zero factor collapses the result to zero, which preserves
+// "no axis weight → no contribution".
+function geometricMean(factors: number[]): number {
+  if (factors.length === 0) return 0;
+  let logSum = 0;
+  for (const f of factors) {
+    if (f <= 0) return 0;
+    logSum += Math.log(f);
+  }
+  return Math.exp(logSum / factors.length);
+}
+
+// Per-review weight is a *quality-only* signal: the co-equal quality factors
+// {credibility, recency, completeness, (tenure + consistency, where they
+// apply)} combined as an equal-weight geometric mean.
+//
+// QUANTITY DOES NOT LIVE HERE. There is deliberately no platform-population
+// or global reviewer-count term in this function. "One review matters more
+// when a venue has few, less when it has many" is a property of the
+// aggregation prior (influence ≈ wᵢ / (Σw + k), keyed to per-venue evidence
+// in lib/scoring/aggregation.ts), not of per-review weight. Adding a global
+// count here would be the wrong variable — it would suppress sparse-but-legit
+// venues and would dominate the co-equal quality factors. See PRD Workstream D2.
 export function computeReviewWeight(
   reviewer: ReviewerState,
   review: ReviewForWeighting,
@@ -67,8 +105,11 @@ export function computeReviewWeight(
 ): number {
   const daysSinceVisit =
     (now.getTime() - review.visitedOn.getTime()) / MS_PER_DAY;
-  const recency = Math.exp(
-    -daysSinceVisit / SCORING_CONSTANTS.RECENCY_HALF_LIFE_DAYS,
+  // Clamp to [0, 1] so a future-dated visit (recency > 1) can't inflate the
+  // mean past the other factors.
+  const recency = Math.min(
+    1,
+    Math.exp(-daysSinceVisit / SCORING_CONSTANTS.RECENCY_HALF_LIFE_DAYS),
   );
 
   const axisWeight = reviewer.axisWeights[axis] ?? 0;
@@ -84,17 +125,18 @@ export function computeReviewWeight(
       ? 1.0
       : SCORING_CONSTANTS.COMPLETENESS_PARTIAL_MULTIPLIER;
 
-  // Seeded reviewers are pre-vetted anchors: bypass the tenure/consistency
-  // multipliers that otherwise penalise new accounts, so their first review
-  // can anchor an unreviewed venue. Recency and completeness still apply —
-  // stale or partial reviews should still count less.
-  const tenureMult = reviewer.status === "beaned" ? 1.0 : reviewer.tenureScore;
-  const consistencyMult =
-    reviewer.status === "beaned" ? 1.0 : reviewer.consistencyScore;
+  // Quality factors that always apply, each co-equal in the geometric mean.
+  const factors = [base, recency, completeness];
 
-  const weight = base * tenureMult * consistencyMult * recency * completeness;
+  // Seeded ("beaned") reviewers are pre-vetted anchors: omit the
+  // tenure/consistency factors that otherwise penalise new accounts, so their
+  // first review can anchor an otherwise-unreviewed venue off the prior.
+  // Recency and completeness still apply — stale or partial reviews count less.
+  if (reviewer.status !== "beaned") {
+    factors.push(reviewer.tenureScore, reviewer.consistencyScore);
+  }
 
-  return clamp(weight, 0, 1);
+  return clamp(geometricMean(factors), 0, 1);
 }
 
 // Validations (helpful/disagree) aren't yet implemented — callers pass

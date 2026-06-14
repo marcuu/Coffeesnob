@@ -66,29 +66,30 @@ describe("scoring golden fixture", () => {
 // document the reason in the PR description.
 // ---------------------------------------------------------------------------
 
-// Refreshed for beaned-reviewer bypass + PRIOR_STRENGTH drop from 5.0 → 3.0.
+// Refreshed for the geometric-mean recalibration of computeReviewWeight (PRD
+// Workstream D): per-review weight is now the equal-weight geometric mean of
+// its quality factors instead of a raw product. The mean compresses the factor
+// range upward, so per-review weights — and hence venue confidence — rise, and
+// posteriors sit closer to the weighted mean (further from the prior). Prior
+// history: beaned-reviewer bypass + PRIOR_STRENGTH 5.0 → 3.0.
 const GOLDEN_OVERALL: Record<string, number> = {
-  "venue-00": 5.92,
-  "venue-01": 5.89,
-  "venue-02": 5.72,
-  "venue-03": 6.26,
-  "venue-04": 5.32,
+  "venue-00": 4.63,
+  "venue-01": 5.85,
+  "venue-02": 4.19,
+  "venue-03": 7.26,
+  "venue-04": 4.49,
 };
 
-// Refresh on the two-axis collapse: 'experience' replaced by 'vibe'. The
-// new fixture builder (and pipeline) produce the values asserted below; if
-// they shift again, regenerate via __tests__/scoring/fixture.ts and explain
-// in the PR description (see docs/scoring.md Section 7).
 const GOLDEN_VENUE_00: Record<Axis, number> = {
-  overall: 5.92,
-  coffee: 5.92,
-  vibe: 5.95,
+  overall: 4.63,
+  coffee: 4.53,
+  vibe: 4.75,
 };
 
 const GOLDEN_CONFIDENCE: Record<string, number> = {
-  "venue-00": 0.0253,
-  "venue-01": 0.0909,
-  "venue-02": 0.1064,
-  "venue-03": 0.1322,
-  "venue-04": 0.2459,
+  "venue-00": 0.6285,
+  "venue-01": 0.6414,
+  "venue-02": 0.7163,
+  "venue-03": 0.5213,
+  "venue-04": 0.6499,
 };

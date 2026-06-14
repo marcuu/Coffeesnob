@@ -1,4 +1,5 @@
 import type { OverallScoreSummary } from "@/lib/aggregation";
+import type { VenueMaturity } from "@/lib/scoring-display";
 import type { Venue } from "@/lib/types";
 
 export type RankedVenue = {
@@ -6,6 +7,8 @@ export type RankedVenue = {
   rank: number;
   score: number;
   reviewCount: number;
+  /** Settledness of the score; governs display precision on the leaderboard. */
+  maturity: VenueMaturity;
   /** Miles from the visitor, set only in "near me" mode. */
   distanceMi?: number;
 };
@@ -33,8 +36,12 @@ export function buildRankings(
   venues: Venue[],
   weightedScores: Map<string, OverallScoreSummary>,
 ): RankingResult {
-  const rankedUnsorted: { venue: Venue; score: number; reviewCount: number }[] =
-    [];
+  const rankedUnsorted: {
+    venue: Venue;
+    score: number;
+    reviewCount: number;
+    maturity: VenueMaturity;
+  }[] = [];
   const unranked: UnrankedVenue[] = [];
 
   for (const venue of venues) {
@@ -44,6 +51,7 @@ export function buildRankings(
         venue,
         score: ws.score,
         reviewCount: ws.rawReviewCount,
+        maturity: ws.maturity,
       });
     } else {
       unranked.push({ venue, reviewCount: ws?.rawReviewCount ?? 0 });

@@ -72,6 +72,23 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
+/* ── Maturity-scaled score authority ──
+   A score's typographic weight should mirror how settled it is (PRD B2):
+   a provisional venue reads lighter / lower-emphasis, a settled one at full
+   weight. Tone colours stay on the existing semantic tokens; maturity only
+   modulates emphasis (opacity + weight), so it composes with any inline
+   colour the score already carries. */
+.score-value {
+  font-variant-numeric: tabular-nums;
+}
+.score-value[data-maturity="provisional"] {
+  opacity: 0.68;
+  font-weight: 400;
+}
+.score-value[data-maturity="settled"] {
+  opacity: 1;
+}
+
 /* ── Mobile bottom tab bar ── */
 .bottom-nav {
   position: fixed;

@@ -44,7 +44,7 @@ export function buildVenueRankingSummary(
 ): VenueRankingSummary {
   const sd = getScoreDisplay(
     scoreEntry?.score ?? null,
-    scoreEntry?.displayable ?? false,
+    scoreEntry?.maturity ?? "forming",
   );
   const rawReviewCount = scoreEntry?.rawReviewCount ?? 0;
   const isUnranked = !sd.displayable;
