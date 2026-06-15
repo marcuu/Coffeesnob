@@ -1,6 +1,6 @@
 import type { OverallScoreSummary } from "@/lib/aggregation";
 import { getScoreDisplay } from "@/lib/scoring-display";
-import type { ScoreDisplayTone } from "@/lib/scoring-display";
+import type { ScoreDisplayTone, VenueMaturity } from "@/lib/scoring-display";
 
 export type { ScoreDisplayTone };
 
@@ -11,6 +11,7 @@ export type VenueRankingSummary = {
   scoreLabel: string;
   scoreDescription: string;
   scoreTone: ScoreDisplayTone;
+  maturity: VenueMaturity;
   signalLabel: string;
   displayable: boolean;
   rawReviewCount: number;
@@ -63,6 +64,7 @@ export function buildVenueRankingSummary(
     scoreLabel: sd.label,
     scoreDescription: sd.description,
     scoreTone: sd.tone,
+    maturity: sd.maturity,
     signalLabel,
     displayable: sd.displayable,
     rawReviewCount,

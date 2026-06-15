@@ -9,6 +9,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
+import { ProvisionalTag } from "@/components/provisional-tag";
 import { createClient } from "@/utils/supabase/server";
 import type { Venue } from "@/lib/types";
 import {
@@ -180,8 +181,11 @@ export default async function VenuesPage({
                           </CardDescription>
                         </div>
                         <div className="shrink-0 text-right text-sm">
-                          <div className="font-medium">
-                            {summary.formattedScore}
+                          <div className="flex items-baseline justify-end gap-2 font-medium">
+                            {summary.maturity === "provisional" ? (
+                              <ProvisionalTag />
+                            ) : null}
+                            <span>{summary.formattedScore}</span>
                           </div>
                           <div className="text-xs text-[var(--color-muted-foreground)]">
                             {summary.rawReviewCount} review
