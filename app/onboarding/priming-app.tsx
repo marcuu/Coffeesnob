@@ -199,7 +199,7 @@ function WelcomeScreen({
           marginBottom: 20,
         }}
       >
-        You&rsquo;re in, {displayName}.
+        Welcome to Caffiends, {displayName}.
       </h1>
       <p
         style={{
@@ -207,26 +207,56 @@ function WelcomeScreen({
           lineHeight: 1.6,
           color: TEXT_MUTED,
           maxWidth: 540,
-          marginBottom: 18,
+          marginBottom: 20,
         }}
       >
-        Caffiends ranks UK third-wave coffee by weighted reviewer
-        credibility. The better your taste signal, the more your reviews
-        shape the rankings.
+        This isn&rsquo;t your usual review website. It&rsquo;s built on
+        three ideas:
       </p>
-      <p
+      <ol
         style={{
-          fontSize: 16,
-          lineHeight: 1.6,
-          color: TEXT_MUTED,
-          maxWidth: 540,
-          marginBottom: 36,
+          listStyle: "none",
+          padding: 0,
+          margin: "0 0 36px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          maxWidth: 560,
+          counterReset: "idea",
         }}
       >
-        Let&rsquo;s get your taste profile started. Rank anywhere from 1 to{" "}
-        {MAX_PRIMING} venues you&rsquo;ve been to. The more you rank, the
-        sharper it starts out.
-      </p>
+        {[
+          "Every coffee shop being rated 4.6 on Google is useless for finding good coffee.",
+          "Nobody scores a coffee out of five reliably, so here you’ll compare coffee against your previous favourites.",
+          "A great rating is earned slowly, not won from one lucky review.",
+        ].map((text, i) => (
+          <li
+            key={i}
+            style={{
+              display: "flex",
+              gap: 14,
+              padding: "12px 14px",
+              borderLeft: `2px solid ${ACCENT}`,
+              background: "rgba(255,255,255,0.02)",
+              fontSize: 15,
+              lineHeight: 1.55,
+              color: TEXT_PRIMARY,
+            }}
+          >
+            <span
+              style={{
+                ...MONO,
+                color: ACCENT,
+                paddingTop: 4,
+                flexShrink: 0,
+              }}
+            >
+              0{i + 1}
+            </span>
+            <span>{text}</span>
+          </li>
+        ))}
+      </ol>
       <PrimaryButton onClick={onStart}>Start →</PrimaryButton>
     </div>
   );
