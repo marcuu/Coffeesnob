@@ -92,8 +92,8 @@ export function Leaderboard({
         reviewed harshly.
       </h1>
       <p style={SUBHEAD}>
-        Bored of every coffee shop being rated 4.6 stars on Google. We&rsquo;ve
-        built a better way of rating — scores you can trust, from people who
+        Bored of every coffee shop being rated 4.6 stars on Google? We&rsquo;ve
+        built a better way of rating. Scores you can trust, from people who
         know their coffee.
       </p>
       <p style={{ ...SUBHEAD, marginTop: 8, fontSize: 14 }}>
