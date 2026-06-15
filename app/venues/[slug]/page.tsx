@@ -190,17 +190,11 @@ export default async function VenueDetailPage({
           },
         }
       : {}),
-    // Only claim a precise rating once the score is settled; a provisional
-    // venue advertises a rounded whole number so search engines aren't fed a
-    // decimal the evidence can't support.
     ...(displayScore !== null && count > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue:
-              maturity === "settled"
-                ? Number(displayScore.toFixed(1))
-                : Math.round(displayScore),
+            ratingValue: Number(displayScore.toFixed(1)),
             bestRating: 10,
             worstRating: 1,
             reviewCount: count,
