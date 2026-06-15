@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
-import { ProvisionalTag } from "@/components/provisional-tag";
 import { RankingBadge } from "@/components/ranking/RankingBadge";
 import { createClient } from "@/utils/supabase/server";
 import type { Review, Venue } from "@/lib/types";
@@ -275,14 +274,8 @@ export default async function VenueDetailPage({
               {explain ? <ScoreExplain data={explain} /> : null}
             </div>
             <div style={{ ...MONO_LABEL, letterSpacing: "0.14em", marginTop: 10, textAlign: "right" }}>
-              <div style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-                <span>Coffee {coffeeDisplay.formattedScore}</span>
-                {coffeeDisplay.maturity === "provisional" ? <ProvisionalTag /> : null}
-              </div>
-              <div style={{ marginTop: 4, display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-                <span>Vibe {vibeDisplay.formattedScore}</span>
-                {vibeDisplay.maturity === "provisional" ? <ProvisionalTag /> : null}
-              </div>
+              <div>Coffee {coffeeDisplay.formattedScore}</div>
+              <div style={{ marginTop: 4 }}>Vibe {vibeDisplay.formattedScore}</div>
             </div>
           </div>
         </div>
