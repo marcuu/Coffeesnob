@@ -37,10 +37,8 @@ export type VenueMaturity = "forming" | "provisional" | "settled";
 export type ScoreEmphasis = "full" | "muted" | "none";
 
 export type ScoreDisplay = {
-  /** Score text to render: "8.4" (settled), "≈7" (provisional), or "—". */
+  /** Score text to render: "8.4" (settled), "7" (provisional), or "—". */
   formattedScore: string;
-  /** True when the score is a coarse approximation (provisional). */
-  approximate: boolean;
   maturity: VenueMaturity;
   label: string;
   description: string;
@@ -69,7 +67,6 @@ export function deriveMaturity(input: {
 
 const FORMING: ScoreDisplay = {
   formattedScore: "—",
-  approximate: false,
   maturity: "forming",
   label: "Forming",
   description: "Not enough trusted reviews yet.",
@@ -97,10 +94,12 @@ function toneFor(score: number): { tone: ScoreDisplayTone; label: string; descri
  *
  * Precision scales with confidence:
  *  - `forming`     → no number; a "not enough reviews" label.
- *  - `provisional` → coarse whole number, prefixed "≈" (e.g. "≈7"). Never a
- *                    decimal — a decimal would claim precision the evidence
- *                    can't support. (Provisional display form, PRD §13.3.)
- *  - `settled`     → full precision, one decimal (e.g. "8.4").
+ *  - `provisional` → coarse whole number (e.g. "7"). Never a decimal — a
+ *                    decimal would claim precision the evidence can't support.
+ *                    Uncertainty is carried by the `Provisional` tag and the
+ *                    muted typographic treatment, not by the number itself.
+ *  - `settled`     → full precision, one decimal (e.g. "8.4"). The decimal is
+ *                    earned: gaining it is the provisional→settled moment.
  */
 export function getScoreDisplay(
   score: number | null | undefined,
@@ -112,8 +111,7 @@ export function getScoreDisplay(
 
   if (maturity === "provisional") {
     return {
-      formattedScore: `≈${Math.round(score)}`,
-      approximate: true,
+      formattedScore: `${Math.round(score)}`,
       maturity: "provisional",
       label,
       description,
@@ -125,7 +123,6 @@ export function getScoreDisplay(
 
   return {
     formattedScore: score.toFixed(1),
-    approximate: false,
     maturity: "settled",
     label,
     description,

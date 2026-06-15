@@ -529,9 +529,12 @@ the default surface, by design.
 earned):
 
 - `forming` → no number; "Not enough trusted reviews yet."
-- `provisional` → coarse whole number, prefixed `≈` (e.g. `≈7`). **Never a
-  decimal.** (Provisional display form chosen per PRD §13.3.)
-- `settled` → one decimal (e.g. `8.4`).
+- `provisional` → clean whole number (e.g. `7`). **Never a decimal**, and
+  never an approximate notation (`~`, `≈`, ranges) — uncertainty is carried
+  by the `Provisional` tag and the muted typographic treatment, not by
+  fuzzing the number.
+- `settled` → one decimal (e.g. `8.4`). The decimal is earned; gaining it
+  is the provisional→settled moment.
 
 Typographic authority mirrors maturity via `.score-value[data-maturity=…]` in
 `app/globals.css` (provisional reads lighter; settled at full weight) — tones

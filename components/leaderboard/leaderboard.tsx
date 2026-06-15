@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CityChips } from "@/components/CityChips";
+import { ProvisionalTag } from "@/components/provisional-tag";
 import { formatDistanceMiles } from "@/lib/geo";
 import { getScoreDisplay } from "@/lib/scoring-display";
 import type { RankedVenue, UnrankedVenue } from "@/lib/rankings";
@@ -386,18 +387,31 @@ function RankedRow({ item }: { item: RankedVenue }) {
         </span>
       </span>
       <span
-        className="score-value"
-        data-maturity={display.maturity}
-        title={display.approximate ? "Provisional — still settling" : undefined}
         style={{
           flexShrink: 0,
-          fontFamily: "var(--font-mono)",
-          fontSize: 20,
-          color: "var(--color-foreground)",
-          letterSpacing: "-0.01em",
+          display: "inline-flex",
+          alignItems: "baseline",
+          gap: 8,
         }}
       >
-        {display.formattedScore}
+        {display.maturity === "provisional" ? <ProvisionalTag /> : null}
+        <span
+          className="score-value"
+          data-maturity={display.maturity}
+          title={
+            display.maturity === "provisional"
+              ? "Provisional — still settling"
+              : undefined
+          }
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 20,
+            color: "var(--color-foreground)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {display.formattedScore}
+        </span>
       </span>
     </Link>
   );

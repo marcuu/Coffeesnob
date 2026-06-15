@@ -53,7 +53,6 @@ describe("getScoreDisplay", () => {
       expect(r.displayable).toBe(false);
       expect(r.formattedScore).toBe("—");
       expect(r.emphasis).toBe("none");
-      expect(r.approximate).toBe(false);
       expect(r.description.length).toBeGreaterThan(0);
     });
 
@@ -65,23 +64,25 @@ describe("getScoreDisplay", () => {
   });
 
   describe("provisional", () => {
-    it("renders a coarse whole number prefixed with ≈ and never a decimal", () => {
-      expect(getScoreDisplay(8.3, "provisional").formattedScore).toBe("≈8");
-      expect(getScoreDisplay(6.6, "provisional").formattedScore).toBe("≈7");
-      expect(getScoreDisplay(7.0, "provisional").formattedScore).toBe("≈7");
+    it("renders a clean whole number with no approximate notation", () => {
+      expect(getScoreDisplay(8.3, "provisional").formattedScore).toBe("8");
+      expect(getScoreDisplay(6.6, "provisional").formattedScore).toBe("7");
+      expect(getScoreDisplay(7.0, "provisional").formattedScore).toBe("7");
     });
 
-    it("is flagged approximate and reads at muted emphasis", () => {
+    it("reads at muted emphasis and is displayable", () => {
       const r = getScoreDisplay(7.4, "provisional");
-      expect(r.approximate).toBe(true);
       expect(r.emphasis).toBe("muted");
       expect(r.displayable).toBe(true);
+      expect(r.maturity).toBe("provisional");
     });
 
-    it("never produces a one-decimal string", () => {
+    it("never produces a decimal or approximate notation", () => {
       for (let s = 1; s <= 10; s += 0.1) {
         const out = getScoreDisplay(s, "provisional").formattedScore;
         expect(out).not.toMatch(/\d\.\d/);
+        expect(out).not.toMatch(/[~≈]/);
+        expect(out).not.toMatch(/\d\s*[–-]\s*\d/);
       }
     });
   });
@@ -93,10 +94,11 @@ describe("getScoreDisplay", () => {
       expect(getScoreDisplay(7.56, "settled").formattedScore).toBe("7.6");
     });
 
-    it("reads at full emphasis and is not approximate", () => {
+    it("reads at full emphasis and earns its decimal", () => {
       const r = getScoreDisplay(8.0, "settled");
       expect(r.emphasis).toBe("full");
-      expect(r.approximate).toBe(false);
+      expect(r.maturity).toBe("settled");
+      expect(r.formattedScore).toMatch(/^\d+\.\d$/);
     });
   });
 
