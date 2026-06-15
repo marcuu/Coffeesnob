@@ -83,19 +83,18 @@ export function Leaderboard({
           "clamp(28px, 5vw, 48px) clamp(16px, 4vw, 36px) clamp(64px, 10vw, 140px)",
       }}
     >
-      <span style={KICKER}>
-        {nearMode
-          ? "Coffee near you"
-          : `${activeRegion ? `${activeRegion.name} coffee` : "UK coffee"} leaderboard`}
-      </span>
+      {nearMode ? (
+        <span style={KICKER}>Coffee near you</span>
+      ) : null}
       <h1 style={HERO}>
         The best coffee,
         <br />
         reviewed harshly.
       </h1>
       <p style={SUBHEAD}>
-        The community&rsquo;s estimate, converged from weighted reviewer
-        scores — not any one person&rsquo;s favourites.
+        Bored of every coffee shop being rated 4.6 stars on Google. We&rsquo;ve
+        built a better way of rating — scores you can trust, from people who
+        know their coffee.
       </p>
       <p style={{ ...SUBHEAD, marginTop: 8, fontSize: 14 }}>
         <Link
