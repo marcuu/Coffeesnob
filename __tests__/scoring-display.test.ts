@@ -64,10 +64,10 @@ describe("getScoreDisplay", () => {
   });
 
   describe("provisional", () => {
-    it("renders a clean whole number with no approximate notation", () => {
-      expect(getScoreDisplay(8.3, "provisional").formattedScore).toBe("8");
-      expect(getScoreDisplay(6.6, "provisional").formattedScore).toBe("7");
-      expect(getScoreDisplay(7.0, "provisional").formattedScore).toBe("7");
+    it("renders one decimal at muted emphasis", () => {
+      expect(getScoreDisplay(8.266, "provisional").formattedScore).toBe("8.3");
+      expect(getScoreDisplay(6.6, "provisional").formattedScore).toBe("6.6");
+      expect(getScoreDisplay(7.0, "provisional").formattedScore).toBe("7.0");
     });
 
     it("reads at muted emphasis and is displayable", () => {
@@ -77,12 +77,11 @@ describe("getScoreDisplay", () => {
       expect(r.maturity).toBe("provisional");
     });
 
-    it("never produces a decimal or approximate notation", () => {
+    it("never produces approximate notation", () => {
       for (let s = 1; s <= 10; s += 0.1) {
         const out = getScoreDisplay(s, "provisional").formattedScore;
-        expect(out).not.toMatch(/\d\.\d/);
+        expect(out).toMatch(/^\d+\.\d$/);
         expect(out).not.toMatch(/[~≈]/);
-        expect(out).not.toMatch(/\d\s*[–-]\s*\d/);
       }
     });
   });

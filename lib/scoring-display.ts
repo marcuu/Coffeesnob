@@ -37,7 +37,7 @@ export type VenueMaturity = "forming" | "provisional" | "settled";
 export type ScoreEmphasis = "full" | "muted" | "none";
 
 export type ScoreDisplay = {
-  /** Score text to render: "8.4" (settled), "7" (provisional), or "—". */
+  /** Score text to render: "8.4" (settled/provisional) or "—" (forming). */
   formattedScore: string;
   maturity: VenueMaturity;
   label: string;
@@ -94,12 +94,10 @@ function toneFor(score: number): { tone: ScoreDisplayTone; label: string; descri
  *
  * Precision scales with confidence:
  *  - `forming`     → no number; a "not enough reviews" label.
- *  - `provisional` → coarse whole number (e.g. "7"). Never a decimal — a
- *                    decimal would claim precision the evidence can't support.
- *                    Uncertainty is carried by the `Provisional` tag and the
- *                    muted typographic treatment, not by the number itself.
- *  - `settled`     → full precision, one decimal (e.g. "8.4"). The decimal is
- *                    earned: gaining it is the provisional→settled moment.
+ *  - `provisional` → one decimal (e.g. "7.4") at muted emphasis. Uncertainty
+ *                    is carried by the `Provisional` tag and the muted
+ *                    typographic treatment, not by hiding the decimal.
+ *  - `settled`     → one decimal (e.g. "8.4") at full emphasis.
  */
 export function getScoreDisplay(
   score: number | null | undefined,
@@ -111,7 +109,7 @@ export function getScoreDisplay(
 
   if (maturity === "provisional") {
     return {
-      formattedScore: `${Math.round(score)}`,
+      formattedScore: score.toFixed(1),
       maturity: "provisional",
       label,
       description,
