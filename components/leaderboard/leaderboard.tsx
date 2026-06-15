@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { CityChips } from "@/components/CityChips";
-import { ProvisionalTag } from "@/components/provisional-tag";
 import { formatDistanceMiles } from "@/lib/geo";
 import { getScoreDisplay } from "@/lib/scoring-display";
 import type { RankedVenue, UnrankedVenue } from "@/lib/rankings";
@@ -315,20 +314,6 @@ function HeroCard({
               /10
             </span>
           </div>
-          {display.maturity === "provisional" ? (
-            <div
-              style={{
-                marginTop: 8,
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "hsl(24 5.4% 50%)",
-              }}
-            >
-              Provisional · still settling
-            </div>
-          ) : null}
         </div>
       </div>
     </Link>
@@ -387,31 +372,17 @@ function RankedRow({ item }: { item: RankedVenue }) {
         </span>
       </span>
       <span
+        className="score-value"
+        data-maturity={display.maturity}
         style={{
           flexShrink: 0,
-          display: "inline-flex",
-          alignItems: "baseline",
-          gap: 8,
+          fontFamily: "var(--font-mono)",
+          fontSize: 20,
+          color: "var(--color-foreground)",
+          letterSpacing: "-0.01em",
         }}
       >
-        {display.maturity === "provisional" ? <ProvisionalTag /> : null}
-        <span
-          className="score-value"
-          data-maturity={display.maturity}
-          title={
-            display.maturity === "provisional"
-              ? "Provisional — still settling"
-              : undefined
-          }
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 20,
-            color: "var(--color-foreground)",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          {display.formattedScore}
-        </span>
+        {display.formattedScore}
       </span>
     </Link>
   );
